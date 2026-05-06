@@ -29,6 +29,9 @@ EXP-<日期>-<序号>-<任务>
 |---|---|---|---|---|---|
 | SMOKE-20260506-01 | 17:25 | OpenVLA-7B 4-bit smoke | 本机 RTX 3090 | ✅ Pass / 4.4GB / 3.94 Hz | 镜像验证 |
 | SMOKE-20260506-02 | 22:17 | 同上 on H20 | 开发机 H20-3e | ✅ Pass / 4.4GB / 3.03 Hz | 开发机镜像验证 |
+| TRAIN-20260506-01 | 22:40 | LIBERO-Spatial LoRA r=32 | 单卡 H20, 50K steps | ❌ 估算 3.8 天 | 单卡太慢，已停 → pivot 到官方 ckpt |
+| EVAL-20260506-01 | 23:41 | LIBERO-Spatial smoke (5 trial) | base ckpt（未 LIBERO 训）| ❌ unnorm_key not found | Pipeline 验证 OK，需 finetuned ckpt |
+| DL-20260506-01 | 22:50 | 4 个官方 LIBERO ckpt | hf-mirror 并行 | ⏳ ~40% (~23G/56G) | 速度 ~10 MB/s |
 
 ---
 
