@@ -40,9 +40,16 @@ echo "  Output dir     : $EVAL_DIR"
 echo "  Extra args     : $*"
 echo "=========================================="
 
-cd /workspace/openvla
+# Render config: osmesa works in our k8s container (EGL fails, see env_setup.md)
+export MUJOCO_GL=osmesa
 
-/opt/conda/bin/python experiments/robot/libero/run_libero_eval.py \
+# cd into EVAL_DIR so save_rollout_video drops MP4 in EVAL_DIR/rollouts/<DATE>/
+cd "$EVAL_DIR"
+
+# But import paths need to find /workspace/openvla
+export PYTHONPATH=/workspace/openvla:${PYTHONPATH:-}
+
+/opt/conda/bin/python /workspace/openvla/experiments/robot/libero/run_libero_eval.py \
     --pretrained_checkpoint "$CKPT" \
     --task_suite_name "$TASK_SUITE" \
     --num_trials_per_task "$N_TRIAL" \
@@ -50,6 +57,7 @@ cd /workspace/openvla
     --local_log_dir "$EVAL_DIR" \
     --run_id_note "$EVAL_ID" \
     --seed 7 \
+    --use_wandb False \
     "$@" 2>&1 | tee "$EVAL_DIR/eval.log"
 
 echo ""
