@@ -1,0 +1,46 @@
+# ============================================================
+# 排除大文件 / 不必要的目录
+# ============================================================
+
+# Python 缓存
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+
+# Git
+**/.git/
+**/.gitignore
+
+# 模型权重 / 数据 / 输出（大文件运行时挂载）
+# 注意：不排除 **/models/ 因为 prismatic/models/ 是 Python 子模块
+# 只排除特定文件扩展名
+**/checkpoints/
+**/wandb/
+**/output/
+**/runs/
+**/logs/
+**/*.pt
+**/*.pth
+**/*.bin
+**/*.safetensors
+**/*.ckpt
+
+# IDE / 编辑器
+**/.vscode/
+**/.idea/
+**/*.swp
+**/.DS_Store
+
+# 编译产物
+**/*.egg-info/
+**/build/
+**/dist/
+
+# 数据格式（OpenVLA 不需要打进镜像）
+**/*.tfrecord
+**/*.h5
+**/*.hdf5
+**/*.parquet
+**/*.zarr/
