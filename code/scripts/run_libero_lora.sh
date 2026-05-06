@@ -54,7 +54,7 @@ fi
 
 cd /workspace/openvla
 
-# OpenVLA appendix E config
+# OpenVLA appendix E config (real flags from finetune.py)
 torchrun --standalone --nnodes 1 --nproc-per-node 1 \
     vla-scripts/finetune.py \
     --vla_path "$VLA_PATH" \
@@ -66,8 +66,11 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 \
     --learning_rate 5e-4 \
     --max_steps $MAX_STEPS \
     --save_steps 5000 \
+    --save_latest_checkpoint_only False \
     --image_aug False \
+    --use_lora True \
     --lora_rank 32 \
+    --lora_dropout 0.0 \
     --use_quantization False \
     --shuffle_buffer_size 100000 \
     --wandb_project openvla-libero \
