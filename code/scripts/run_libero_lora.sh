@@ -54,8 +54,11 @@ fi
 
 cd /workspace/openvla
 
+# Use conda's torchrun explicitly (avoid /usr/bin/python3 shebang issue)
+TORCHRUN=${TORCHRUN:-/opt/conda/bin/torchrun}
+
 # OpenVLA appendix E config (real flags from finetune.py)
-torchrun --standalone --nnodes 1 --nproc-per-node 1 \
+"$TORCHRUN" --standalone --nnodes 1 --nproc-per-node 1 \
     vla-scripts/finetune.py \
     --vla_path "$VLA_PATH" \
     --data_root_dir "$DATA_ROOT" \
