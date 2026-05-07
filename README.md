@@ -26,8 +26,8 @@
 
 - ✅ Reproduced **OpenVLA-7B on LIBERO 4-suite** (400 rollouts): **Spatial 78% / Object 60% / Goal 77% / Long 53%** vs paper 76.5 avg → see the [focused repo](https://github.com/lz-googlefycy/openvla-libero)
 - ✅ Published critical analyses of **7 major VLA papers** (RT-1, RT-2, Octo, OpenVLA, π0, π0.5, π*0.6) — *skeptical-by-default review*
-- 🔜 **Next**: porting Spirit v1.5 (Spirit-AI, RoboChallenge #1) onto **XLeRobot** (SO-100, \$660) for real-robot demos
-- 🔜 **Target**: cross-embodiment LoRA fine-tune + open dataset on HuggingFace
+- 🚧 **In progress**: **Spirit v1.5 (Spirit-AI, RoboChallenge #1) × XLeRobot (SO-100, \$660)** — [adapter + Docker + integration design](docs/spirit_xlerobot_integration.md) live; Spirit ckpt downloading; zero-shot demo video targeted for Week 3
+- 🔜 **Next-next**: cross-embodiment LoRA fine-tune (50 teleop demos) → real-robot demo + blog #2 (Week 4-5)
 
 ---
 
