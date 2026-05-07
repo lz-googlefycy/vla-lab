@@ -85,3 +85,12 @@ EXP-<日期>-<序号>-<任务>
 2. ⚠️ 必须保存多 ckpt 批量评测，不要只信最后一个
 3. ⚠️ 破坏性操作必须先 confirm
 4. ⚠️ 启动远程进程的 wrapper 脚本要先在小数据上 sanity check
+
+### 2026-05-07
+
+| ID | 时间 | 任务 | 配置 | 结果 | 备注 |
+|---|---|---|---|---|---|
+| DL-20260507 | 10:55 | 4 个官方 LIBERO ckpt 下载完成 | hf-mirror, 4 并行 串行 spatial 优先 | ✅ All 4 × 15 GB | 总耗时 ~12h |
+| SCP-20260507-spatial | 10:55 | scp spatial → 开发机 | 25 MB/s | ✅ 15 GB / ~10 min | 用 scp 不是 rsync（dev rsync 缺 libxxhash） |
+| EVAL-20260507-01 | 11:23 | LIBERO-Spatial t=10 trials | bf16, MUJOCO_GL=osmesa, TRANSFORMERS_OFFLINE | ⏳ in progress | 50s/trial avg, 100 rollout × 50s ≈ 90 min |
+| AUTO-20260507 | 11:25 | auto_pipeline_v3 启动 | 串行 scp + eval object/goal/long | ⏳ in progress | 总 ETA 6-7h |
