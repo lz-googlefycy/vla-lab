@@ -1,17 +1,68 @@
-# vla-lab — Independent VLA Reproduction & Research Notes
+<div align="center">
 
-> Personal project by **Liu Zhi (刘志)**, independent researcher transitioning from **autonomous-driving motion planning** into **embodied AI / Vision-Language-Action (VLA) models**.
+# vla-lab
 
-[![Status](https://img.shields.io/badge/status-active-brightgreen)]() [![License](https://img.shields.io/badge/license-MIT-blue)]() [![Last Update](https://img.shields.io/badge/updated-May%202026-informational)]()
+**Independent VLA Reproduction & Research Notes**
+
+*Personal project by Liu Zhi (刘志) — transitioning from autonomous-driving motion planning into embodied AI / Vision-Language-Action models.*
+
+[![Status](https://img.shields.io/badge/status-active-brightgreen)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
+[![Last Update](https://img.shields.io/badge/updated-May%202026-informational)]()
+
+<br/>
+
+<img src="assets/demos/hero.gif" width="480" alt="OpenVLA-7B on LIBERO-Spatial"/>
+
+*OpenVLA-7B on LIBERO-Spatial — 10 tasks, all successful*
+
+</div>
 
 ---
 
 ## ⭐ TL;DR
 
-- ✅ Reproduced **OpenVLA-7B on LIBERO 4-suite** (400 rollouts): **Spatial 78% / Object 60% / Goal 77% / Long 53%** vs paper 76.5 avg
+- ✅ Reproduced **OpenVLA-7B on LIBERO 4-suite** (400 rollouts): **Spatial 78% / Object 60% / Goal 77% / Long 53%** vs paper 76.5 avg → see the [focused repo](https://github.com/lz-googlefycy/openvla-libero)
 - ✅ Published critical analyses of **7 major VLA papers** (RT-1, RT-2, Octo, OpenVLA, π0, π0.5, π*0.6) — *skeptical-by-default review*
 - 🔜 **Next**: porting Spirit v1.5 (Spirit-AI, RoboChallenge #1) onto **XLeRobot** (SO-100, \$660) for real-robot demos
 - 🔜 **Target**: cross-embodiment LoRA fine-tune + open dataset on HuggingFace
+
+---
+
+## 🎬 LIBERO 4-suite at a glance
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center">
+<b>Spatial</b> · 78% SR<br/>
+<i>same object, different positions</i><br/>
+<img src="assets/demos/preview_spatial.gif" width="320"/>
+</td>
+<td align="center">
+<b>Object</b> · 60% SR<br/>
+<i>same layout, different objects</i><br/>
+<img src="assets/demos/preview_object.gif" width="320"/>
+</td>
+</tr>
+<tr>
+<td align="center">
+<b>Goal</b> · 77% SR<br/>
+<i>different task goals</i><br/>
+<img src="assets/demos/preview_goal.gif" width="320"/>
+</td>
+<td align="center">
+<b>Long (10)</b> · 53% SR<br/>
+<i>long-horizon multi-step tasks</i><br/>
+<img src="assets/demos/preview_long.gif" width="320"/>
+</td>
+</tr>
+</table>
+
+<sub>Full 4-suite demo MP4 (40 clips, 5 MB): <a href="assets/demos/openvla_libero_4suite_demo.mp4"><code>assets/demos/openvla_libero_4suite_demo.mp4</code></a>. Reproduction scripts in the companion repo: <a href="https://github.com/lz-googlefycy/openvla-libero">openvla-libero</a>.</sub>
+
+</div>
 
 ---
 
