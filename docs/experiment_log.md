@@ -116,3 +116,9 @@ Wall time 1h 32m, 100 rollout MP4s saved.
 **Object Total SR: 60.0% (60/100)** vs paper 88.4%±0.8 → -28%（偏差大，可能与渲染/seed 有关）
 
 → Goal eval started 14:42
+
+### 2026-05-07 16:18 — Goal eval done
+
+**Goal Total SR: 77.0% (77/100)** vs paper 79.2%±1.0 → -2.2% (复现成功)
+
+→ Long eval started 16:18
