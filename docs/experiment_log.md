@@ -122,3 +122,21 @@ Wall time 1h 32m, 100 rollout MP4s saved.
 **Goal Total SR: 77.0% (77/100)** vs paper 79.2%±1.0 → -2.2% (复现成功)
 
 → Long eval started 16:18
+
+### 2026-05-07 20:00 — 🎉🎉🎉 全部 4 suite 评测完成！
+
+**LIBERO 4-suite 最终结果**:
+
+| Suite | Paper | Ours | Δ |
+|---|---|---|---|
+| Spatial | 84.7 | **78.0%** | -6.7% |
+| Object | 88.4 | **60.0%** | -28.4% |
+| Goal | 79.2 | **77.0%** | -2.2% |
+| Long | 53.7 | **53.0%** | -0.7% |
+| **Avg** | 76.5 | **67.0%** | -9.5% |
+
+Long 几乎完美复现 (-0.7%)。
+Object 偏差大 (-28%)，待研究。
+400 rollout MP4s 全部生成，4-suite demo 已合成。
+
+总时间：5/6 晚下载 + 5/7 eval，~20h wall time。
