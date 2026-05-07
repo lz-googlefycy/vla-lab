@@ -122,20 +122,46 @@ def annotate_frame(frame, text_lines, position="top"):
 
 def build_demo(selected, out_path, fps=30, max_frames_per_clip=300,
                include_title_card=True):
+    """Build demo. All frames resized to a common (H, W) determined by 1st clip."""
+    # Determine target frame size from the first valid clip
+    target_h, target_w = None, None
+    for r in selected:
+        try:
+            reader = imageio.get_reader(r["path"])
+            first = reader.get_next_data()
+            target_h, target_w = first.shape[:2]
+            reader.close()
+            break
+        except Exception:
+            continue
+    if target_h is None:
+        print("[error] no clip readable to set target size")
+        return
+    print(f"[info] target frame size: {target_w}x{target_h}")
     print(f"[info] writing demo to {out_path} (fps={fps})")
+
     writer = imageio.get_writer(out_path, fps=fps, codec="libx264",
                                  quality=8, macro_block_size=1)
 
+    def resize_frame(frame, h, w):
+        """Resize via PIL if available; otherwise skip mismatched frames."""
+        if frame.shape[:2] == (h, w):
+            return frame
+        try:
+            from PIL import Image
+            img = Image.fromarray(frame).resize((w, h), Image.BILINEAR)
+            return np.array(img)
+        except Exception:
+            return None
+
     if include_title_card:
-        # 60 frames = 2s of title card (black with text)
-        title_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        title_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
         title_frame = annotate_frame(title_frame, [
             "OpenVLA-7B on LIBERO",
-            "4 suites: Spatial / Object / Goal / Long",
-            f"Total clips: {len(selected)}",
-            "https://github.com/liuzhi7/ro_planning",
+            f"Clips: {len(selected)}",
+            "github.com/liuzhi7/ro_planning",
         ], position="top")
-        for _ in range(60):
+        for _ in range(int(2.0 * fps)):  # 2-second title
             writer.append_data(title_frame)
 
     for i, r in enumerate(selected):
@@ -156,24 +182,19 @@ def build_demo(selected, out_path, fps=30, max_frames_per_clip=300,
         if not frames:
             continue
 
-        # Resize all frames to a common size (use first frame's size)
-        h, w = frames[0].shape[:2]
-
-        # Annotate
         text_lines = [
             f"[{i+1}/{len(selected)}] {r['suite']}: {r['task'][:60]}",
             f"episode {r['episode']} {'✓' if r['success'] else '✗'}",
         ]
 
         for f in frames:
-            if f.shape[:2] != (h, w):
-                # Skip mismatched frames
+            f_resized = resize_frame(f, target_h, target_w)
+            if f_resized is None:
                 continue
-            annotated = annotate_frame(f, text_lines, position="top")
+            annotated = annotate_frame(f_resized, text_lines, position="top")
             writer.append_data(annotated)
 
-        # 0.5s blank between clips
-        blank = np.zeros((h, w, 3), dtype=np.uint8)
+        blank = np.zeros((target_h, target_w, 3), dtype=np.uint8)
         for _ in range(int(0.3 * fps)):
             writer.append_data(blank)
 
