@@ -1,0 +1,4 @@
+# Vendored Spirit v1.5 source is not committed.
+# Clone it in parallel with this dir before docker build:
+#   git clone git@github.com:Spirit-AI-Team/spirit-v1.5.git
+spirit-v1.5/

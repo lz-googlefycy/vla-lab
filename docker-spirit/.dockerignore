@@ -1,0 +1,17 @@
+**/__pycache__/
+**/*.pyc
+**/.git/
+**/*.egg-info/
+**/build/
+**/dist/
+**/assets/*.mp4
+**/assets/*.gif
+**/assets/*.png
+**/*.safetensors
+**/*.bin
+**/*.pt
+**/*.pth
+**/*.ckpt
+**/wandb/
+**/outputs/
+**/checkpoints/
