@@ -94,3 +94,19 @@ EXP-<日期>-<序号>-<任务>
 | SCP-20260507-spatial | 10:55 | scp spatial → 开发机 | 25 MB/s | ✅ 15 GB / ~10 min | 用 scp 不是 rsync（dev rsync 缺 libxxhash） |
 | EVAL-20260507-01 | 11:23 | LIBERO-Spatial t=10 trials | bf16, MUJOCO_GL=osmesa, TRANSFORMERS_OFFLINE | ⏳ in progress | 50s/trial avg, 100 rollout × 50s ≈ 90 min |
 | AUTO-20260507 | 11:25 | auto_pipeline_v3 启动 | 串行 scp + eval object/goal/long | ⏳ in progress | 总 ETA 6-7h |
+
+### 2026-05-07 12:55 — 🎉 LIBERO-Spatial 评测完成
+
+**Total SR: 78.0% (78/100)** vs paper 84.7%±0.9 → -6.7%
+
+| Task | SR | Task | SR |
+|---|---|---|---|
+| 0 | 80% | 5 | 70% |
+| 1 | 60% | 6 | 100% |
+| 2 | 90% | 7 | 70% |
+| 3 | 90% | 8 | 70% |
+| 4 | 70% | 9 | 80% |
+
+Wall time 1h 32m, 100 rollout MP4s saved.
+
+→ Object eval started 12:56
