@@ -43,6 +43,31 @@ echo "=========================================="
 # Render config: osmesa works in our k8s container (EGL fails, see env_setup.md)
 export MUJOCO_GL=osmesa
 
+# Force HF transformers to use local code, never call out to huggingface.co
+# (dev machine has no internet)
+export TRANSFORMERS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+export TOKENIZERS_PARALLELISM=false
+
+# Auto-fix finetuned ckpts that reference remote auto_map ("openvla/openvla-7b--xxx")
+# These configs are baked into HF release files; we patch them to local-only
+# refs and copy the *.py files from the base model. Idempotent.
+if [ -f "$CKPT/config.json" ]; then
+    if grep -q 'openvla/openvla-7b--' "$CKPT/config.json" 2>/dev/null \
+       || grep -q 'openvla/openvla-7b--' "$CKPT/preprocessor_config.json" 2>/dev/null; then
+        echo "[fix] patching auto_map to local refs in $CKPT"
+        sed -i 's|openvla/openvla-7b--configuration_prismatic|configuration_prismatic|g; s|openvla/openvla-7b--modeling_prismatic|modeling_prismatic|g' \
+            "$CKPT/config.json" 2>/dev/null || true
+        sed -i 's|openvla/openvla-7b--processing_prismatic|processing_prismatic|g' \
+            "$CKPT/preprocessor_config.json" 2>/dev/null || true
+    fi
+    BASE_PY_DIR=/workspace/models/openvla-7b
+    if [ -d "$BASE_PY_DIR" ] && [ ! -f "$CKPT/configuration_prismatic.py" ]; then
+        echo "[fix] copying *.py from $BASE_PY_DIR to $CKPT"
+        cp "$BASE_PY_DIR"/*.py "$CKPT/" 2>/dev/null || true
+    fi
+fi
+
 # cd into EVAL_DIR so save_rollout_video drops MP4 in EVAL_DIR/rollouts/<DATE>/
 cd "$EVAL_DIR"
 
