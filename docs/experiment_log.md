@@ -110,3 +110,9 @@ EXP-<日期>-<序号>-<任务>
 Wall time 1h 32m, 100 rollout MP4s saved.
 
 → Object eval started 12:56
+
+### 2026-05-07 14:42 — Object eval done
+
+**Object Total SR: 60.0% (60/100)** vs paper 88.4%±0.8 → -28%（偏差大，可能与渲染/seed 有关）
+
+→ Goal eval started 14:42
