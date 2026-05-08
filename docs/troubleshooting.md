@@ -434,15 +434,37 @@ nvidia-container-toolkit 默认只暴露 `compute,utility` capability，
 没挂 `graphics` capability + nvidia ICD。**不是消费卡 vs datacenter
 卡的问题，是 k8s pod 配置**。本机 docker 也是同样原因。
 
-**根因升级**：要让 SAPIEN work，需要在 pod 模板里加：
+**2026-05-08 后续：本机反向验证**
+
+为避免误传断言，在本机 RTX 3090 + docker 上做了同样验证：
+
+| Setting | nvidia ICD | libGLX_nvidia | SAPIEN scene+camera | Maniskill PickCube |
+|---|---|---|---|---|
+| 默认 `--gpus all` | ❌ | ❌ | ❌ ErrorIncompat | ❌ |
+| `--gpus all -e NVIDIA_DRIVER_CAPABILITIES=all` | ❌ (lib 来了但 ICD JSON 没自动挂) | ✅ `libGLX_nvidia.so.570.133.20` | （需要 ICD JSON）| - |
+| 上面 + bind-mount `nvidia_icd.json` | ✅ | ✅ | ✅ **64×64 RGBA 渲染成功** | ❌ "single-GPU only" / "supported physical device" — 这是 Maniskill 设备解析的另一个 bug，不是 Vulkan |
+
+所以**本机有补救路径**：`-e NVIDIA_DRIVER_CAPABILITIES=all -v
+/usr/share/vulkan/icd.d/nvidia_icd.json:/usr/share/vulkan/icd.d/nvidia_icd.json:ro`
+能让 SAPIEN 工作。
+
+**H20 pod 没有补救路径**：
+
+| 路径 | 在 H20 pod 行不行 |
+|---|---|
+| 改 `--gpus` 启动参数 | ❌ pod 用户改不动 k8s deployment |
+| 设 `NVIDIA_DRIVER_CAPABILITIES=all` env | ❌ 即使 export 也没用，nvidia-container-toolkit 已经在容器创建期决定了 capability，运行期改 env 不生效 |
+| bind-mount nvidia_icd.json | ❌ pod 不能访问宿主机文件 |
+| 用 SAPIEN bundled ICD | ❌ 它指向 `libGLX_nvidia.so.0`，但 pod 内**没这个 lib**（toolkit 没挂） |
+
+**根因升级**：要让 SAPIEN/Maniskill 在 ML 平台 pod 上 work，需要 ML
+平台 admin 改 pod 模板：
 ```
 env:
   - name: NVIDIA_DRIVER_CAPABILITIES
     value: "compute,utility,graphics"
 ```
-+ host 上正确挂载 `/usr/share/glvnd/egl_vendor.d/10_nvidia.json` 和
-`/usr/share/vulkan/icd.d/nvidia_icd.json`。这通常是 ML 平台层面的配
-置变更，单个 pod 改不动。
+单个用户改不动。
 
 **永久绕开方案**：闭环 eval 用 LIBERO（mujoco/osmesa），不用 Maniskill/SAPIEN。
 

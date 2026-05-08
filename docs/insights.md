@@ -47,15 +47,31 @@ H20 是 datacenter 卡，nvidia-container-toolkit 应该把 Vulkan ICD 自动
 
 **现在的理解**
 nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
-进容器。Vulkan/OpenGL 需要单独开 `graphics` capability，这要在 k8s
-deployment 里加 `NVIDIA_DRIVER_CAPABILITIES=all`（或
-`compute,graphics`）环境变量 + nvidia ICD `.json` 文件挂进容器。
+进容器。Vulkan/OpenGL 需要单独开 `graphics` capability — 它对应的
+是 `libGLX_nvidia.so`、`libnvidia-glvkspirv.so` 这些图形 lib，以及
+`nvidia_icd.json` 的挂载。开 graphics 有两种方式：
+- docker：`-e NVIDIA_DRIVER_CAPABILITIES=all`（运行时加）
+- k8s：pod spec 里设同名 env var（pod 启动时就生效）
 
-大部分 ML 平台的 pod 模板没开这个 — 训练/推理工作流不需要 Vulkan，
-开了反而暴露 GPU 显示接口的攻击面。但**所有依赖 SAPIEN / Maniskill /
-Isaac Lab / Habitat 等 Vulkan-based sim 框架的人**，都会撞到这个墙。
+**本机反向验证**（RTX 3090 desktop docker）：
+默认 `--gpus all` 也一样不 work，但手动加
+`-e NVIDIA_DRIVER_CAPABILITIES=all -v nvidia_icd.json:...` 后 SAPIEN
+渲染成功。所以这**不是 datacenter GPU 特有问题**，是所有容器的默认
+行为。
 
-这不是单点 bug，是基础设施配置导致的 sim 工作流系统性受限。
+**H20 datacenter pod 的结构性限制**：
+- pod 用户不能改 `--gpus` 或 env（k8s deployment 层定义）
+- 运行时 `export NVIDIA_DRIVER_CAPABILITIES=all` 无效 — capability
+  在容器创建时就决定了
+- pod 不能 bind-mount 宿主机文件
+- pod 里根本**没有** `libGLX_nvidia.so`（toolkit 没挂）
+
+所以**单个用户在标准 ML 平台 pod 里没有补救路径**，这是一条结构性
+约束。得平台 admin 改 RuntimeClass 模板，加 graphics capability。
+
+对训练/推理工作流，平台不开 graphics 是合理的（能缩小攻击面、减少
+依赖冲突）。但所有做 sim-to-real / 大规模闭环 eval 的人会撞墙，而他
+们人数在涨。
 
 **对后续工作的影响**
 1. **闭环 eval 路径必须避开 Vulkan**：Maniskill 默认用 SAPIEN（vulkan
