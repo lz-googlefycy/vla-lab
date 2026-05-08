@@ -303,6 +303,61 @@ a = spirit_action[0, step_idx].detach().float().cpu().numpy()
 
 ---
 
+---
+
+## 2026-05-08 — gh CLI 认证失败 (proxy blocks api.github.com)
+
+**现象**：
+```
+error validating token: Get "https://api.github.com/": EOF
+```
+
+**触发条件**：
+在本机已经有 SSH key 到 github.com 能正常 `git push`，但 `gh auth login --with-token`
+失败。
+
+**根因**：
+本机 shell 默认环境变量有 `ALL_PROXY=socks5h://127.0.0.1:20989` +
+`HTTPS_PROXY=http://127.0.0.1:41211`。gh 是 HTTP API 客户端，走这些代理，
+代理出口**被 block 到 api.github.com**（但不 block `github.com:22` SSH）。
+
+用 `curl https://api.github.com/` 实测：
+- **default**：SSL_ERROR_SYSCALL (5s timeout)
+- **no proxy** (unset all)：HTTP 200 in 222 ms ✅
+- **socks5 20989**：timeout
+- **http 41211**：EOF
+
+**修复**：
+永久加到 `~/.bashrc`:
+```bash
+export NO_PROXY="${NO_PROXY:+$NO_PROXY,}github.com,api.github.com,raw.githubusercontent.com,codeload.github.com,objects.githubusercontent.com"
+export no_proxy="${no_proxy:+$no_proxy,}github.com,api.github.com,..."
+
+# Helper function to unset all proxies before a command
+gh-direct() {
+    env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u HTTP_PROXY \
+        -u https_proxy -u http_proxy -u CLASH_SOCKS_PROXY -u CLASH_HTTP_PROXY \
+        "$@"
+}
+
+# Alias: 'gh' always goes direct
+alias gh='gh-direct /home/ubuntu/mambaforge/bin/gh'
+```
+
+下次登录：
+```bash
+unset ALL_PROXY HTTPS_PROXY HTTP_PROXY all_proxy https_proxy http_proxy
+echo 'ghp_xxx' | /home/ubuntu/mambaforge/bin/gh auth login --with-token
+gh auth status  # ✓ Logged in to github.com as lz-googlefycy
+```
+
+**影响**：
+- 本机 gh 现在全功能可用
+- 开发机**不能**访问 github.com（连 anaconda.com 也 timeout），所以 gh 只在本机跑
+- 所有 GitHub release asset 上传只能从本机做
+
+---
+
 ## 性能结果（6 个 bug 全修之后）
 
 | 指标 | RTX 3090 24GB |
