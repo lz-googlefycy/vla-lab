@@ -140,3 +140,22 @@ Object 偏差大 (-28%)，待研究。
 400 rollout MP4s 全部生成，4-suite demo 已合成。
 
 总时间：5/6 晚下载 + 5/7 eval，~20h wall time。
+
+### 2026-05-08 — Spirit v1.5 跑通 + 仿真主战场启动
+
+#### 上半天：Spirit 本机 smoke 通过（复查上次）
+6.1 Hz bf16 on RTX 3090 + 10 GB GPU，6 bug 修复记录在 troubleshooting.md。
+
+#### 下半天
+- ✅ Spirit 镜像 push MICR/volc/evad 3 仓库（digest f7901cc7）
+- ✅ Spirit-v1.5 (21 GB) + Qwen3-VL-4B (8.3 GB) scp 到开发机 /ad-alg/.../ro_planning/models/
+- ✅ Spirit-v1.5-patched 目录在开发机创建（local-path backbone）
+- ❌ 开发机 pod / 根盘只 20 GB，docker pull Spirit 镜像失败 → 需要 pod 重建
+- ✅ 创建 spirit-sim-v1.0-cu128-py310 镜像（Spirit 基础 + Maniskill 3.0.1 + SAPIEN 3.0.3 + LIBERO）
+- ❌ Maniskill 创建 env 失败（Vulkan driver 在 docker 不可用）
+- ✅ 改用 "Spirit sees scene image → predict action chunk" 简化 demo
+- ✅ Phase A 产出：5 instructions × 60-step × 14-DoF action chunks 
+- ✅ gh CLI 本机装 + PAT 认证 + NO_PROXY 永久配置
+- ✅ v0.1-demos Release 上传到两个 GitHub 仓库
+- ✅ README 切换到 Release CDN URL
+- ✅ docs/troubleshooting.md + docs/insights.md 初版

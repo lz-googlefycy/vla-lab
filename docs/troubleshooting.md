@@ -378,3 +378,70 @@ gh auth status  # ✓ Logged in to github.com as lz-googlefycy
 
 此文档由 `ro_planning/docs/troubleshooting.md` 同步到 `vla-lab/docs/troubleshooting.md`。
 每次踩新坑，在这里按**日期 + 类别 + 短标题**加条目，不要合并不同主题。
+
+---
+
+## 2026-05-08 — SAPIEN / Maniskill Vulkan unavailable in container
+
+**现象**：
+```
+[svulkan2] [error] Your GPU driver does not support Vulkan.
+RuntimeError: vk::createInstanceUnique: ErrorIncompatibleDriver
+```
+
+**触发条件**：
+`spirit-sim-v1.0-cu128-py310` 镜像内 `gym.make("PushCube-v1", robot_uids="xlerobot")`
+失败。SAPIEN 3.x 渲染器走 Vulkan，docker 里默认没 Vulkan ICD。
+
+**根因**：
+SAPIEN 切换到 Vulkan-only 渲染（3.x 起），不再支持 OpenGL/osmesa 回退。要在
+容器里启用 Vulkan 需要：
+1. 宿主机装 `nvidia-container-toolkit-vulkan` (或 `libnvidia-gl-xxx` 被正确挂载)
+2. 容器内装 `libvulkan1 + mesa-vulkan-drivers`（已装）
+3. `docker run --gpus all` 实际传入 NVIDIA ICD（有时需要 `--privileged` 或特殊 mount）
+
+我们 docker 环境似乎**已装依赖但 ICD 加载失败**，warning 里提到 `Failed to find glvnd ICD file. ... NVIDIA driver ... incorrect or partial installation`。
+
+**修复**（暂）：
+**不用 Maniskill 跑 Phase A**。改用 "Spirit sees scene image + language → predict action chunk"
+简化 demo。博客 #2 的核心素材（action chunk plots + 推理速度）不依赖仿真 env。
+
+**未来修复路径**：
+1. 换用 Maniskill `sim_backend='cpu'` — 但这会非常慢
+2. 换用 XLeRobot 的 `simulation/mujoco/`（纯 mujoco，无 Vulkan 依赖）
+3. 在开发机 H20（pod 可能有 Vulkan）验证是否只是本机 docker 环境问题
+4. 使用 `--runtime=nvidia` 而不是 `--gpus`，或在 host 装 `nvidia-docker2`
+
+**影响**：
+Phase A 里"Spirit 在仿真机器人里执行 rollout"这种视觉视频**本周不会有**。
+改用"Spirit 看静态图 + 预测动作轨迹"作为 blog #2 主图。真机视频等硬件接入。
+
+---
+
+## 2026-05-08 — 开发机 pod 根盘 20 GB 不够装 Spirit 镜像
+
+**现象**：
+```
+write /var/lib/docker/tmp/GetImageBlob532615915: no space left on device
+```
+
+**触发条件**：
+`ssh dev "docker pull <registry>/spirit-v1.0-cu128-py310"` 在开发机 pod 里失败。
+
+**根因**：
+开发机是 k8s pod，root overlay 只 20 GB，`/var/lib/docker` 在 root。Spirit 镜像 20 GB
+（加上已在 pod 里用的其他镜像），拉取时超容量。
+
+JuiceFS (`/ad-alg/...`) 5 PB 可用但不能放 `/var/lib/docker`（docker 要 local 块设备）。
+
+**修复**：
+**不能在 pod 内 docker pull 镜像**。解决方案：
+1. **(推荐) 请用户重建 pod**，指定 Spirit 镜像作为 pod image，这样所有 Spirit 依赖
+   都在 pod 里，不占 docker 空间
+2. 备选：在 pod 里创建新 conda env + pip install（但外网不通，行不通）
+
+**影响**：
+当前开发机 pod 用的是 `openvla-v1.0-cu118-py310` 镜像（torch 2.2 + transformers 4.40）。
+要跑 Spirit（需要 torch 2.8 + transformers 4.57），**必须等用户用新镜像重建 pod**。
+暂时 Spirit 只能在本机 RTX 3090 跑。
+
