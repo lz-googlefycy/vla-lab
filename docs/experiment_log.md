@@ -180,3 +180,34 @@ Object 偏差大 (-28%)，待研究。
 1. 用 ML 平台 UI 重建 pod，镜像选 `micr.cloud.mioffice.cn/world-model-lyk/planningmodel:spirit-v1.0-cu128-py310`
 2. 挂载 JuiceFS `/ad-alg/planning-users/liuzhi7/`
 3. 进 pod 后执行 `bash /opt/vla-lab/bootstrap-ssh.sh` 或 `bash /ad-alg/planning-users/liuzhi7/.ssh_backup/bootstrap-ssh.sh`
+
+### 2026-05-08 15:24 — 🎉 开发机新 pod 启动 + Spirit smoke on H20 通过
+
+**用户**用 spirit-v1.0-cu128-py310 重建了 pod。验证：
+- ✅ torch 2.8.0+cu128, transformers 4.57.1, diffusers 0.35.2, flash_attn 2.8.3
+- ✅ H20-3e 143 GB 可用
+- ✅ `/opt/vla-lab/bootstrap-ssh.sh` 在镜像里
+- ✅ SSH 隧道恢复 (用户已经从 desktop ssh 进 4163)
+- ✅ `/workspace/spirit-v1.5` 源码在镜像里（COPY 进来的）
+- ✅ JuiceFS `/ad-alg/.../models/` 数据完整
+
+**Spirit smoke test on H20**:
+| 指标 | 值 |
+|---|---|
+| 模型加载 | 22.9 s (vs 3090: 58 s, 2.5× 更快) |
+| Warmup 推理 | 1034 ms (vs 3090: 1513 ms) |
+| Steady-state | **152 ms / 6.6 Hz** (vs 3090: 163 ms / 6.1 Hz) |
+| 延迟方差 | ±3 ms (vs 3090: ±100 ms, **30× 改善**) |
+| GPU 显存 | 10 GB / 150 GB (余量 14×) |
+
+**Phase A on H20 完成** — 5 个 custom instruction 全部产出 action chunk：
+- 推理稳定 152-158 ms
+- 5 个 chunk PNG + state JSON 存到 `assets/spirit/phase_a_h20/`
+
+**新增 insights.md 条目**: "H20 vs RTX 3090 上 Spirit 的延迟稳定性差异"
+- mean 差 8%，但 **tail latency (p99) 差 30×**
+- 这是 consumer vs datacenter GPU 未被报告的差距，对博客 #2 / paper 有价值
+
+**下一步**:
+- H20 可以做真正的 Phase B fine-tune（3090 显存不够）
+- Maniskill Vulkan 问题在 H20 上需要重新验证

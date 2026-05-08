@@ -17,6 +17,56 @@
 
 ---
 
+## 2026-05-08 · H20 vs RTX 3090 上 Spirit 的延迟稳定性差异 <a name="h20-vs-3090-latency"></a>
+
+**上下文**
+今天把 Spirit v1.5 从本机 RTX 3090 24GB 迁到开发机 H20 144GB。**同样**的 bf16
+推理代码、**同样** action chunking 配置、**同样**的 monkey-patch。
+
+**观察**
+
+| 指标 | RTX 3090 24 GB | H20 144 GB | 变化 |
+|---|---|---|---|
+| 模型加载 | 58 s | 23 s | 2.5× 更快 |
+| Steady-state 推理 mean | 163 ms | 152 ms | 慢 8% 改善 |
+| Min 延迟 | 151 ms | 151 ms | 一样 |
+| **Max 延迟** | **251 ms** | **154 ms** | **2× 改善** |
+| 延迟方差 | ±100 ms | **±3 ms** | **30× 改善** |
+| GPU 显存 | 10 GB / 24 GB | 10 GB / 150 GB | 14× 余量 |
+
+H20 上 6.6 Hz 几乎是**确定性**，而 3090 上有明显的 tail latency。
+
+**原本的预期**
+"推理延迟主要看 FLOPs，GPU 算力差不多的话差距应该不大。3090 fp16 算力 ~142 TFLOPS，
+H20 bf16 算力 ~148 TFLOPS——**预期差距 <5%**。"
+
+**现在的理解**
+
+延迟 mean 确实差不多（8% 改善，跟 FLOPS 差异一致）。但**tail latency 差一个数量级**，
+原因是 3090 上：
+
+1. **内存竞争**：3090 上还有 5 GB 系统占用（桌面、Chrome、其它），而 Spirit 用 10 GB，
+   留给激活的空间只有 ~9 GB。chunk 60×14×1536 = ~5 MB 激活看起来小，但 Qwen3-VL 编码
+   3 张 320×240 图时的中间 feature map 可能临时冲到几个 GB。
+2. **ECC memory + 更大 HBM**：H20 是 ECC HBM3，bitflips 重试概率更低。
+
+**深度含义**：**"consumer GPU 能跑"和"production GPU 能稳定跑"是两件事**。
+博客 #2 应该诚实报告这两个数字——读者看到 "6.1 Hz on 3090" 以为 "稳定的 6 Hz"，
+实际 p99 可能更慢。
+
+**对后续工作的影响**
+1. 本机 3090 用于**快速 iteration / 调试**，H20 用于**正式 benchmark / fine-tune / 视频录制**
+2. Phase B fine-tune **必须在 H20**（3090 显存不够训）
+3. 如果后面要做 "deploy on edge GPU" 的故事，**单独做 tail latency 分布实验**
+
+**相关工作 / 文献**
+- OpenVLA 论文在 A100 上只报 mean latency，不报 p99
+- π0 论文同样
+- **Robot VLA benchmarks 里没人认真比较 consumer vs datacenter GPU 的 tail latency**——
+  这是一个未被填的空白，可能是一个 minor contribution
+
+---
+
 ## 2026-05-08 · 跨 embodiment 部署的"最后一公里" <a name="cross-embodiment-last-mile"></a>
 
 **上下文**
@@ -318,6 +368,7 @@ Spirit 的 `modeling_spirit_vla.py` 看起来更像**研究代码**而非**生�
 
 每条 insight 都有 anchor 链接，方便交叉引用：
 
+- [H20 vs RTX 3090 上 Spirit 的延迟稳定性](#h20-vs-3090-latency) ← new
 - [跨 embodiment 部署的最后一公里](#cross-embodiment-last-mile)
 - [Spirit 用 prompt 字符串"理解"硬件](#robot-type-as-prompt)
 - [Spirit 为什么比 OpenVLA 快一倍](#spirit-speed-advantage)
