@@ -159,3 +159,24 @@ Object 偏差大 (-28%)，待研究。
 - ✅ v0.1-demos Release 上传到两个 GitHub 仓库
 - ✅ README 切换到 Release CDN URL
 - ✅ docs/troubleshooting.md + docs/insights.md 初版
+
+### 2026-05-08 下半夜 — 镜像 v2（SSH 工具 + bootstrap 脚本）
+
+**起因**：用户希望每次 pod 重建后不用再手动配 SSH / autossh 反向隧道。
+
+**方案**：
+- 镜像打包 openssh-server + autossh + tmux + bootstrap 脚本到 `/opt/vla-lab/`
+- SSH 私钥 / authorized_keys 不入镜像（安全），存 JuiceFS
+  `/ad-alg/planning-users/liuzhi7/.ssh_backup/`
+- bootstrap-ssh.sh 一键恢复：复制 keys + 修 perms + 启 sshd:2222 + 启 autossh
+
+**产出**：
+- 新 digest: `00f59b575f` (base) / `397eed04` (sim, not yet pushed)
+- 三仓库都 push 了 base v2
+- 本机清理 OpenVLA 镜像，释放 81 GB（324 → 405 GB 可用）
+- docs/dev_machine_bootstrap.md — 使用手册
+
+**未完成**：用户需要
+1. 用 ML 平台 UI 重建 pod，镜像选 `micr.cloud.mioffice.cn/world-model-lyk/planningmodel:spirit-v1.0-cu128-py310`
+2. 挂载 JuiceFS `/ad-alg/planning-users/liuzhi7/`
+3. 进 pod 后执行 `bash /opt/vla-lab/bootstrap-ssh.sh` 或 `bash /ad-alg/planning-users/liuzhi7/.ssh_backup/bootstrap-ssh.sh`
