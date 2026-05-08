@@ -12,11 +12,11 @@
 
 <br/>
 
-<a href="assets/demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4 (5 MB, 40 clips, ~4 min)">
+<a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4 (5 MB, 40 clips, ~4 min)">
 <img src="assets/demos/hero.gif" width="480" alt="OpenVLA-7B on LIBERO-Spatial — click to play full MP4"/>
 </a>
 
-<sub>▶ <b>Click the animation</b> to play the full <b>4-suite demo MP4</b> (40 clips, ~4 min, 5 MB) with pause / seek / fullscreen controls.</sub>
+<sub>▶ <b>Click the animation</b> to play the full <b>4-suite demo MP4</b> (40 clips, ~4 min, 5 MB) — hosted on <a href="https://github.com/lz-googlefycy/vla-lab/releases/tag/v0.1-demos">Release v0.1-demos</a>.</sub>
 
 </div>
 
@@ -41,29 +41,29 @@
 <td align="center">
 <b>Spatial</b> · 78% SR<br/>
 <i>same object, different positions</i><br/>
-<a href="assets/demos/openvla_libero_spatial_demo.mp4" title="Click to play full Spatial demo MP4"><img src="assets/demos/preview_spatial.gif" width="320" alt="Spatial demo — click to play full MP4"/></a>
+<a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_spatial_demo.mp4" title="Click to play full Spatial demo MP4"><img src="assets/demos/preview_spatial.gif" width="320" alt="Spatial demo — click to play full MP4"/></a>
 </td>
 <td align="center">
 <b>Object</b> · 60% SR<br/>
 <i>same layout, different objects</i><br/>
-<a href="assets/demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_object.gif" width="320" alt="Object demo — click to play full MP4"/></a>
+<a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_object.gif" width="320" alt="Object demo — click to play full MP4"/></a>
 </td>
 </tr>
 <tr>
 <td align="center">
 <b>Goal</b> · 77% SR<br/>
 <i>different task goals</i><br/>
-<a href="assets/demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_goal.gif" width="320" alt="Goal demo — click to play full MP4"/></a>
+<a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_goal.gif" width="320" alt="Goal demo — click to play full MP4"/></a>
 </td>
 <td align="center">
 <b>Long (10)</b> · 53% SR<br/>
 <i>long-horizon multi-step tasks</i><br/>
-<a href="assets/demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_long.gif" width="320" alt="Long demo — click to play full MP4"/></a>
+<a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_4suite_demo.mp4" title="Click to play full 4-suite demo MP4"><img src="assets/demos/preview_long.gif" width="320" alt="Long demo — click to play full MP4"/></a>
 </td>
 </tr>
 </table>
 
-<sub>GIFs are 20 s previews that autoplay. <b>Click any preview</b> to play the corresponding MP4 with pause / seek / fullscreen controls. Full <a href="assets/demos/openvla_libero_4suite_demo.mp4">4-suite MP4 (40 clips, 5 MB)</a> covers all 4 suites. Reproduction scripts: <a href="https://github.com/lz-googlefycy/openvla-libero">openvla-libero</a>.</sub>
+<sub>GIFs are 20 s previews that autoplay. <b>Click any preview</b> to play the corresponding MP4 with pause / seek / fullscreen controls. Full <a href="https://github.com/lz-googlefycy/vla-lab/releases/download/v0.1-demos/openvla_libero_4suite_demo.mp4">4-suite MP4 (40 clips, 5 MB)</a> covers all 4 suites. Reproduction scripts: <a href="https://github.com/lz-googlefycy/openvla-libero">openvla-libero</a>.</sub>
 
 </div>
 
