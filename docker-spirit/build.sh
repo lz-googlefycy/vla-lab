@@ -12,7 +12,7 @@ if [ ! -d spirit-v1.5 ]; then
     git clone --depth 1 https://github.com/Spirit-AI-Team/spirit-v1.5.git
 fi
 
-TAG="${TAG:-spirit-v1.0-cu128-py310}"
-echo "Building $TAG ..."
+TAG="${TAG:-spirit-v1.1-cu128-py311}"
+echo "Building $TAG (unified: infer + sim + LoRA) ..."
 docker build --network=host -t "$TAG" .
 echo "Done. Try: docker run --rm --gpus all $TAG python -c 'import model; print(\"OK\")'"
