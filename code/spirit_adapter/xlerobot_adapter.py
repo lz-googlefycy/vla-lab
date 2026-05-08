@@ -111,12 +111,23 @@ class XLeRobotSpiritAdapter:
         image_right_wrist: Optional[np.ndarray] = None,
         target_cam_size: tuple[int, int] = (240, 320),
         device: str = "cuda",
+        robot_type: str = "aloha",  # Spirit knows: ARX5, aloha, Franka, UR5 — we impersonate aloha (dual-arm)
+        dtype: str = "bf16",         # must match the policy's dtype
     ):
         self.tile_cam_high = tile_cam_high
         self.image_left_wrist = image_left_wrist
         self.image_right_wrist = image_right_wrist
         self.H, self.W = target_cam_size
         self.device = device
+        self.robot_type = robot_type
+        self.dtype_str = dtype
+        if _TORCH:
+            if dtype in ("bf16", "bfloat16"):
+                self.torch_dtype = torch.bfloat16
+            elif dtype in ("fp16", "half", "float16"):
+                self.torch_dtype = torch.float16
+            else:
+                self.torch_dtype = torch.float32
 
     # ------------------------------------------------------------------
     # Image helpers
@@ -150,10 +161,13 @@ class XLeRobotSpiritAdapter:
         if not _TORCH:
             raise ImportError("torch is required at runtime; install it or skip inference")
 
+        # State must match policy dtype (bf16). But images stay float32 because
+        # Spirit's preprocess_rb_batch internally does (img*255).astype(uint8),
+        # which doesn't support bfloat16 tensors.
         spirit_state = pad_state_12_to_14(obs_xle["state"])
-        state_t = torch.from_numpy(spirit_state).unsqueeze(0).float().to(self.device)
+        state_t = torch.from_numpy(spirit_state).unsqueeze(0).to(self.device).to(self.torch_dtype)
 
-        head = self._to_tensor_image(obs_xle["image_head"]).to(self.device)
+        head = self._to_tensor_image(obs_xle["image_head"]).to(self.device)  # float32 for preprocess
 
         # Decide wrist cameras
         if obs_xle.get("image_left_wrist") is not None:
@@ -176,6 +190,7 @@ class XLeRobotSpiritAdapter:
             "observation.images.cam_left_wrist": left.unsqueeze(0),
             "observation.images.cam_right_wrist": right.unsqueeze(0),
             "task": [obs_xle["task"]],
+            "robot_type": [self.robot_type],
         }
 
     def unwrap_action(self, spirit_action: "torch.Tensor", step_idx: int = 0) -> np.ndarray:
@@ -188,7 +203,8 @@ class XLeRobotSpiritAdapter:
             np.ndarray (12,).
         """
         if hasattr(spirit_action, "cpu"):
-            a = spirit_action[0, step_idx].detach().cpu().numpy()
+            # Cast to fp32 before numpy: numpy doesn't support bf16/fp16 directly
+            a = spirit_action[0, step_idx].detach().float().cpu().numpy()
         else:
             a = np.asarray(spirit_action)[0, step_idx]
         return unpad_action_14_to_12(a)
@@ -196,7 +212,7 @@ class XLeRobotSpiritAdapter:
     def unwrap_action_chunk(self, spirit_action: "torch.Tensor") -> np.ndarray:
         """Full chunk: (B, T, 14) → (T, 12)."""
         if hasattr(spirit_action, "cpu"):
-            a = spirit_action[0].detach().cpu().numpy()
+            a = spirit_action[0].detach().float().cpu().numpy()
         else:
             a = np.asarray(spirit_action)[0]
         T = a.shape[0]
@@ -216,27 +232,112 @@ class SpiritLeRobotPolicy:
     Note: at construction time this loads Qwen3-VL + DiT head fully into VRAM.
     """
 
-    def __init__(self, spirit_ckpt_path: str, tile_cam_high: bool = True, device: str = "cuda"):
+    def __init__(
+        self,
+        spirit_ckpt_path: str,
+        tile_cam_high: bool = True,
+        device: str = "cuda",
+        dtype: str = "bf16",           # fp32 needs ~42 GB on 3090; bf16 halves it
+        load_to_cpu_first: bool = True, # avoid OOM by loading to CPU then casting & moving
+    ):
         import sys
+        import json
         # Make sure Spirit's source is on the path
         spirit_src = "/workspace/spirit-v1.5"
         if spirit_src not in sys.path:
             sys.path.insert(0, spirit_src)
+
+        # --- Monkey-patch Spirit's sample_noise/sample_time to honor bf16 ---
+        # These are hardcoded to float32 in utils/sampling.py, causing dtype
+        # mismatches downstream when the model is cast to bf16.
+        import torch
+        if dtype in ("bf16", "bfloat16"):
+            torch_dtype_target = torch.bfloat16
+        elif dtype in ("fp16", "half", "float16"):
+            torch_dtype_target = torch.float16
+        else:
+            torch_dtype_target = torch.float32
+
+        from utils import sampling as _spirit_sampling
+        _orig_sample_noise = _spirit_sampling.sample_noise
+        _orig_sample_time = _spirit_sampling.sample_time
+        def _patched_sample_noise(shape, dev):
+            return torch.normal(mean=0.0, std=1.0, size=shape, dtype=torch_dtype_target, device=dev)
+        def _patched_sample_time(bsize, dev):
+            t = _orig_sample_time(bsize, dev)
+            return t.to(dtype=torch_dtype_target)
+        _spirit_sampling.sample_noise = _patched_sample_noise
+        _spirit_sampling.sample_time = _patched_sample_time
+        # Also patch the already-bound references inside modeling_spirit_vla
+        import model.modeling_spirit_vla as _msv
+        _msv.sample_noise = _patched_sample_noise
+        _msv.sample_time = _patched_sample_time
+
         from model import SpiritVLAPolicy  # noqa
-        self.inner = SpiritVLAPolicy.from_pretrained(spirit_ckpt_path, train=False)
+
+        # Spirit's from_pretrained reads config.device and decides to load state_dict
+        # directly to that device. To avoid OOM on 24 GB GPUs, we transiently rewrite
+        # config.device to 'cpu', load, cast dtype, then move to target device.
+        config_path = f"{spirit_ckpt_path}/config.json"
+        if load_to_cpu_first:
+            with open(config_path, "r") as f:
+                original_cfg = f.read()
+            cfg = json.loads(original_cfg)
+            cfg["device"] = "cpu"
+            with open(config_path, "w") as f:
+                json.dump(cfg, f, indent=2)
+            try:
+                self.inner = SpiritVLAPolicy.from_pretrained(spirit_ckpt_path, train=False)
+            finally:
+                # restore
+                with open(config_path, "w") as f:
+                    f.write(original_cfg)
+        else:
+            self.inner = SpiritVLAPolicy.from_pretrained(spirit_ckpt_path, train=False)
+
+        # Cast dtype
+        if dtype in ("bf16", "bfloat16"):
+            self.inner = self.inner.to(torch.bfloat16)
+        elif dtype in ("fp16", "half", "float16"):
+            self.inner = self.inner.to(torch.float16)
+
+        # Move to target device
         self.inner = self.inner.to(device).eval()
-        self.adapter = XLeRobotSpiritAdapter(tile_cam_high=tile_cam_high, device=device)
+        self.adapter = XLeRobotSpiritAdapter(
+            tile_cam_high=tile_cam_high, device=device, dtype=dtype
+        )
         self._cached_chunk = None
         self._cached_step = 0
         self._chunk_horizon = 12  # how many action-chunk steps to reuse before re-inferring
+        self._dtype = dtype
+        self._device = device
 
     def select_action(self, obs_xle: Dict) -> np.ndarray:
         """Return next 12-DoF action for XLeRobot."""
         import torch
         if self._cached_chunk is None or self._cached_step >= self._chunk_horizon:
             batch = self.adapter.wrap_observation(obs_xle)
-            with torch.no_grad():
-                self._cached_chunk = self.inner.select_action(batch)
+            # Pre-generate noise in the model's dtype to avoid Spirit's internal
+            # float32-only sample_noise() which crashes with bf16 weights.
+            # Shape: (B, n_action_steps, max_action_dim)
+            cfg = self.inner.config
+            noise_shape = (
+                batch["observation.state"].shape[0],
+                cfg.n_action_steps,
+                cfg.max_action_dim,
+            )
+            if self._dtype in ("bf16", "bfloat16"):
+                noise_dtype = torch.bfloat16
+            elif self._dtype in ("fp16", "half", "float16"):
+                noise_dtype = torch.float16
+            else:
+                noise_dtype = torch.float32
+            noise = torch.randn(noise_shape, dtype=noise_dtype, device=self._device)
+            # autocast wrapper forces mixed precision across Spirit's internal
+            # DiT layers (where some tensors drift back to fp32 and mismatch weights)
+            autocast_dtype = noise_dtype if noise_dtype != torch.float32 else torch.bfloat16
+            with torch.no_grad(), torch.autocast(device_type="cuda", dtype=autocast_dtype):
+                self._cached_chunk = self.inner.select_action(batch, noise=noise)
             self._cached_step = 0
         a = self.adapter.unwrap_action(self._cached_chunk, step_idx=self._cached_step)
         self._cached_step += 1
