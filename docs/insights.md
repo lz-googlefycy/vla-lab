@@ -17,6 +17,66 @@
 
 ---
 
+## 2026-05-08 · k8s pod 里 Vulkan 不可用是基础设施问题，不是单点 bug <a name="k8s-vulkan-icd-missing"></a>
+
+**上下文**
+本地 RTX 3090 docker 里 SAPIEN 起不来，本以为是消费卡 + docker
+配置问题。今天在 datacenter H20 pod（k8s 容器）里跑 7-stage
+`vulkan_smoke.py` 完整验证，期待 datacenter GPU + nvidia-container-toolkit
+能 work。
+
+**观察**
+
+```
+[1] /usr/share/vulkan/icd.d/  →  intel/radeon/llvmpipe/virtio
+                                 ❌ 无 nvidia_icd.json
+[2] vulkaninfo --summary      →  deviceName = llvmpipe (软渲染 CPU)
+[3] sapien.Engine()           →  ✅ 构造成功（不 touch GPU）
+[4] sapien.Scene + camera     →  ❌ "failed to find a rendering device"
+[5] gym.make("PickCube-v1")   →  ❌ vk::createInstanceUnique:
+                                    ErrorIncompatibleDriver
+```
+
+`vulkaninfo` 表面 "PASS" 是假象，它跑的是 mesa 的 LavaPipe（CPU 软渲染）。
+SAPIEN 一旦真要 GPU device 立刻 fail。
+
+**原本的预期**
+H20 是 datacenter 卡，nvidia-container-toolkit 应该把 Vulkan ICD 自动
+挂进容器（和 CUDA 一起）。我以为本地 docker 失败是 RTX 3090 + 消费驱动
+特例，换 H20 应该好。
+
+**现在的理解**
+nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
+进容器。Vulkan/OpenGL 需要单独开 `graphics` capability，这要在 k8s
+deployment 里加 `NVIDIA_DRIVER_CAPABILITIES=all`（或
+`compute,graphics`）环境变量 + nvidia ICD `.json` 文件挂进容器。
+
+大部分 ML 平台的 pod 模板没开这个 — 训练/推理工作流不需要 Vulkan，
+开了反而暴露 GPU 显示接口的攻击面。但**所有依赖 SAPIEN / Maniskill /
+Isaac Lab / Habitat 等 Vulkan-based sim 框架的人**，都会撞到这个墙。
+
+这不是单点 bug，是基础设施配置导致的 sim 工作流系统性受限。
+
+**对后续工作的影响**
+1. **闭环 eval 路径必须避开 Vulkan**：Maniskill 默认用 SAPIEN（vulkan
+   渲染）→ 不可用。退路：
+   - **LIBERO**（基于 robosuite + mujoco），可以用 osmesa CPU 软渲染或
+     EGL（如果挂了 nvidia EGL ICD）→ 今天验证 work。
+   - **mujoco MJX**（GPU 加速但走 OpenGL/EGL，不走 Vulkan）→ 备选。
+   - **PyBullet**（CPU 物理 + OpenGL/CPU 渲染）→ 慢但稳。
+2. Phase A 不受影响：之前因为本地 Vulkan 失败 pivot 到的"静态图 +
+   action chunk plot" demo 路径反而是对的。
+3. 一个没人说的事：很多 VLA 论文里都画了"我们在 Maniskill 评测的"图，
+   但**没人提这个东西在 ML 云平台上其实默认跑不了**—这个 gap 值得写。
+
+**相关工作 / 文献**
+- nvidia-container-toolkit 文档 §"Driver Capabilities"
+- SAPIEN 3 `_vulkan_tricks.py`：fallback ICD 注入逻辑，只对单 GPU
+  桌面生效，多 GPU 服务器场景未测
+- Maniskill issue #355: "no rendering device on aks/gke"
+
+---
+
 ## 2026-05-08 · H20 vs RTX 3090 上 Spirit 的延迟稳定性差异 <a name="h20-vs-3090-latency"></a>
 
 **上下文**
@@ -368,7 +428,8 @@ Spirit 的 `modeling_spirit_vla.py` 看起来更像**研究代码**而非**生�
 
 每条 insight 都有 anchor 链接，方便交叉引用：
 
-- [H20 vs RTX 3090 上 Spirit 的延迟稳定性](#h20-vs-3090-latency) ← new
+- [k8s pod 里 Vulkan 不可用是基础设施问题](#k8s-vulkan-icd-missing) ← new
+- [H20 vs RTX 3090 上 Spirit 的延迟稳定性](#h20-vs-3090-latency)
 - [跨 embodiment 部署的最后一公里](#cross-embodiment-last-mile)
 - [Spirit 用 prompt 字符串"理解"硬件](#robot-type-as-prompt)
 - [Spirit 为什么比 OpenVLA 快一倍](#spirit-speed-advantage)

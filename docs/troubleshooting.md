@@ -409,12 +409,42 @@ SAPIEN 切换到 Vulkan-only 渲染（3.x 起），不再支持 OpenGL/osmesa �
 **未来修复路径**：
 1. 换用 Maniskill `sim_backend='cpu'` — 但这会非常慢
 2. 换用 XLeRobot 的 `simulation/mujoco/`（纯 mujoco，无 Vulkan 依赖）
-3. 在开发机 H20（pod 可能有 Vulkan）验证是否只是本机 docker 环境问题
+3. 在 H20 datacenter pod 验证是否只是消费 GPU + 桌面 docker 的问题
 4. 使用 `--runtime=nvidia` 而不是 `--gpus`，或在 host 装 `nvidia-docker2`
 
 **影响**：
 Phase A 里"Spirit 在仿真机器人里执行 rollout"这种视觉视频**本周不会有**。
 改用"Spirit 看静态图 + 预测动作轨迹"作为 blog #2 主图。真机视频等硬件接入。
+
+**2026-05-08 后续验证**（H20 datacenter pod 上跑 vulkan_smoke.py 7-stage check）：
+
+| Check | Result | Note |
+|---|---|---|
+| 1. libvulkan.so | ✅ | apt 装的 mesa loader |
+| 1b. nvidia ICD .json | ❌ | `/usr/share/vulkan/icd.d/` 只有 intel/radeon/llvmpipe/virtio |
+| 2. vulkaninfo --summary | ✅* | 假阳性：deviceName = `llvmpipe` (LLVM 软渲染 CPU) |
+| 3. sapien.Engine() | ✅ | 不 touch GPU，只构造对象 |
+| 4. SAPIEN scene + camera | ❌ | "failed to find a rendering device" |
+| 5. gym.make PickCube cpu | ❌ | `vk::createInstanceUnique: ErrorIncompatibleDriver` |
+| 6. gym.make rgb sensors | ❌ | 同上 |
+| 7. env.step | ❌ | 同上 |
+
+**结论**：H20 pod 的 nvidia driver 是 570.86.10，但 k8s
+nvidia-container-toolkit 默认只暴露 `compute,utility` capability，
+没挂 `graphics` capability + nvidia ICD。**不是消费卡 vs datacenter
+卡的问题，是 k8s pod 配置**。本机 docker 也是同样原因。
+
+**根因升级**：要让 SAPIEN work，需要在 pod 模板里加：
+```
+env:
+  - name: NVIDIA_DRIVER_CAPABILITIES
+    value: "compute,utility,graphics"
+```
++ host 上正确挂载 `/usr/share/glvnd/egl_vendor.d/10_nvidia.json` 和
+`/usr/share/vulkan/icd.d/nvidia_icd.json`。这通常是 ML 平台层面的配
+置变更，单个 pod 改不动。
+
+**永久绕开方案**：闭环 eval 用 LIBERO（mujoco/osmesa），不用 Maniskill/SAPIEN。
 
 ---
 
