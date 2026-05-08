@@ -18,14 +18,24 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PYTHONUNBUFFERED=1
 
 # ============================================================
-# 0. System deps (LeRobot/SO-100 needs these for camera & render)
+# 0. System deps (LeRobot/SO-100 needs these for camera & render,
+#    plus SSH tooling for reverse tunnel from pod to user desktop)
 # ============================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git wget curl ca-certificates ffmpeg \
         libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev \
         v4l-utils libv4l-dev \
         build-essential \
+        openssh-server openssh-client autossh tmux \
     && rm -rf /var/lib/apt/lists/*
+
+# ============================================================
+# 0b. Bootstrap script to restore SSH keys + start reverse tunnel.
+#     Keys live on JuiceFS (/ad-alg/.../ssh_backup/), not in image.
+#     Usage after pod rebuild: bash /opt/vla-lab/bootstrap-ssh.sh
+# ============================================================
+COPY bootstrap-ssh.sh /opt/vla-lab/bootstrap-ssh.sh
+RUN chmod +x /opt/vla-lab/bootstrap-ssh.sh
 
 # ============================================================
 # 1. Spirit v1.5 dependencies (pinned for reproducibility)
