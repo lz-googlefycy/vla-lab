@@ -224,7 +224,9 @@ def rollout_one_episode(
         n_steps = t - cfg.num_steps_wait + 1
         t += 1
 
-        if done:
+        # LIBERO's `done` flag isn't always set on success — use the explicit
+        # check_success() method as the canonical signal.
+        if done or (hasattr(env, "check_success") and env.check_success()):
             success = True
             break
 
@@ -272,6 +274,23 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
     Returns the dict in DPOPairDataset format, ready to torch.save().
     """
     from libero.libero import benchmark
+
+    # LIBERO ships init_states as torch pickles that aren't safe-loadable
+    # under torch>=2.6 default weights_only=True. Patch torch.load locally
+    # to allow numpy globals before LIBERO touches them.
+    import torch as _t
+    try:
+        _t.serialization.add_safe_globals(
+            [_t.serialization.add_safe_globals.__globals__.get("Tensor")]  # noqa
+        )
+    except Exception:
+        pass
+    _orig_load = _t.load
+    def _patched_load(f, *a, **kw):
+        if "weights_only" not in kw:
+            kw["weights_only"] = False
+        return _orig_load(f, *a, **kw)
+    _t.load = _patched_load
 
     benchmark_dict = benchmark.get_benchmark_dict()
     task_suite = benchmark_dict[cfg.suite]()
