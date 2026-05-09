@@ -1,0 +1,65 @@
+{
+  "per_instruction": [
+    {
+      "id": 0,
+      "instruction": "pick up the red cube and place it on the blue plate",
+      "before_mean": 0.05461884289979935,
+      "before_std": 0.5387318730354309,
+      "after_mean": 0.5376513004302979,
+      "after_std": 0.42990222573280334,
+      "l1_diff": 0.6268072724342346,
+      "cosine_per_dof_mean": 0.12907964416912623,
+      "cosine_per_dof_min": -0.5885474681854248
+    },
+    {
+      "id": 1,
+      "instruction": "put the coffee cup into the cabinet",
+      "before_mean": -0.01985546201467514,
+      "before_std": 0.46163538098335266,
+      "after_mean": 0.3418416976928711,
+      "after_std": 0.2543027997016907,
+      "l1_diff": 0.4464443624019623,
+      "cosine_per_dof_mean": 0.0158893455352102,
+      "cosine_per_dof_min": -0.6859663724899292
+    },
+    {
+      "id": 2,
+      "instruction": "fold the white towel in half",
+      "before_mean": 0.1428130865097046,
+      "before_std": 0.44563692808151245,
+      "after_mean": 0.19502043724060059,
+      "after_std": 0.25442609190940857,
+      "l1_diff": 0.30641254782676697,
+      "cosine_per_dof_mean": 0.3010981346347502,
+      "cosine_per_dof_min": -0.4651988744735718
+    },
+    {
+      "id": 3,
+      "instruction": "open the drawer and put the apple inside",
+      "before_mean": 0.10243257880210876,
+      "before_std": 0.5907800793647766,
+      "after_mean": -0.06285551190376282,
+      "after_std": 0.43336427211761475,
+      "l1_diff": 0.45364677906036377,
+      "cosine_per_dof_mean": 0.06396765501371451,
+      "cosine_per_dof_min": -0.49749019742012024
+    },
+    {
+      "id": 4,
+      "instruction": "pour the contents of the bottle into the glass",
+      "before_mean": -0.06170932576060295,
+      "before_std": 0.7222550511360168,
+      "after_mean": -0.2780231237411499,
+      "after_std": 0.3899816572666168,
+      "l1_diff": 0.5364236235618591,
+      "cosine_per_dof_mean": 0.03707438362263409,
+      "cosine_per_dof_min": -0.5818761587142944
+    }
+  ],
+  "args": {
+    "pretrained_path": "models/Spirit-v1.5-patched",
+    "lora_ckpt": "output/lora_smoke_v1/checkpoint-300",
+    "output_dir": "output/lora_smoke_v1/eval",
+    "num_samples": 2
+  }
+}
