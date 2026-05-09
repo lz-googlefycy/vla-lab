@@ -230,11 +230,15 @@ class OpenVLAAdapter(VLABase):
         image = batch["image"].to(self.device)              # (B, 3, H, W)
 
         log_probs = []
+        model_dtype = next(self.model.parameters()).dtype
         for b in range(B):
             prompt = self._format_prompt(instructions[b])
-            inputs = self.processor(prompt, image[b].unsqueeze(0), return_tensors="pt")
+            # OpenVLA processor expects PIL.Image, not Tensor
+            pil_img = self._tensor_to_pil(image[b])
+            inputs = self.processor(prompt, pil_img, return_tensors="pt")
             input_ids = inputs["input_ids"].to(self.device)
-            pixel_values = inputs["pixel_values"].to(self.device)
+            # Cast image to model's dtype (bf16) — vision encoder requires match
+            pixel_values = inputs["pixel_values"].to(self.device).to(model_dtype)
 
             action_tokens_flat = token_ids_t[b].reshape(-1)   # (T*7,)
             full_input = torch.cat(
@@ -332,9 +336,8 @@ class OpenVLAAdapter(VLABase):
         out_list = []
         for b in range(batch["image"].shape[0]):
             prompt = self._format_prompt(batch["instruction"][b])
-            inputs = self.processor(
-                prompt, batch["image"][b].unsqueeze(0), return_tensors="pt"
-            ).to(self.device)
+            pil_img = self._tensor_to_pil(batch["image"][b])
+            inputs = self.processor(prompt, pil_img, return_tensors="pt").to(self.device)
             action = self.model.predict_action(
                 **inputs, unnorm_key=self.unnorm_key, do_sample=False
             )
@@ -344,6 +347,13 @@ class OpenVLAAdapter(VLABase):
     def _format_prompt(self, instruction: str) -> str:
         """Format LIBERO-style prompt the way OpenVLA expects."""
         return f"In: What action should the robot take to {instruction}?\nOut:"
+
+    @staticmethod
+    def _tensor_to_pil(t: torch.Tensor):
+        """(3,H,W) float in [0,1] → PIL.Image."""
+        from PIL import Image
+        arr = (t.detach().cpu().permute(1, 2, 0).clamp(0, 1).numpy() * 255).astype("uint8")
+        return Image.fromarray(arr)
 
     # --------------- weight management --------------- #
 
