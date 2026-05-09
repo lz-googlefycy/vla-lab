@@ -110,7 +110,7 @@ self.inner = self.inner.to(torch.bfloat16).to("cuda").eval()
 ```
 
 **影响**：
-需要 docker `rw` 挂载（因为要临时改 config.json）。H20 144 GB 上不需要这个 workaround。
+需要 docker `rw` 挂载（因为要临时改 config.json）。the datacenter server card (~144 GB) 上不需要这个 workaround。
 
 ---
 
@@ -369,7 +369,7 @@ gh auth status  # ✓ Logged in to github.com as lz-googlefycy
 | Action chunk | 60 × 14 |
 | 有效控制频率（chunk horizon 12） | 73 Hz |
 
-对比 OpenVLA-7B 在 H20 的 3 Hz，Spirit 在更弱 GPU 上快一倍。深度分析见
+对比 OpenVLA-7B 在 datacenter server card 的 3 Hz，Spirit 在更弱 GPU 上快一倍。深度分析见
 [insights.md # spirit-speed-advantage](./insights.md#spirit-speed-advantage)。
 
 ---
@@ -409,14 +409,14 @@ SAPIEN 切换到 Vulkan-only 渲染（3.x 起），不再支持 OpenGL/osmesa �
 **未来修复路径**：
 1. 换用 Maniskill `sim_backend='cpu'` — 但这会非常慢
 2. 换用 XLeRobot 的 `simulation/mujoco/`（纯 mujoco，无 Vulkan 依赖）
-3. 在 H20 datacenter pod 验证是否只是消费 GPU + 桌面 docker 的问题
+3. 在 datacenter container pod 验证是否只是消费 GPU + 桌面 docker 的问题
 4. 使用 `--runtime=nvidia` 而不是 `--gpus`，或在 host 装 `nvidia-docker2`
 
 **影响**：
 Phase A 里"Spirit 在仿真机器人里执行 rollout"这种视觉视频**本周不会有**。
 改用"Spirit 看静态图 + 预测动作轨迹"作为 blog #2 主图。真机视频等硬件接入。
 
-**2026-05-08 后续验证**（H20 datacenter pod 上跑 vulkan_smoke.py 7-stage check）：
+**2026-05-08 后续验证**（datacenter container pod 上跑 vulkan_smoke.py 7-stage check）：
 
 | Check | Result | Note |
 |---|---|---|
@@ -429,7 +429,7 @@ Phase A 里"Spirit 在仿真机器人里执行 rollout"这种视觉视频**本�
 | 6. gym.make rgb sensors | ❌ | 同上 |
 | 7. env.step | ❌ | 同上 |
 
-**结论**：H20 pod 的 nvidia driver 是 570.86.10，但 k8s
+**结论**：the datacenter pod 的 nvidia driver 是 570.86.10，但 k8s
 nvidia-container-toolkit 默认只暴露 `compute,utility` capability，
 没挂 `graphics` capability + nvidia ICD。**不是消费卡 vs datacenter
 卡的问题，是 k8s pod 配置**。本机 docker 也是同样原因。
@@ -448,9 +448,9 @@ nvidia-container-toolkit 默认只暴露 `compute,utility` capability，
 /usr/share/vulkan/icd.d/nvidia_icd.json:/usr/share/vulkan/icd.d/nvidia_icd.json:ro`
 能让 SAPIEN 工作。
 
-**H20 pod 没有补救路径**：
+**the datacenter pod 没有补救路径**：
 
-| 路径 | 在 H20 pod 行不行 |
+| 路径 | 在 the datacenter pod 行不行 |
 |---|---|
 | 改 `--gpus` 启动参数 | ❌ pod 用户改不动 k8s deployment |
 | 设 `NVIDIA_DRIVER_CAPABILITIES=all` env | ❌ 即使 export 也没用，nvidia-container-toolkit 已经在容器创建期决定了 capability，运行期改 env 不生效 |
@@ -484,7 +484,7 @@ write /var/lib/docker/tmp/GetImageBlob532615915: no space left on device
 开发机是 k8s pod，root overlay 只 20 GB，`/var/lib/docker` 在 root。Spirit 镜像 20 GB
 （加上已在 pod 里用的其他镜像），拉取时超容量。
 
-JuiceFS (`/ad-alg/...`) 5 PB 可用但不能放 `/var/lib/docker`（docker 要 local 块设备）。
+JuiceFS (`/workspace/jfs/...`) 5 PB 可用但不能放 `/var/lib/docker`（docker 要 local 块设备）。
 
 **修复**：
 **不能在 pod 内 docker pull 镜像**。解决方案：

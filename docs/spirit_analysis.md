@@ -24,7 +24,7 @@ Spirit v1.5 = Qwen3-VL backbone + DiT (Diffusion Transformer) head + policy API
 | Backbone | PaLI-X 5B/55B | Llama-2 7B + DINOv2+SigLIP | **Qwen3-VL**（最新） |
 | Action 表示 | 离散 256-bin token | 离散 256-bin token | **DiT 连续 + diffusion** |
 | 训练数据 | 自家 130k + WebLI | 970k OXE | RoboChallenge Table30 dirty data |
-| 推理 | 1-3 Hz multi-TPU | 6 Hz A100 / 3 Hz H20 | （需测） |
+| 推理 | 1-3 Hz multi-TPU | 6 Hz A100 / 3 Hz datacenter server card | （需测） |
 | 开源 | ❌ | ✅ | **✅ MIT** |
 | 真机评测 | EDR（关停） | LIBERO 仿真 | **RoboChallenge 真机** |
 
@@ -105,16 +105,16 @@ RoboChallenge 真机集群执行 + 评分
 | 数据加载 worker | 32 |
 
 **我们的硬件能力评估**：
-- 单 H20-3e 144 GB > A100 80GB ✅
+- 单 datacenter GPU server card 144 GB > A100 80GB ✅
 - BS 32 应该能跑（Spirit 7B + diffusers, 显存可能比 OpenVLA-7B 高）
 - 单卡训 → BS 减到 8/16，steps 翻倍到 80K-160K
-- **40K steps × 8 GPU 估算 → 单卡 H20 ~ 5-7 天**
+- **40K steps × 8 GPU 估算 → 单卡 datacenter server card ~ 5-7 天**
 
 ## 7. 我们的复现路线（4 步）
 
 ### Step 1（Week 2-3）：推理 smoke test
 - [ ] 拉 Spirit v1.5 仓库 + base ckpt
-- [ ] 在我们开发机（H20）跑通推理（不上 RoboChallenge，用本地数据）
+- [ ] 在我们开发机（datacenter server card）跑通推理（不上 RoboChallenge，用本地数据）
 - [ ] 验证 action shape / dtype / latency
 - **产出**：博客 #2 的工程素材
 
@@ -130,7 +130,7 @@ RoboChallenge 真机集群执行 + 评分
 
 ### Step 4（Week 5-7）：XLeRobot fine-tune
 - [ ] XLeRobot 采 50-100 demo
-- [ ] 用 Spirit fine-tune 代码 + LoRA（适应单卡 H20）
+- [ ] 用 Spirit fine-tune 代码 + LoRA（适应单卡 datacenter server card）
 - [ ] 评测 fine-tune 前后
 - **产出**：HuggingFace release + 博客 #3
 

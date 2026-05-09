@@ -71,7 +71,7 @@
 
 ## 🎯 LIBERO Reproduction Results
 
-Using **official OpenVLA finetuned checkpoints** from HuggingFace, 10 trials per task × 10 tasks = 100 rollouts per suite, bf16 + flash-attn-2 on NVIDIA H20.
+Using **official OpenVLA finetuned checkpoints** from HuggingFace, 10 trials per task × 10 tasks = 100 rollouts per suite, bf16 + flash-attn-2 on a datacenter GPU server card.
 
 | Suite | Paper SR | **Ours SR** | Δ | Status |
 |:---|---:|---:|---:|:---:|
@@ -112,14 +112,16 @@ Key cross-paper insight: **all ablations tell the same story — pre-training + 
 ```
 vla-lab/
 ├── README.md                     # this file
-├── docs/                         # plans, analyses, results
-│   ├── plan_v1.4_final.md       # 16-week roadmap
+├── docs/                         # analyses, deployment notes, results
 │   ├── env_setup.md             # image + hardware + file-system setup
-│   ├── libero_leaderboard_plan.md
 │   ├── results_libero_official_ckpt.md    # 4-suite numbers + per-task
 │   ├── spirit_analysis.md       # Spirit v1.5 repo + reproduction plan
+│   ├── spirit_xlerobot_integration.md
 │   ├── robochallenge_analysis.md
-│   └── pi_series_analysis.md    # π0 / π0.5 / π*0.6 critical review
+│   ├── pi_series_analysis.md    # π0 / π0.5 / π*0.6 critical review
+│   ├── insights.md              # deeper observations across the project
+│   ├── troubleshooting.md       # bugs and workarounds (deployment notes)
+│   └── experiment_log.md        # daily progress records
 ├── docker/                       # Dockerfile (openvla-v1.0-cu118-py310)
 ├── code/
 │   ├── scripts/                  # run_libero_{lora,eval,eval_all}.sh, sync_official_ckpts.sh
@@ -136,7 +138,7 @@ vla-lab/
 
 ### Prerequisites
 
-- NVIDIA GPU ≥ 24 GB (RTX 3090 works for 4-bit inference; H20 / A100 80GB for full-bf16)
+- NVIDIA GPU ≥ 24 GB (RTX 3090 works for 4-bit inference; datacenter server card / A100 80GB for full-bf16)
 - Docker + nvidia-container-runtime
 - \~30 GB for model + \~10 GB for LIBERO RLDS dataset
 
@@ -185,7 +187,7 @@ docker run --rm --gpus all \
 ### 4. Reproduce a LIBERO suite
 
 ```bash
-# Single suite (10 trials/task × 10 tasks = 100 rollouts, ~1.5 h on H20)
+# Single suite (10 trials/task × 10 tasks = 100 rollouts, ~1.5 h on a datacenter server card)
 bash code/scripts/run_libero_eval.sh spatial \
   /workspace/models/openvla-7b-finetuned-libero-spatial 10
 
@@ -208,18 +210,15 @@ python code/tools/build_demo_video.py \
 
 ---
 
-## 🗺️ 16-Week Roadmap
-
-See [`docs/plan_v1.4_final.md`](./docs/plan_v1.4_final.md) for detail. Current summary:
+## 🗺️ Roadmap
 
 | Phase | Focus | Status |
 |:---:|:---|:---|
-| 0 | Infrastructure (image, data, dev machine) | ✅ done |
+| 0 | Infrastructure (image, data, dev environment) | ✅ done |
 | 1 | LIBERO reproduction on official ckpts | ✅ done |
-| 2 | Spirit v1.5 on XLeRobot (SO-100) | 🔜 next |
-| 3 | Post-training / LoRA + 4-bit deployment | planned |
-| 4 | Cross-embodiment fine-tune + HF dataset | planned |
-| 5 | Portfolio site + job applications | planned |
+| 2 | Spirit v1.5 on XLeRobot (SO-100) | 🔜 active |
+| 3 | LoRA fine-tune + cross-embodiment adaptation | planned |
+| 4 | Real-robot demo + horizontal compare across open VLAs | planned |
 
 ---
 

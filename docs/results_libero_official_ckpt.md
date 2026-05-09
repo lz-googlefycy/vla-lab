@@ -13,7 +13,7 @@
 | 模型 | `openvla/openvla-7b-finetuned-libero-{spatial,object,goal,10}`（HuggingFace 官方 release） |
 | 推理 | bf16 + flash-attn-2 |
 | 评测协议 | num_trials_per_task=10 × num_tasks=10 = 100 rollouts/suite |
-| 评测平台 | NVIDIA H20-3e (144 GB) |
+| 评测平台 | datacenter GPU server card (~144 GB) |
 | Seed | 7 |
 | OpenVLA paper 数字（参考） | Spatial 84.7±0.9, Object 88.4±0.8, Goal 79.2±1.0, Long 53.7±1.3, Avg 76.5 |
 

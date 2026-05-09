@@ -28,8 +28,8 @@ EXP-<日期>-<序号>-<任务>
 | ID | 时间 | 任务 | 配置 | 结果 | 备注 |
 |---|---|---|---|---|---|
 | SMOKE-20260506-01 | 17:25 | OpenVLA-7B 4-bit smoke | 本机 RTX 3090 | ✅ Pass / 4.4GB / 3.94 Hz | 镜像验证 |
-| SMOKE-20260506-02 | 22:17 | 同上 on H20 | 开发机 H20-3e | ✅ Pass / 4.4GB / 3.03 Hz | 开发机镜像验证 |
-| TRAIN-20260506-01 | 22:40 | LIBERO-Spatial LoRA r=32 | 单卡 H20, 50K steps | ❌ 估算 3.8 天 | 单卡太慢，已停 → pivot 到官方 ckpt |
+| SMOKE-20260506-02 | 22:17 | 同上 on a datacenter server card | 开发机 datacenter GPU server card | ✅ Pass / 4.4GB / 3.03 Hz | 开发机镜像验证 |
+| TRAIN-20260506-01 | 22:40 | LIBERO-Spatial LoRA r=32 | 单卡 datacenter server card, 50K steps | ❌ 估算 3.8 天 | 单卡太慢，已停 → pivot 到官方 ckpt |
 | EVAL-20260506-01 | 23:41 | LIBERO-Spatial smoke (5 trial) | base ckpt（未 LIBERO 训）| ❌ unnorm_key not found | Pipeline 验证 OK，需 finetuned ckpt |
 | DL-20260506-01 | 22:50 | 4 个官方 LIBERO ckpt | hf-mirror 并行 | ⏳ ~40% (~23G/56G) | 速度 ~10 MB/s |
 
@@ -148,7 +148,7 @@ Object 偏差大 (-28%)，待研究。
 
 #### 下半天
 - ✅ Spirit 镜像 push MICR/volc/evad 3 仓库（digest f7901cc7）
-- ✅ Spirit-v1.5 (21 GB) + Qwen3-VL-4B (8.3 GB) scp 到开发机 /ad-alg/.../ro_planning/models/
+- ✅ Spirit-v1.5 (21 GB) + Qwen3-VL-4B (8.3 GB) scp 到开发机 /workspace/jfs/ro_planning/models/
 - ✅ Spirit-v1.5-patched 目录在开发机创建（local-path backbone）
 - ❌ 开发机 pod / 根盘只 20 GB，docker pull Spirit 镜像失败 → 需要 pod 重建
 - ✅ 创建 spirit-sim-v1.0-cu128-py310 镜像（Spirit 基础 + Maniskill 3.0.1 + SAPIEN 3.0.3 + LIBERO）
@@ -167,7 +167,7 @@ Object 偏差大 (-28%)，待研究。
 **方案**：
 - 镜像打包 openssh-server + autossh + tmux + bootstrap 脚本到 `/opt/vla-lab/`
 - SSH 私钥 / authorized_keys 不入镜像（安全），存 JuiceFS
-  `/ad-alg/planning-users/liuzhi7/.ssh_backup/`
+  `/workspace/jfs/.ssh_backup/`
 - bootstrap-ssh.sh 一键恢复：复制 keys + 修 perms + 启 sshd:2222 + 启 autossh
 
 **产出**：
@@ -177,21 +177,21 @@ Object 偏差大 (-28%)，待研究。
 - docs/dev_machine_bootstrap.md — 使用手册
 
 **未完成**：用户需要
-1. 用 ML 平台 UI 重建 pod，镜像选 `micr.cloud.mioffice.cn/world-model-lyk/planningmodel:spirit-v1.0-cu128-py310`
-2. 挂载 JuiceFS `/ad-alg/planning-users/liuzhi7/`
-3. 进 pod 后执行 `bash /opt/vla-lab/bootstrap-ssh.sh` 或 `bash /ad-alg/planning-users/liuzhi7/.ssh_backup/bootstrap-ssh.sh`
+1. 用 ML 平台 UI 重建 pod，镜像选 `<private-registry>/planningmodel:spirit-v1.0-cu128-py310`
+2. 挂载 JuiceFS `/workspace/jfs/`
+3. 进 pod 后执行 `bash /opt/vla-lab/bootstrap-ssh.sh` 或 `bash /workspace/jfs/.ssh_backup/bootstrap-ssh.sh`
 
-### 2026-05-08 15:24 — 🎉 开发机新 pod 启动 + Spirit smoke on H20 通过
+### 2026-05-08 15:24 — 🎉 开发机新 pod 启动 + Spirit smoke on a datacenter server card 通过
 
 **用户**用 spirit-v1.0-cu128-py310 重建了 pod。验证：
 - ✅ torch 2.8.0+cu128, transformers 4.57.1, diffusers 0.35.2, flash_attn 2.8.3
-- ✅ H20-3e 143 GB 可用
+- ✅ datacenter GPU server card (~144 GB) 可用
 - ✅ `/opt/vla-lab/bootstrap-ssh.sh` 在镜像里
 - ✅ SSH 隧道恢复 (用户已经从 desktop ssh 进 4163)
 - ✅ `/workspace/spirit-v1.5` 源码在镜像里（COPY 进来的）
-- ✅ JuiceFS `/ad-alg/.../models/` 数据完整
+- ✅ JuiceFS `/workspace/jfs/.../models/` 数据完整
 
-**Spirit smoke test on H20**:
+**Spirit smoke test on a datacenter server card**:
 | 指标 | 值 |
 |---|---|
 | 模型加载 | 22.9 s (vs 3090: 58 s, 2.5× 更快) |
@@ -200,14 +200,14 @@ Object 偏差大 (-28%)，待研究。
 | 延迟方差 | ±3 ms (vs 3090: ±100 ms, **30× 改善**) |
 | GPU 显存 | 10 GB / 150 GB (余量 14×) |
 
-**Phase A on H20 完成** — 5 个 custom instruction 全部产出 action chunk：
+**Phase A on a datacenter server card 完成** — 5 个 custom instruction 全部产出 action chunk：
 - 推理稳定 152-158 ms
 - 5 个 chunk PNG + state JSON 存到 `assets/spirit/phase_a_h20/`
 
-**新增 insights.md 条目**: "H20 vs RTX 3090 上 Spirit 的延迟稳定性差异"
+**新增 insights.md 条目**: "datacenter server card vs RTX 3090 上 Spirit 的延迟稳定性差异"
 - mean 差 8%，但 **tail latency (p99) 差 30×**
 - 这是 consumer vs datacenter GPU 未被报告的差距，对博客 #2 / paper 有价值
 
 **下一步**:
-- H20 可以做真正的 Phase B fine-tune（3090 显存不够）
-- Maniskill Vulkan 问题在 H20 上需要重新验证
+- datacenter server card 可以做真正的 Phase B fine-tune（3090 显存不够）
+- Maniskill Vulkan 问题在 datacenter server card 上需要重新验证

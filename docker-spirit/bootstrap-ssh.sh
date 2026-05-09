@@ -4,7 +4,7 @@
 #
 # Rationale: the k8s pod loses all state between rebuilds.  SSH private
 # keys should NOT live in the docker image (it is pushed to 3 public-ish
-# registries). Instead they live on JuiceFS (/ad-alg/.../ssh_backup/)
+# registries). Instead they live on JuiceFS (/workspace/jfs/.../ssh_backup/)
 # which is persistent across pod rebuilds.  This script:
 #
 #   1. Copies the saved SSH assets from JuiceFS back to /root/.ssh
@@ -18,7 +18,7 @@
 # ============================================================
 set -euo pipefail
 
-BACKUP_DIR="${SSH_BACKUP_DIR:-/ad-alg/planning-users/liuzhi7/.ssh_backup}"
+BACKUP_DIR="${SSH_BACKUP_DIR:-/workspace/jfs/.ssh_backup}"
 SSH_DIR="${SSH_DIR:-/root/.ssh}"
 
 log()  { echo "[bootstrap-ssh] $*"; }

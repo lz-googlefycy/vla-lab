@@ -21,7 +21,7 @@
 
 **上下文**
 本地 RTX 3090 docker 里 SAPIEN 起不来，本以为是消费卡 + docker
-配置问题。今天在 datacenter H20 pod（k8s 容器）里跑 7-stage
+配置问题。今天在 datacenter the datacenter pod（k8s 容器）里跑 7-stage
 `vulkan_smoke.py` 完整验证，期待 datacenter GPU + nvidia-container-toolkit
 能 work。
 
@@ -41,9 +41,9 @@
 SAPIEN 一旦真要 GPU device 立刻 fail。
 
 **原本的预期**
-H20 是 datacenter 卡，nvidia-container-toolkit 应该把 Vulkan ICD 自动
+datacenter server card 是 datacenter 卡，nvidia-container-toolkit 应该把 Vulkan ICD 自动
 挂进容器（和 CUDA 一起）。我以为本地 docker 失败是 RTX 3090 + 消费驱动
-特例，换 H20 应该好。
+特例，换 datacenter server card 应该好。
 
 **现在的理解**
 nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
@@ -59,7 +59,7 @@ nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
 渲染成功。所以这**不是 datacenter GPU 特有问题**，是所有容器的默认
 行为。
 
-**H20 datacenter pod 的结构性限制**：
+**datacenter container pod 的结构性限制**：
 - pod 用户不能改 `--gpus` 或 env（k8s deployment 层定义）
 - 运行时 `export NVIDIA_DRIVER_CAPABILITIES=all` 无效 — capability
   在容器创建时就决定了
@@ -93,15 +93,15 @@ nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
 
 ---
 
-## 2026-05-08 · H20 vs RTX 3090 上 Spirit 的延迟稳定性差异 <a name="h20-vs-3090-latency"></a>
+## 2026-05-08 · datacenter server card vs RTX 3090 上 Spirit 的延迟稳定性差异 <a name="server card-vs-3090-latency"></a>
 
 **上下文**
-今天把 Spirit v1.5 从本机 RTX 3090 24GB 迁到开发机 H20 144GB。**同样**的 bf16
+今天把 Spirit v1.5 从本机 RTX 3090 24GB 迁到开发机 the datacenter server card (~144 GB)。**同样**的 bf16
 推理代码、**同样** action chunking 配置、**同样**的 monkey-patch。
 
 **观察**
 
-| 指标 | RTX 3090 24 GB | H20 144 GB | 变化 |
+| 指标 | RTX 3090 24 GB | the datacenter server card (~144 GB) | 变化 |
 |---|---|---|---|
 | 模型加载 | 58 s | 23 s | 2.5× 更快 |
 | Steady-state 推理 mean | 163 ms | 152 ms | 慢 8% 改善 |
@@ -110,11 +110,11 @@ nvidia-container-toolkit 默认只暴露 `compute,utility` 两个 capability
 | 延迟方差 | ±100 ms | **±3 ms** | **30× 改善** |
 | GPU 显存 | 10 GB / 24 GB | 10 GB / 150 GB | 14× 余量 |
 
-H20 上 6.6 Hz 几乎是**确定性**，而 3090 上有明显的 tail latency。
+datacenter server card 上 6.6 Hz 几乎是**确定性**，而 3090 上有明显的 tail latency。
 
 **原本的预期**
 "推理延迟主要看 FLOPs，GPU 算力差不多的话差距应该不大。3090 fp16 算力 ~142 TFLOPS，
-H20 bf16 算力 ~148 TFLOPS——**预期差距 <5%**。"
+datacenter server card bf16 算力 ~148 TFLOPS——**预期差距 <5%**。"
 
 **现在的理解**
 
@@ -124,15 +124,15 @@ H20 bf16 算力 ~148 TFLOPS——**预期差距 <5%**。"
 1. **内存竞争**：3090 上还有 5 GB 系统占用（桌面、Chrome、其它），而 Spirit 用 10 GB，
    留给激活的空间只有 ~9 GB。chunk 60×14×1536 = ~5 MB 激活看起来小，但 Qwen3-VL 编码
    3 张 320×240 图时的中间 feature map 可能临时冲到几个 GB。
-2. **ECC memory + 更大 HBM**：H20 是 ECC HBM3，bitflips 重试概率更低。
+2. **ECC memory + 更大 HBM**：datacenter server card 是 ECC HBM3，bitflips 重试概率更低。
 
 **深度含义**：**"consumer GPU 能跑"和"production GPU 能稳定跑"是两件事**。
 博客 #2 应该诚实报告这两个数字——读者看到 "6.1 Hz on 3090" 以为 "稳定的 6 Hz"，
 实际 p99 可能更慢。
 
 **对后续工作的影响**
-1. 本机 3090 用于**快速 iteration / 调试**，H20 用于**正式 benchmark / fine-tune / 视频录制**
-2. Phase B fine-tune **必须在 H20**（3090 显存不够训）
+1. 本机 3090 用于**快速 iteration / 调试**，datacenter server card 用于**正式 benchmark / fine-tune / 视频录制**
+2. Phase B fine-tune **必须在 datacenter server card**（3090 显存不够训）
 3. 如果后面要做 "deploy on edge GPU" 的故事，**单独做 tail latency 分布实验**
 
 **相关工作 / 文献**
@@ -255,11 +255,11 @@ Phase B fine-tune 数据生成时：
 
 ---
 
-## 2026-05-08 · Spirit 在 RTX 3090 上比 OpenVLA 在 H20 上快一倍 <a name="spirit-speed-advantage"></a>
+## 2026-05-08 · Spirit 在 RTX 3090 上比 OpenVLA 在 datacenter server card 上快一倍 <a name="spirit-speed-advantage"></a>
 
 **上下文**
 同样 bf16 推理，同样 batch_size=1，同样不带 flash-attn3（都是 flash-attn2），
-Spirit 3090 = 6.1 Hz，OpenVLA H20 = 3.0 Hz。**3090 更弱，但更快**。
+Spirit 3090 = 6.1 Hz，OpenVLA datacenter server card = 3.0 Hz。**3090 更弱，但更快**。
 
 **观察**
 两个根本原因：
@@ -445,7 +445,7 @@ Spirit 的 `modeling_spirit_vla.py` 看起来更像**研究代码**而非**生�
 每条 insight 都有 anchor 链接，方便交叉引用：
 
 - [k8s pod 里 Vulkan 不可用是基础设施问题](#k8s-vulkan-icd-missing) ← new
-- [H20 vs RTX 3090 上 Spirit 的延迟稳定性](#h20-vs-3090-latency)
+- [datacenter server card vs RTX 3090 上 Spirit 的延迟稳定性](#server card-vs-3090-latency)
 - [跨 embodiment 部署的最后一公里](#cross-embodiment-last-mile)
 - [Spirit 用 prompt 字符串"理解"硬件](#robot-type-as-prompt)
 - [Spirit 为什么比 OpenVLA 快一倍](#spirit-speed-advantage)

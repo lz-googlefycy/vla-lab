@@ -10,7 +10,7 @@
 #   bash run_libero_lora.sh goal
 #   bash run_libero_lora.sh long
 #
-# 在开发机上跑（H20-3e, 144 GB）
+# 在开发机上跑（datacenter GPU server card, 144 GB）
 # ============================================================
 set -euo pipefail
 

@@ -55,7 +55,7 @@ nvidia/cuda:11.8 base
 ssh -p <dev-port> <dev-machine>
 
 # GPU
-NVIDIA H20-3e × 1, 144 GB HBM
+datacenter GPU server card × 1, 144 GB HBM
 
 # Python
 /opt/conda/bin/python  # 注意：PATH 没自动设，要用全路径

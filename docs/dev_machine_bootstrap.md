@@ -1,7 +1,7 @@
 # 开发机 Pod 重建后快速恢复 SSH 指南
 
 > 每次 ML 平台重建 pod 后，pod 内所有 `/` 根分区内容会丢失（包括 /root/.ssh）。
-> 但 JuiceFS 挂载的 `/ad-alg/...` 是**跨 pod 持久化的**。
+> 但 JuiceFS 挂载的 `/workspace/jfs/...` 是**跨 pod 持久化的**。
 > 这份文档教你**如何一行命令恢复 SSH 反向隧道 + Spirit 环境**。
 
 ---
@@ -11,7 +11,7 @@
 所有 SSH 资产保存在 JuiceFS：
 
 ```
-/ad-alg/planning-users/liuzhi7/.ssh_backup/
+/workspace/jfs/.ssh_backup/
 ├── authorized_keys              # 你 desktop 能 ssh 进 pod 的公钥
 ├── id_rsa / id_rsa.pub          # pod 作为 client 用的 keypair
 ├── autossh_volc_to_desktop      # autossh 反向隧道 private key
@@ -30,21 +30,21 @@
 选镜像：
 
 ```
-micr.cloud.mioffice.cn/world-model-lyk/planningmodel:spirit-v1.0-cu128-py310
+<private-registry>/planningmodel:spirit-v1.0-cu128-py310
 ```
 
 或 sim 扩展（含 LIBERO + Maniskill）：
 
 ```
-micr.cloud.mioffice.cn/world-model-lyk/planningmodel:spirit-sim-v1.0-cu128-py310
+<private-registry>/planningmodel:spirit-sim-v1.0-cu128-py310
 ```
 
-挂载 JuiceFS 路径 `/ad-alg/planning-users/liuzhi7/` 到 pod 内同样的位置（平台 UI 通常默认挂载）。
+挂载 JuiceFS 路径 `/workspace/jfs/` 到 pod 内同样的位置（平台 UI 通常默认挂载）。
 
 ### 2. 进入 pod 后（通过 ML 平台的"在线 IDE"/ 相应工具），一行执行：
 
 ```bash
-bash /ad-alg/planning-users/liuzhi7/.ssh_backup/bootstrap-ssh.sh
+bash /workspace/jfs/.ssh_backup/bootstrap-ssh.sh
 ```
 
 这个脚本会：
@@ -67,11 +67,11 @@ ssh -p 4163 root@127.0.0.1
 
 ## 脚本内部做了什么
 
-[`bootstrap-ssh.sh`](/ad-alg/planning-users/liuzhi7/.ssh_backup/bootstrap-ssh.sh)：
+[`bootstrap-ssh.sh`](/workspace/jfs/.ssh_backup/bootstrap-ssh.sh)：
 
 ```bash
 # 从 JuiceFS 备份恢复 SSH 资产
-cp /ad-alg/.../.ssh_backup/{authorized_keys, id_rsa, autossh_volc_to_desktop, ...} \
+cp /workspace/jfs/.../.ssh_backup/{authorized_keys, id_rsa, autossh_volc_to_desktop, ...} \
    /root/.ssh/
 chmod 600 /root/.ssh/{authorized_keys, id_rsa, autossh_volc_to_desktop}
 
@@ -97,7 +97,7 @@ tmux new-session -d -s autossh-4163 \
 
 ```bash
 # 在现有 pod 里（旧 key 还在）
-cp /root/.ssh/authorized_keys /ad-alg/planning-users/liuzhi7/.ssh_backup/
+cp /root/.ssh/authorized_keys /workspace/jfs/.ssh_backup/
 
 # 下次 pod 重建时就会用新 key
 ```
@@ -124,7 +124,7 @@ cp /root/.ssh/authorized_keys /ad-alg/planning-users/liuzhi7/.ssh_backup/
 A: JuiceFS 备份里缺 `autossh_tunnel_cmd.sh`。手动创建，或跑下面这行：
 
 ```bash
-cat > /ad-alg/planning-users/liuzhi7/.ssh_backup/autossh_tunnel_cmd.sh <<'EOF'
+cat > /workspace/jfs/.ssh_backup/autossh_tunnel_cmd.sh <<'EOF'
 #!/bin/bash
 tmux new-session -d -s autossh-4163 \
     "AUTOSSH_GATETIME=0 autossh -M 0 -N \
@@ -137,7 +137,7 @@ tmux new-session -d -s autossh-4163 \
      -R 4163:127.0.0.1:2222 \
      ubuntu@10.189.148.41 > /tmp/autossh-4163.log 2>&1"
 EOF
-chmod +x /ad-alg/planning-users/liuzhi7/.ssh_backup/autossh_tunnel_cmd.sh
+chmod +x /workspace/jfs/.ssh_backup/autossh_tunnel_cmd.sh
 ```
 
 ### Q: 隧道启动了但 desktop 连不上

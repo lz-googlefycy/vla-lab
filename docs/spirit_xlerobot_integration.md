@@ -171,7 +171,7 @@ class SpiritLeRobotPolicy:
 - [ ] Day 4-5: Spirit LoRA fine-tune 脚本
   - 基于 Spirit 官方 `train.py` 改，只训 DiT action head + state/action projection 层
   - 冻结 Qwen3-VL backbone（节省显存，50 条数据也不够训 backbone）
-  - 开发机单卡 H20 144GB，BS 4-8
+  - 开发机单卡 the datacenter server card (~144 GB)，BS 4-8
 - [ ] Day 6-7: Spirit + XLeRobot (fine-tuned) 在仿真评测，对比 zero-shot baseline
 
 **验收**：
@@ -202,7 +202,7 @@ class SpiritLeRobotPolicy:
 | LoRA fine-tune 50 条数据不够 | 中 | 高 | fallback 到 **full fine-tune 小规模**或 **跟 OpenVLA 官方对比 baseline** |
 | XLeRobot 硬件/软件 bug | 中 | 中 | 先在 Mujoco 仿真全跑通，真机只做最终验证 |
 | 腕部相机缺失 → zero-shot 显著降低 | 高 | 中 | Phase B fine-tune 时学习只用 cam_high 的投影，或者花 $60 加装双 USB 腕部相机 |
-| Qwen3-VL-4B 显存不够 | 低 | 高 | 本机 3090-24GB 4-bit 量化可能勉强；开发机 H20-144GB 肯定够 |
+| Qwen3-VL-4B 显存不够 | 低 | 高 | 本机 3090-24GB 4-bit 量化可能勉强；开发机 datacenter server card-144GB 肯定够 |
 | 推理太慢（DiT 10 步 + 60 action chunk） | 中 | 中 | 减少 num_steps 到 5，用 action chunking 节省 inference frequency |
 
 ---
