@@ -24,11 +24,12 @@
 
 ## ⭐ TL;DR
 
+- 🚧 **Active main line**: Cross-Base Preference Alignment for VLA Models — **DPO + GRPO across OpenVLA / Spirit / π0.5 on LIBERO 4-suite**. Workshop paper target. See [`code/post_training/`](code/post_training/) + [`docs/upstream_contributions.md`](docs/upstream_contributions.md).
 - ✅ Reproduced **OpenVLA-7B on LIBERO 4-suite** (400 rollouts): **Spatial 78% / Object 60% / Goal 77% / Long 53%** vs paper 76.5 avg → see the [focused repo](https://github.com/lz-googlefycy/openvla-libero)
 - ✅ **Spirit v1.5 (千寻智能, RoboChallenge #1) smoke test passes on RTX 3090 24 GB: 6.1 Hz steady-state, bf16, 10 GB VRAM.** Code + adapter open-sourced. Full engineering notes: [`docs/troubleshooting.md`](docs/troubleshooting.md) + [`docs/insights.md`](docs/insights.md)
 - ✅ Published critical analyses of **7 major VLA papers** (RT-1, RT-2, Octo, OpenVLA, π0, π0.5, π*0.6) — *skeptical-by-default review*
-- 🚧 **In progress**: Spirit × XLeRobot (SO-100) — Maniskill sim rollout video (Week 3), then real-robot LoRA fine-tune (Week 4-5)
-- 🔜 **Next-next**: blog #2 — "Running 千寻 Spirit v1.5 on a \$660 robot, at 6.1 Hz, on a consumer GPU"
+- ✅ **Phase B-1 LoRA pipeline working**: Spirit v1.5 LoRA on synthetic data, loss 1.385 → 0.082 in 300 steps (94% reduction) on a single datacenter GPU. See [`assets/spirit/blog2_figures/lora_smoke_loss.png`](assets/spirit/blog2_figures/lora_smoke_loss.png).
+- ✅ **Phase 1 OpenVLA-DPO end-to-end**: Real OpenVLA-7B + LoRA + DPO pipeline runs on RTX 3090 24 GB. Loss starts at exact ln(2), accuracy → 1.0 in 6 steps, margin to +28 in 30 steps. See [`assets/post_training_v0/openvla_dpo_smoke_30step.jsonl`](assets/post_training_v0/openvla_dpo_smoke_30step.jsonl).
 
 ---
 
