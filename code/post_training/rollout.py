@@ -67,7 +67,13 @@ class RolloutConfig:
     suite: str = "libero_spatial"           # libero_spatial / libero_object / libero_goal / libero_10
     n_tasks: int = 10                        # tasks per suite (LIBERO has 10)
     n_inits_per_task: int = 5                # initial states to sample per task
-    resolution: int = 224                    # image resize
+    # Render at 224 directly so we skip the resize step. OpenVLA's
+    # official eval uses 256 → resize 224 with tf.image.lanczos3 +
+    # JPEG round-trip, which is hard to reproduce exactly. Direct 224
+    # render avoids that distribution shift, at the cost of a slightly
+    # different camera FOV vs official eval.
+    resolution: int = 224
+    model_input_size: int = 224
     num_steps_wait: int = 10                 # initial settling steps
     max_steps_override: Optional[int] = None  # override default per-suite max_steps
 
@@ -91,8 +97,12 @@ class RolloutConfig:
 # ---------------------------------------------------------------------- #
 
 
-def get_libero_env(task, resolution: int = 224):
-    """Adapted from openvla/experiments/robot/libero/libero_utils.py."""
+def get_libero_env(task, resolution: int = 256):
+    """Adapted from openvla/experiments/robot/libero/libero_utils.py.
+
+    OpenVLA's official LIBERO eval uses resolution=256 (env render) +
+    resize 224 (model input). Match that for direct comparability.
+    """
     from libero.libero import get_libero_path
     from libero.libero.envs import OffScreenRenderEnv
 
@@ -161,6 +171,17 @@ def rollout_one_episode(
     """
     sample_kwargs = sample_kwargs or {}
 
+    # Toggle stochastic sampling on the adapter (if it supports it).
+    # Used to make K candidates differ; greedy → all K identical.
+    deterministic = sample_kwargs.get("deterministic", False)
+    if hasattr(adapter, "_sample_do_sample"):
+        adapter._sample_do_sample = not deterministic
+    elif not deterministic:
+        adapter._sample_do_sample = True
+    if not deterministic:
+        adapter._sample_temperature = float(sample_kwargs.get("temperature", 1.0))
+        adapter._sample_top_p = float(sample_kwargs.get("top_p", 0.95))
+
     env.reset()
     obs = env.set_init_state(initial_state)
 
@@ -189,10 +210,22 @@ def rollout_one_episode(
         if img_arr is None:
             raise RuntimeError(f"No image found in obs keys: {list(obs.keys())}")
 
-        # LIBERO renders BGR images flipped vertically — convert to RGB+upright
-        img = np.flip(img_arr, axis=0)            # vertical flip
+        # LIBERO renders agentview rotated 180° relative to OpenVLA's
+        # training distribution. See OpenVLA's libero_utils.get_libero_image:
+        # `img = img[::-1, ::-1]`. Same rotation needed here.
+        img = img_arr[::-1, ::-1]
         if img.dtype != np.uint8:
             img = (img * 255).astype(np.uint8)
+        # Resize from env-render resolution to model input size (224 for
+        # OpenVLA). PIL bilinear matches OpenVLA's training pipeline.
+        if img.shape[0] != cfg.model_input_size:
+            from PIL import Image
+            img = np.asarray(
+                Image.fromarray(img).resize(
+                    (cfg.model_input_size, cfg.model_input_size),
+                    Image.BILINEAR,
+                )
+            )
         img_t = torch.from_numpy(img.copy()).permute(2, 0, 1).float() / 255.0   # (3, H, W)
 
         if first_image is None:
@@ -208,10 +241,18 @@ def rollout_one_episode(
             action_chunk = adapter.select_action(batch)        # (1, 1, 7) for OpenVLA
         action = action_chunk.squeeze(0).squeeze(0).cpu().numpy()  # (7,)
 
-        # Normalize gripper [0, 1] → [-1, +1] (LIBERO env expects)
-        gripper = action[-1]
-        action[-1] = 1.0 if gripper > 0.5 else -1.0
-        # Some LIBERO setups invert gripper sign — try both later
+        # OpenVLA: gripper in [0, 1] → binarise to {-1, +1}, then invert
+        # because OpenVLA's RLDS dataloader maps 0=close, 1=open but
+        # LIBERO env expects -1=open, +1=close. See
+        # openvla/experiments/robot/robot_utils.py.
+        if hasattr(adapter, 'cfg') and getattr(adapter.cfg, 'base', '') == 'openvla':
+            # Step 1: normalize gripper to [-1, +1] then binarise
+            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+            # Step 2: invert sign for LIBERO
+            action[-1] = -action[-1]
+        else:
+            # Spirit / π0.5 / others: simple binarise
+            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
 
         actions.append(action.copy())
         try:
@@ -249,17 +290,20 @@ def rollout_one_episode(
 
 
 def compute_episode_reward(episode: dict, cfg: RolloutConfig) -> float:
-    """Reward for one episode using reward.py weights (default 0.7/0.2/0.1)."""
+    """Reward for one episode using reward.py weights (default 0.7/0.2/0.1).
+
+    LIBERO env doesn't expose a continuous progress signal, so we use a
+    simple binary mapping: success → progress=1.0, failure → progress=0.0.
+    Earlier draft used length-fraction as a partial-credit proxy, but
+    that produced identical rewards for all failed episodes (they all
+    run to max_steps), wiping out the smoothness-based signal that
+    distinguishes within the failure cluster.
+    """
     from .reward import chunk_reward, RewardConfig
 
     success = episode["success"]
     actions = episode["actions"]
-    # Estimate progress from how far through max_steps we got *if successful*
-    # — LIBERO env doesn't expose continuous progress. We approximate as:
-    #   success → 1.0, failure → length-fraction (longer episodes failed
-    #   trying harder, get partial credit).
-    suite_max = _MAX_STEPS.get(cfg.suite, 220)
-    progress = 1.0 if success else min(1.0, len(actions) / suite_max)
+    progress = 1.0 if success else 0.0
     return chunk_reward(actions, success=success, progress=progress, cfg=RewardConfig())
 
 

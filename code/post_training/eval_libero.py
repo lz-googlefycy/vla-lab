@@ -118,7 +118,10 @@ def run_one_trial(
             return {"success": False, "n_steps": 0, "elapsed_s": 0,
                     "error": "no image in obs"}
 
-        img = np.flip(img_arr, axis=0)  # LIBERO renders flipped
+        # LIBERO renders agentview rotated 180° relative to OpenVLA's
+        # training distribution (per openvla/experiments/.../libero_utils.py
+        # get_libero_image: `img = img[::-1, ::-1]`).
+        img = img_arr[::-1, ::-1]
         if img.dtype != np.uint8:
             img = (img * 255).astype(np.uint8)
         if capture_video:

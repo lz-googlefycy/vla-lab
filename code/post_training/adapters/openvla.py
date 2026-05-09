@@ -337,15 +337,31 @@ class OpenVLAAdapter(VLABase):
         return chunks.contiguous()
 
     def _predict_single(self, batch: dict) -> torch.Tensor:
-        """Single-step prediction (greedy). Returns (B, 7)."""
+        """Single-step prediction. Returns (B, 7).
+
+        Uses greedy by default. Set ``self._sample_temperature > 0`` and
+        ``self._sample_do_sample = True`` (e.g. before policy_sample
+        calls) to switch to stochastic sampling — needed for K-candidate
+        rollout where each k must produce a different trajectory.
+        """
         out_list = []
+        do_sample = getattr(self, "_sample_do_sample", False)
+        gen_kwargs = {
+            "do_sample": do_sample,
+            "unnorm_key": self.unnorm_key,
+        }
+        if do_sample:
+            gen_kwargs["temperature"] = float(getattr(self, "_sample_temperature", 1.0))
+            gen_kwargs["top_p"] = float(getattr(self, "_sample_top_p", 0.95))
+
         for b in range(batch["image"].shape[0]):
             prompt = self._format_prompt(batch["instruction"][b])
             pil_img = self._tensor_to_pil(batch["image"][b])
             inputs = self.processor(prompt, pil_img, return_tensors="pt").to(self.device)
-            action = self.model.predict_action(
-                **inputs, unnorm_key=self.unnorm_key, do_sample=False
-            )
+            # Cast pixel_values to model dtype (bf16) like in policy_logp
+            model_dtype = next(self.model.parameters()).dtype
+            inputs["pixel_values"] = inputs["pixel_values"].to(model_dtype)
+            action = self.model.predict_action(**inputs, **gen_kwargs)
             out_list.append(torch.as_tensor(action, dtype=torch.float32))
         return torch.stack(out_list).to(self.device)
 
