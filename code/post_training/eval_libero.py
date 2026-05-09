@@ -69,7 +69,9 @@ def patch_torch_load_for_libero() -> None:
     _t.load = patched
 
 
-def get_libero_env(task, resolution: int = 224):
+def get_libero_env(task, resolution: int = 256):
+    """Match OpenVLA official eval: render at 256, resize to 224 with
+    tf.image.lanczos3 + JPEG round-trip via _resize_image_rlds()."""
     from libero.libero import get_libero_path
     from libero.libero.envs import OffScreenRenderEnv
     bddl = os.path.join(get_libero_path("bddl_files"),
@@ -79,6 +81,25 @@ def get_libero_env(task, resolution: int = 224):
         camera_heights=resolution, camera_widths=resolution,
     )
     return env, task.language
+
+
+def _resize_image_rlds(img_uint8: np.ndarray, target_size: int) -> np.ndarray:
+    """RLDS-style preprocessing approximating OpenVLA's TF pipeline.
+
+    See rollout.py:_resize_image_rlds for the full incident analysis —
+    we use PIL JPEG round-trip + cv2.INTER_LANCZOS4 instead of tf
+    because TF + libero env crash together in our docker setup.
+    """
+    import io
+    import cv2
+    from PIL import Image
+    buf = io.BytesIO()
+    Image.fromarray(img_uint8).save(buf, format="JPEG", quality=95)
+    img_after_jpeg = np.array(Image.open(buf))
+    return cv2.resize(
+        img_after_jpeg, (target_size, target_size),
+        interpolation=cv2.INTER_LANCZOS4,
+    )
 
 
 def get_libero_dummy_action() -> np.ndarray:
@@ -126,6 +147,10 @@ def run_one_trial(
             img = (img * 255).astype(np.uint8)
         if capture_video:
             frames.append(img.copy())
+        # OpenVLA RLDS resize (tf.lanczos3 + JPEG round-trip). 224 = OpenVLA
+        # model input. Skip resize if env already renders at target size.
+        if img.shape[0] != 224:
+            img = _resize_image_rlds(img, 224)
         img_t = torch.from_numpy(img.copy()).permute(2, 0, 1).float() / 255.0
 
         batch = {

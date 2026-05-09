@@ -366,15 +366,45 @@ class OpenVLAAdapter(VLABase):
         return torch.stack(out_list).to(self.device)
 
     def _format_prompt(self, instruction: str) -> str:
-        """Format LIBERO-style prompt the way OpenVLA expects."""
-        return f"In: What action should the robot take to {instruction}?\nOut:"
+        """Format LIBERO-style prompt the way OpenVLA expects.
+
+        Matches openvla/experiments/robot/openvla_utils.py:163 — the
+        instruction is lowercased before insertion. Critical for
+        finetuned LIBERO ckpts to stay in distribution.
+        """
+        return f"In: What action should the robot take to {instruction.lower()}?\nOut:"
 
     @staticmethod
     def _tensor_to_pil(t: torch.Tensor):
-        """(3,H,W) float in [0,1] → PIL.Image."""
+        """(3,H,W) float in [0,1] → PIL.Image, with mandatory center crop
+        for OpenVLA finetuned LIBERO ckpts.
+
+        OpenVLA's finetuned LIBERO ckpts were trained with random crop
+        augmentation (crop_scale=0.9). At inference they require a
+        deterministic center crop with the same scale, then resize back
+        to the original size, before being passed to the model.
+
+        See openvla/experiments/robot/openvla_utils.py:135-155
+        (`if center_crop: ...`).
+        """
         from PIL import Image
+        import numpy as np
         arr = (t.detach().cpu().permute(1, 2, 0).clamp(0, 1).numpy() * 255).astype("uint8")
-        return Image.fromarray(arr)
+
+        # Center crop at scale=0.9 then resize back. Matches OpenVLA's
+        # crop_and_resize utility (TF version), reimplemented in numpy/PIL.
+        crop_scale = 0.9
+        H, W = arr.shape[:2]
+        # crop dims: orig * sqrt(crop_scale), per OpenVLA's comment
+        new_h = int(round(H * (crop_scale ** 0.5)))
+        new_w = int(round(W * (crop_scale ** 0.5)))
+        h_off = (H - new_h) // 2
+        w_off = (W - new_w) // 2
+        cropped = arr[h_off : h_off + new_h, w_off : w_off + new_w]
+        # resize back to original size — bilinear is fine for this step
+        # (the original RLDS resize was applied earlier in rollout)
+        pil = Image.fromarray(cropped).resize((W, H), Image.BILINEAR)
+        return pil
 
     @staticmethod
     def _patch_openvla_compat() -> None:

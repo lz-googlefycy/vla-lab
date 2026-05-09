@@ -44,26 +44,28 @@ RUN pip install \
         h5py \
     || true
 
+# NOTE: tensorflow-cpu was tried for RLDS-style image preprocessing
+# (tf.image.encode_jpeg + decode + lanczos3 resize) but caused silent
+# LIBERO env construction crashes when both libs co-resided in the
+# same process. The RLDS resize is now approximated with
+# cv2.INTER_LANCZOS4 + PIL JPEG round-trip (mean pixel diff ~13/255
+# vs TF reference). See docs/v1.5_first_real_rollout.md.
+
 # ============================================================
-# 3. Sanity check at build time (no GPU needed for import)
+# 3. Sanity check at build time
 # ============================================================
 RUN python -c "\
-import torch; \
-import transformers; \
-import timm; \
-import peft; \
-import accelerate; \
-import diffusers; \
-import mani_skill; \
-import sapien; \
-import libero; \
+import torch, transformers, timm, peft, accelerate, diffusers; \
 print(f'torch={torch.__version__}'); \
 print(f'transformers={transformers.__version__}'); \
 print(f'timm={timm.__version__}'); \
 print(f'peft={peft.__version__}'); \
-print(f'accelerate={accelerate.__version__}'); \
+print(f'accelerate={accelerate.__version__}')" \
+&& python -c "\
+import mani_skill, sapien, libero, cv2; \
 print(f'mani_skill={mani_skill.__version__}'); \
 print(f'sapien={sapien.__version__}'); \
+print(f'cv2={cv2.__version__}'); \
 print('libero: ok')"
 
 WORKDIR /workspace

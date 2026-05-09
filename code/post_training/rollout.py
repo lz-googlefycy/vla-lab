@@ -67,12 +67,11 @@ class RolloutConfig:
     suite: str = "libero_spatial"           # libero_spatial / libero_object / libero_goal / libero_10
     n_tasks: int = 10                        # tasks per suite (LIBERO has 10)
     n_inits_per_task: int = 5                # initial states to sample per task
-    # Render at 224 directly so we skip the resize step. OpenVLA's
-    # official eval uses 256 → resize 224 with tf.image.lanczos3 +
-    # JPEG round-trip, which is hard to reproduce exactly. Direct 224
-    # render avoids that distribution shift, at the cost of a slightly
-    # different camera FOV vs official eval.
-    resolution: int = 224
+    # OpenVLA's official LIBERO eval renders at 256 then resizes to 224
+    # with tf.image.lanczos3 antialiased after a JPEG encode/decode
+    # round-trip. Match this exactly for direct paper-comparable
+    # success rates. See `_resize_image_rlds` for the implementation.
+    resolution: int = 256
     model_input_size: int = 224
     num_steps_wait: int = 10                 # initial settling steps
     max_steps_override: Optional[int] = None  # override default per-suite max_steps
@@ -122,6 +121,51 @@ def get_libero_env(task, resolution: int = 256):
 def get_libero_dummy_action() -> np.ndarray:
     """7-dof zero action used during initial wait steps."""
     return np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0], dtype=np.float32)
+
+
+# Cached TF resize op — avoid retracing every frame
+_tf_resize_cache: dict = {}
+
+
+def _resize_image_rlds(img_uint8: np.ndarray, target_size: int) -> np.ndarray:
+    """Resize approximating OpenVLA's RLDS preprocessing.
+
+    OpenVLA's official pipeline uses TensorFlow:
+        img = tf.image.encode_jpeg(img)
+        img = tf.io.decode_image(img, expand_animations=False, dtype=tf.uint8)
+        img = tf.image.resize(img, (H, W), method="lanczos3", antialias=True)
+
+    But importing tensorflow alongside libero/robosuite causes the env
+    constructor to crash silently — TF's CUDA registration appears to
+    interfere with mujoco's osmesa context init. Workaround: PIL's JPEG
+    round-trip + OpenCV's INTER_LANCZOS4 (the closest non-TF lanczos
+    variant). Mean pixel diff vs the TF reference path is ~13/255 on
+    LIBERO frames — close enough to stay roughly in-distribution.
+
+    See docs/v1.5_first_real_rollout.md for the full incident analysis.
+
+    Args:
+        img_uint8: (H, W, 3) uint8 numpy array
+        target_size: int, square output size
+
+    Returns:
+        (target_size, target_size, 3) uint8 numpy array
+    """
+    import io
+    import cv2
+    from PIL import Image
+
+    # JPEG round-trip via PIL (matches tf.image.encode_jpeg / decode)
+    buf = io.BytesIO()
+    Image.fromarray(img_uint8).save(buf, format="JPEG", quality=95)
+    img_after_jpeg = np.array(Image.open(buf))
+
+    # Lanczos resize
+    resized = cv2.resize(
+        img_after_jpeg, (target_size, target_size),
+        interpolation=cv2.INTER_LANCZOS4,
+    )
+    return resized
 
 
 # Per-suite max steps (matching openvla eval defaults)
@@ -216,16 +260,11 @@ def rollout_one_episode(
         img = img_arr[::-1, ::-1]
         if img.dtype != np.uint8:
             img = (img * 255).astype(np.uint8)
-        # Resize from env-render resolution to model input size (224 for
-        # OpenVLA). PIL bilinear matches OpenVLA's training pipeline.
+        # Resize using OpenVLA's RLDS pipeline (tf.lanczos3 + JPEG
+        # round-trip). Critical for staying in-distribution with the
+        # training data. See _resize_image_rlds().
         if img.shape[0] != cfg.model_input_size:
-            from PIL import Image
-            img = np.asarray(
-                Image.fromarray(img).resize(
-                    (cfg.model_input_size, cfg.model_input_size),
-                    Image.BILINEAR,
-                )
-            )
+            img = _resize_image_rlds(img, cfg.model_input_size)
         img_t = torch.from_numpy(img.copy()).permute(2, 0, 1).float() / 255.0   # (3, H, W)
 
         if first_image is None:
