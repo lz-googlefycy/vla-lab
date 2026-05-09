@@ -106,6 +106,11 @@ class OpenVLAAdapter(VLABase):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._sample_temperature = 1.0   # set externally before policy_sample
 
+        # Patch OpenVLA model class to be compatible with transformers >= 4.50
+        # (newer transformers asserts _supports_sdpa attribute that older
+        # custom model classes like OpenVLA's don't have)
+        self._patch_openvla_compat()
+
         # Lazy import to avoid forcing transformers on this module's load
         from transformers import AutoModelForVision2Seq, AutoProcessor
 
@@ -354,6 +359,54 @@ class OpenVLAAdapter(VLABase):
         from PIL import Image
         arr = (t.detach().cpu().permute(1, 2, 0).clamp(0, 1).numpy() * 255).astype("uint8")
         return Image.fromarray(arr)
+
+    @staticmethod
+    def _patch_openvla_compat() -> None:
+        """transformers >= 4.50 calls model._supports_sdpa during __init__
+        to decide attention impl. OpenVLA defines _supports_sdpa as a
+        @property that delegates to self.language_model — but at __init__
+        time language_model isn't assigned yet, raising AttributeError.
+
+        Fix: forcibly replace the @property on PrismaticPreTrainedModel
+        with a plain class attribute False. Subclasses then inherit the
+        plain attribute. Idempotent.
+        """
+        try:
+            from transformers.dynamic_module_utils import get_class_from_dynamic_module
+            for cls_name in (
+                "modeling_prismatic.OpenVLAForActionPrediction",
+                "modeling_prismatic.PrismaticForConditionalGeneration",
+                "modeling_prismatic.PrismaticPreTrainedModel",
+            ):
+                try:
+                    cls = get_class_from_dynamic_module(cls_name, "openvla/openvla-7b")
+                    # Forcibly replace property descriptor (if any) with
+                    # a plain class attribute. type.__setattr__ avoids
+                    # the property's __set__ being invoked.
+                    type.__setattr__(cls, "_supports_sdpa", False)
+                    type.__setattr__(cls, "_supports_flash_attn_2", False)
+                    type.__setattr__(cls, "_supports_attention_backend", False)
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        # Belt-and-suspenders: walk sys.modules for any dynamic module
+        # file path HF has already loaded
+        import sys as _sys
+        for mod_name, mod in list(_sys.modules.items()):
+            if "modeling_prismatic" in mod_name and mod is not None:
+                for cls_name in (
+                    "PrismaticPreTrainedModel",
+                    "PrismaticForConditionalGeneration",
+                    "OpenVLAForActionPrediction",
+                ):
+                    cls = getattr(mod, cls_name, None)
+                    if cls is None:
+                        continue
+                    type.__setattr__(cls, "_supports_sdpa", False)
+                    type.__setattr__(cls, "_supports_flash_attn_2", False)
+                    type.__setattr__(cls, "_supports_attention_backend", False)
 
     # --------------- weight management --------------- #
 

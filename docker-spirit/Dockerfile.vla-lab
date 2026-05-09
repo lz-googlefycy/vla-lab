@@ -1,11 +1,15 @@
 # ============================================================
 # vla-lab-v1.0 — unified image for v1.5 post-training paper
-# Base:  spirit-v1.1-cu128-py311 (Maniskill+SAPIEN+LIBERO + Spirit deps)
-# Adds: OpenVLA family deps (timm, peft, etc), gsutil for π0.5 ckpt fetch
-#       transformers downgrade for OpenVLA compatibility
+# Base:  spirit-v1.1-cu128-py311
+# Adds:  timm, peft, accelerate, bitsandbytes (OpenVLA family)
+#        h5py, imageio[ffmpeg] (rollout video / data)
 #
-# Goal: one image that can run all three bases (OpenVLA / Spirit / π0.5
-#       inference paths) plus LIBERO env, on H20 / RTX 3090.
+# JAX (for π0.5 path) is intentionally NOT installed here — it's a 2GB
+# wheel that doubles build time. Install at runtime if needed:
+#   pip install "jax[cuda12]==0.4.34" flax==0.10.0
+#
+# Goal: one image to cover OpenVLA + Spirit + Maniskill + LIBERO across
+#       inference, training, and eval. ~ +500MB on top of spirit-v1.1.
 #
 # Build:
 #   cd ro_planning/docker-spirit
@@ -19,64 +23,48 @@ ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # ============================================================
-# 1. OpenVLA dependencies
+# 1. OpenVLA family deps
+#    - timm: OpenVLA's vision encoder uses timm ViT
+#    - peft: optional, in case we need official LoRA path later
+#    - accelerate: required by transformers low_cpu_mem_usage
+#    - bitsandbytes: optional 4-bit quantisation for tight VRAM budgets
 # ============================================================
-# OpenVLA requires older transformers (its custom AutoProcessor
-# subclass uses APIs that broke in 4.50+). We keep transformers 4.57
-# as installed by spirit-v1.1 but add a transformers-4.40 venv-style
-# extra by installing in a sub-prefix; alternative is two images.
-# For now we just install timm (vision encoder dep) + peft + accelerate
-# and accept that the OpenVLA forward path may need a small monkey-patch.
 RUN pip install \
         timm==0.9.10 \
-        peft==0.13.0 \
+        "peft>=0.17.0" \
         accelerate==1.0.0 \
         bitsandbytes \
+    || (echo "pip install partial failure — check logs"; exit 1)
+
+# ============================================================
+# 2. Eval / video / ffmpeg helpers
+# ============================================================
+RUN pip install \
+        imageio[ffmpeg] \
+        h5py \
     || true
 
 # ============================================================
-# 2. OpenVLA-compat transformers build (optional second venv)
-# ============================================================
-# If user needs OpenVLA's old transformers, run:
-#   pip install transformers==4.40.1 -t /opt/transformers-openvla
-# and PYTHONPATH=/opt/transformers-openvla:$PYTHONPATH for that script.
-# Skipping default install here — keep main transformers 4.57 for
-# Spirit / π0.5 compat. OpenVLA path will use python -c trick.
-
-# ============================================================
-# 3. JAX for openpi (π0.5 path), CPU + CUDA wheels
-# ============================================================
-RUN pip install \
-        "jax[cuda12]==0.4.34" \
-        flax==0.10.0 \
-        optax==0.2.4 \
-    || echo "JAX CUDA install failed — falling back to CPU jax for now"
-
-# ============================================================
-# 4. openpi (read-only; for inference + serve_policy)
-# ============================================================
-# Skip: openpi uses uv, conflicts with conda. We mount openpi at
-# runtime via -v /workspace/openpi:/openpi and use system python.
-
-# ============================================================
-# 5. gsutil for pulling π0.5 ckpts from gs://openpi-assets
-# ============================================================
-RUN curl -fsSL https://sdk.cloud.google.com | bash || true
-ENV PATH="/root/google-cloud-sdk/bin:${PATH}"
-
-# ============================================================
-# 6. Sanity check at build time
+# 3. Sanity check at build time (no GPU needed for import)
 # ============================================================
 RUN python -c "\
-import torch, transformers, diffusers, mani_skill, sapien, libero, timm; \
+import torch; \
+import transformers; \
+import timm; \
+import peft; \
+import accelerate; \
+import diffusers; \
+import mani_skill; \
+import sapien; \
+import libero; \
 print(f'torch={torch.__version__}'); \
 print(f'transformers={transformers.__version__}'); \
+print(f'timm={timm.__version__}'); \
+print(f'peft={peft.__version__}'); \
+print(f'accelerate={accelerate.__version__}'); \
 print(f'mani_skill={mani_skill.__version__}'); \
 print(f'sapien={sapien.__version__}'); \
-print(f'timm={timm.__version__}'); \
 print('libero: ok')"
 
 WORKDIR /workspace
-
-# Default: open shell
 CMD ["/bin/bash"]
