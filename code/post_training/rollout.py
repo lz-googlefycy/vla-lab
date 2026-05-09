@@ -261,19 +261,23 @@ def rollout_one_episode(
         if img.dtype != np.uint8:
             img = (img * 255).astype(np.uint8)
         # Resize using OpenVLA's RLDS pipeline (tf.lanczos3 + JPEG
-        # round-trip). Critical for staying in-distribution with the
-        # training data. See _resize_image_rlds().
+        # round-trip → cv2 substitute, see _resize_image_rlds).
         if img.shape[0] != cfg.model_input_size:
             img = _resize_image_rlds(img, cfg.model_input_size)
-        img_t = torch.from_numpy(img.copy()).permute(2, 0, 1).float() / 255.0   # (3, H, W)
+        img_uint8 = img.copy()                                            # (H, W, 3) uint8
+        img_t = torch.from_numpy(img_uint8).permute(2, 0, 1).float() / 255.0  # (3, H, W)
 
         if first_image is None:
             first_image = img_t.clone()
 
-        # Build batch and sample one action
+        # Build batch — include BOTH float tensor (back-compat) and raw
+        # uint8 ndarray. OpenVLA adapter prefers the uint8 path because
+        # the float→uint8 round-trip causes ~1/255 quantisation drift
+        # which is enough to OOD the visual encoder on LIBERO.
         batch = {
             "instruction": [task_description],
             "image": img_t.unsqueeze(0),
+            "image_uint8": [img_uint8],   # list of (H, W, 3) uint8 per sample
         }
         with torch.no_grad():
             # OpenVLA single-step prediction
