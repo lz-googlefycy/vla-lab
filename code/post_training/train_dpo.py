@@ -116,10 +116,13 @@ def build_adapter(cfg: PostTrainConfig):
         from .adapters.openvla import OpenVLAAdapter
         return OpenVLAAdapter(cfg)
     if cfg.base == "spirit":
-        # to be implemented in Week 2
-        raise NotImplementedError("Spirit adapter not yet implemented")
+        from .adapters.spirit import SpiritAdapter
+        return SpiritAdapter(cfg)
     if cfg.base == "pi05":
-        raise NotImplementedError("π0.5 adapter not yet implemented")
+        raise NotImplementedError(
+            "π0.5 adapter scheduled for Week 2; needs JAX/PyTorch path "
+            "decision (see docs/openpi_onboard.md)"
+        )
     raise ValueError(f"unknown base: {cfg.base}")
 
 

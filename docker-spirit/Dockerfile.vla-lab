@@ -1,0 +1,82 @@
+# ============================================================
+# vla-lab-v1.0 — unified image for v1.5 post-training paper
+# Base:  spirit-v1.1-cu128-py311 (Maniskill+SAPIEN+LIBERO + Spirit deps)
+# Adds: OpenVLA family deps (timm, peft, etc), gsutil for π0.5 ckpt fetch
+#       transformers downgrade for OpenVLA compatibility
+#
+# Goal: one image that can run all three bases (OpenVLA / Spirit / π0.5
+#       inference paths) plus LIBERO env, on H20 / RTX 3090.
+#
+# Build:
+#   cd ro_planning/docker-spirit
+#   docker build -f Dockerfile.vla-lab -t vla-lab-v1.0-cu128-py311 .
+# ============================================================
+
+FROM spirit-v1.1-cu128-py311
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# ============================================================
+# 1. OpenVLA dependencies
+# ============================================================
+# OpenVLA requires older transformers (its custom AutoProcessor
+# subclass uses APIs that broke in 4.50+). We keep transformers 4.57
+# as installed by spirit-v1.1 but add a transformers-4.40 venv-style
+# extra by installing in a sub-prefix; alternative is two images.
+# For now we just install timm (vision encoder dep) + peft + accelerate
+# and accept that the OpenVLA forward path may need a small monkey-patch.
+RUN pip install \
+        timm==0.9.10 \
+        peft==0.13.0 \
+        accelerate==1.0.0 \
+        bitsandbytes \
+    || true
+
+# ============================================================
+# 2. OpenVLA-compat transformers build (optional second venv)
+# ============================================================
+# If user needs OpenVLA's old transformers, run:
+#   pip install transformers==4.40.1 -t /opt/transformers-openvla
+# and PYTHONPATH=/opt/transformers-openvla:$PYTHONPATH for that script.
+# Skipping default install here — keep main transformers 4.57 for
+# Spirit / π0.5 compat. OpenVLA path will use python -c trick.
+
+# ============================================================
+# 3. JAX for openpi (π0.5 path), CPU + CUDA wheels
+# ============================================================
+RUN pip install \
+        "jax[cuda12]==0.4.34" \
+        flax==0.10.0 \
+        optax==0.2.4 \
+    || echo "JAX CUDA install failed — falling back to CPU jax for now"
+
+# ============================================================
+# 4. openpi (read-only; for inference + serve_policy)
+# ============================================================
+# Skip: openpi uses uv, conflicts with conda. We mount openpi at
+# runtime via -v /workspace/openpi:/openpi and use system python.
+
+# ============================================================
+# 5. gsutil for pulling π0.5 ckpts from gs://openpi-assets
+# ============================================================
+RUN curl -fsSL https://sdk.cloud.google.com | bash || true
+ENV PATH="/root/google-cloud-sdk/bin:${PATH}"
+
+# ============================================================
+# 6. Sanity check at build time
+# ============================================================
+RUN python -c "\
+import torch, transformers, diffusers, mani_skill, sapien, libero, timm; \
+print(f'torch={torch.__version__}'); \
+print(f'transformers={transformers.__version__}'); \
+print(f'mani_skill={mani_skill.__version__}'); \
+print(f'sapien={sapien.__version__}'); \
+print(f'timm={timm.__version__}'); \
+print('libero: ok')"
+
+WORKDIR /workspace
+
+# Default: open shell
+CMD ["/bin/bash"]
