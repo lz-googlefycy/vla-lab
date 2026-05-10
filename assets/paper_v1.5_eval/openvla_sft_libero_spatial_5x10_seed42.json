@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_spatial": {
+      "rate": 0.72,
+      "success": 36,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "1": {
+          "task": "pick up the black bowl next to the ramekin and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "2": {
+          "task": "pick up the black bowl from table center and place it on the plate",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        },
+        "3": {
+          "task": "pick up the black bowl on the cookie box and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "4": {
+          "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        },
+        "5": {
+          "task": "pick up the black bowl on the ramekin and place it on the plate",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        },
+        "6": {
+          "task": "pick up the black bowl next to the cookie box and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "7": {
+          "task": "pick up the black bowl on the stove and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "pick up the black bowl next to the plate and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "9": {
+          "task": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        }
+      }
+    }
+  },
+  "overall_avg": 0.72,
+  "meta": {
+    "base": "openvla",
+    "base_ckpt": "/model",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_spatial"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 7128.607228517532
+  }
+}
