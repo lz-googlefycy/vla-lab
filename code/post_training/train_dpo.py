@@ -54,7 +54,8 @@ class DPOPairDataset(Dataset):
 
         {
             "instructions": List[str],            # length B
-            "images": Tensor (B, 3, H, W),
+            "images": Tensor (B, 3, H, W),        # float [0,1] — back-compat
+            "images_uint8": List[ndarray],         # uint8 (H,W,3) — preferred
             "chosen_chunks": Tensor (B, T, A),
             "rejected_chunks": Tensor (B, T, A),
             "chosen_rewards": Tensor (B,),         # for diagnostics
@@ -66,6 +67,7 @@ class DPOPairDataset(Dataset):
         d = torch.load(pairs_file, map_location="cpu", weights_only=False)
         self.instructions: list[str] = d["instructions"]
         self.images: torch.Tensor = d["images"]
+        self.images_uint8 = d.get("images_uint8", None)
         self.chosen_chunks: torch.Tensor = d["chosen_chunks"]
         self.rejected_chunks: torch.Tensor = d["rejected_chunks"]
         self.chosen_rewards: torch.Tensor = d.get(
@@ -85,7 +87,7 @@ class DPOPairDataset(Dataset):
         return len(self.instructions)
 
     def __getitem__(self, idx: int) -> dict:
-        return {
+        item = {
             "instruction": self.instructions[idx],
             "image": self.images[idx],
             "chosen_chunk": self.chosen_chunks[idx],
@@ -93,10 +95,13 @@ class DPOPairDataset(Dataset):
             "chosen_reward": self.chosen_rewards[idx].item(),
             "rejected_reward": self.rejected_rewards[idx].item(),
         }
+        if self.images_uint8 is not None:
+            item["image_uint8"] = self.images_uint8[idx]
+        return item
 
     @staticmethod
     def collate_fn(batch: list[dict]) -> dict:
-        return {
+        out = {
             "instruction": [b["instruction"] for b in batch],
             "image": torch.stack([b["image"] for b in batch]),
             "chosen_chunk": torch.stack([b["chosen_chunk"] for b in batch]),
@@ -104,6 +109,9 @@ class DPOPairDataset(Dataset):
             "chosen_reward": torch.tensor([b["chosen_reward"] for b in batch]),
             "rejected_reward": torch.tensor([b["rejected_reward"] for b in batch]),
         }
+        if "image_uint8" in batch[0]:
+            out["image_uint8"] = [b["image_uint8"] for b in batch]
+        return out
 
 
 # ---------------------------------------------------------------------- #

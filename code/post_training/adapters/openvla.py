@@ -201,50 +201,90 @@ class OpenVLAAdapter(VLABase):
 
         Args:
             batch: dict with at least
-                "instruction": List[str]   - language instruction per sample
-                "image": (B, 3, H, W) RGB image (current obs)
-                "history_chunks": optional list of past actions in this episode
-                                  to expose to the model as conversation history
-            chunk: (B, T, 7) float actions in continuous units (will be
-                   discretised to bin tokens internally)
+                "instruction": List[str] - language instruction per sample
+                "image_uint8": List[np.ndarray] (preferred) - raw uint8 (H, W, 3)
+                "image": (B, 3, H, W) float tensor in [0, 1] (back-compat)
+            chunk: (B, T, 7) float actions in CONTINUOUS unnormalized
+                   units (i.e. real EE delta — e.g. [-0.5, 0.5] meters).
+                   Internally normalized via stored q01/q99 stats then
+                   discretized into 256 bins matching OpenVLA's
+                   training-time tokenization.
 
         Returns:
-            (B,) log-prob estimate
+            (B,) log-prob estimate. Sum over T*7 action tokens.
+
+        Implementation notes
+        --------------------
+        - Uses teacher-forcing forward (NOT model.generate) so it's
+          unaffected by the transformers >= 4.50 generate degeneration
+          bug that broke select_action.
+        - Inserts the magic token 29871 to match training-time tokenization
+          (same insertion as predict_action and our _manual_greedy_predict_action).
+        - Restricts logits to action-token range when computing log_softmax
+          so the probabilities are over the action vocabulary only,
+          giving more meaningful logp values across (chosen, rejected)
+          pairs in DPO.
         """
         B, T, A = chunk.shape
         assert A == OPENVLA_ACTION_DIM, f"OpenVLA expects 7-DoF actions, got {A}"
 
-        # Discretise chunk into bin tokens. OpenVLA reverses the mapping:
-        # token_id = vocab_size - bin_id_in_[1, 256]
-        # We follow the same convention used in predict_action().
-        chunk_np = chunk.detach().cpu().numpy()
-        # First normalise to [-1, 1] using stored norm stats (assumes batch
-        # is already in continuous action space; if not, caller normalises)
-        bins = np.linspace(-1, 1, OPENVLA_NUM_BINS)
-        bin_centers = (bins[:-1] + bins[1:]) / 2.0
-        # Map each value to nearest bin index
-        bin_ids = np.clip(
-            np.digitize(chunk_np, bins) - 1, 0, OPENVLA_NUM_BINS - 1
-        )                                    # (B, T, 7)
-        token_ids = self.model.vocab_size - 1 - bin_ids   # OpenVLA convention
-        token_ids_t = torch.as_tensor(token_ids, dtype=torch.long, device=self.device)
+        from PIL import Image
 
-        # For each sample, build the full input_ids: [prompt_tokens, action_tokens]
-        # then teacher-force forward and extract log-probs at action positions.
+        # 1. Continuous → bin token via stored q01/q99 (REVERSE of predict_action's
+        #    bin → continuous decode, lines 521-535).
+        stats = self.model.get_action_stats(self.unnorm_key)
+        action_low = np.array(stats["q01"])         # (7,)
+        action_high = np.array(stats["q99"])        # (7,)
+        # Normalize to [-1, 1] (forward of predict_action's
+        # 0.5 * (norm + 1) * (high - low) + low)
+        chunk_np = chunk.detach().cpu().numpy()     # (B, T, 7)
+        # avoid div-by-zero on dims where q99==q01
+        denom = np.where(action_high - action_low > 1e-6,
+                         action_high - action_low, 1.0)
+        normalized = 2 * (chunk_np - action_low) / denom - 1
+        normalized = np.clip(normalized, -1.0, 1.0)
+        # Map to bin index in [0, 255]
+        bin_ids = np.clip(
+            np.digitize(normalized, self.model.bins) - 1,
+            0, OPENVLA_NUM_BINS - 1,
+        )
+        # Token id: predict_action L522 says
+        #   discretized_actions = vocab_size - predicted_action_token_ids
+        # so reverse:
+        #   token_id = vocab_size - bin_id - 1   (bin_id goes 0..255)
+        # but predict_action then clips with `discretized - 1`. Account for the
+        # +1 offset by using bin_id+1 here, matching the inverse map exactly.
+        token_ids_np = self.model.vocab_size - (bin_ids + 1)
+        token_ids_t = torch.as_tensor(token_ids_np, dtype=torch.long, device=self.device)
+
         instructions = batch["instruction"]
-        image = batch["image"].to(self.device)              # (B, 3, H, W)
+        if "image_uint8" in batch:
+            uint8_imgs = batch["image_uint8"]
+        else:
+            uint8_imgs = None
 
         log_probs = []
-        model_dtype = next(self.model.parameters()).dtype
         for b in range(B):
             prompt = self._format_prompt(instructions[b])
-            # OpenVLA processor expects PIL.Image, not Tensor
-            pil_img = self._tensor_to_pil(image[b])
-            inputs = self.processor(prompt, pil_img, return_tensors="pt")
-            input_ids = inputs["input_ids"].to(self.device)
-            # Cast image to model's dtype (bf16) — vision encoder requires match
-            pixel_values = inputs["pixel_values"].to(self.device).to(model_dtype)
+            if uint8_imgs is not None:
+                pil_img = Image.fromarray(uint8_imgs[b]).convert("RGB")
+                pil_img = self._center_crop_and_resize(pil_img, crop_scale=0.9)
+            else:
+                pil_img = self._tensor_to_pil(batch["image"][b])
 
+            inputs = self.processor(prompt, pil_img, return_tensors="pt").to(
+                self.device, dtype=torch.bfloat16
+            )
+            input_ids = inputs["input_ids"]   # (1, L_prompt)
+            pixel_values = inputs["pixel_values"]
+
+            # Insert magic 29871 token (matches predict_action L512-515 and
+            # our _manual_greedy_predict_action)
+            if not torch.all(input_ids[:, -1] == 29871):
+                magic = torch.tensor([[29871]], dtype=input_ids.dtype, device=self.device)
+                input_ids = torch.cat([input_ids, magic], dim=1)
+
+            # Append action tokens for teacher-forcing
             action_tokens_flat = token_ids_t[b].reshape(-1)   # (T*7,)
             full_input = torch.cat(
                 [input_ids[0], action_tokens_flat], dim=0
@@ -256,16 +296,24 @@ class OpenVLAAdapter(VLABase):
                 pixel_values=pixel_values,
                 attention_mask=attention_mask,
             )
-            # outputs.logits: (1, L, V)
-            # We want log p(action_token_i | full_input[:i])
-            # The action tokens are the last T*7 positions.
-            logits = outputs.logits[0]                # (L, V)
+            logits = outputs.logits[0]              # (L, V)
             n_action = action_tokens_flat.numel()
-            # Logits at position i predict token at position i+1; action
-            # tokens are at positions L-n_action..L-1 in full_input,
-            # so prediction logits live at L-n_action-1..L-2.
-            pred_logits = logits[-n_action - 1:-1]    # (n_action, V)
-            log_p_all = torch.log_softmax(pred_logits, dim=-1)
+            # Logits at position i predict token i+1; action tokens are
+            # the last n_action positions of full_input, so the relevant
+            # prediction logits live at positions [L-n_action-1 .. L-2].
+            pred_logits = logits[-n_action - 1: -1]   # (n_action, V)
+
+            # Restrict to action-token range before softmax — same trick
+            # as in _manual_greedy_predict_action. Otherwise the softmax
+            # is dominated by non-action vocabulary positions and the
+            # action-token probabilities become tiny / unstable.
+            n_bins = self.model.bin_centers.shape[0] + 1   # 256
+            allowed_lo = self.model.vocab_size - n_bins
+            mask = torch.full_like(pred_logits, float("-inf"))
+            mask[:, allowed_lo:] = 0.0
+            masked_logits = pred_logits + mask
+
+            log_p_all = torch.log_softmax(masked_logits, dim=-1)
             log_p_actions = log_p_all.gather(
                 dim=-1, index=action_tokens_flat.unsqueeze(-1)
             ).squeeze(-1)                             # (n_action,)

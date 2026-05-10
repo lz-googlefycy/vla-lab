@@ -147,21 +147,31 @@ def run_one_trial(
             img = (img * 255).astype(np.uint8)
         if capture_video:
             frames.append(img.copy())
-        # OpenVLA RLDS resize (tf.lanczos3 + JPEG round-trip). 224 = OpenVLA
-        # model input. Skip resize if env already renders at target size.
+        # OpenVLA RLDS resize (cv2 lanczos4 substitute for tf.lanczos3).
         if img.shape[0] != 224:
             img = _resize_image_rlds(img, 224)
-        img_t = torch.from_numpy(img.copy()).permute(2, 0, 1).float() / 255.0
+        img_uint8 = img.copy()
+        img_t = torch.from_numpy(img_uint8).permute(2, 0, 1).float() / 255.0
 
+        # Pass BOTH float tensor (back-compat) and raw uint8 ndarray
+        # (preferred by OpenVLA adapter — avoids float→uint8 round-trip
+        # quantisation that OOD's the visual encoder).
         batch = {
             "instruction": [instruction],
             "image": img_t.unsqueeze(0),
+            "image_uint8": [img_uint8],
         }
         with torch.no_grad():
             chunk = adapter.select_action(batch)
         action = chunk.squeeze(0).squeeze(0).cpu().numpy()
-        # Normalize gripper
-        action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+
+        # Gripper handling: OpenVLA → invert sign for LIBERO (see rollout.py).
+        # Other bases: simple binarisation.
+        if hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "openvla":
+            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+            action[-1] = -action[-1]
+        else:
+            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
 
         try:
             obs, _, done, _ = env.step(action.tolist())
