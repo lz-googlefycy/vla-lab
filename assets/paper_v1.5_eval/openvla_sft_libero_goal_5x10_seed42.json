@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_goal": {
+      "rate": 0.82,
+      "success": 41,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "open the middle drawer of the cabinet",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        },
+        "1": {
+          "task": "put the bowl on the stove",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "2": {
+          "task": "put the wine bottle on top of the cabinet",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "3": {
+          "task": "open the top drawer and put the bowl inside",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        },
+        "4": {
+          "task": "put the bowl on top of the cabinet",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "push the plate to the front of the stove",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "6": {
+          "task": "put the cream cheese in the bowl",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "7": {
+          "task": "turn on the stove",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "put the bowl on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "9": {
+          "task": "put the wine bottle on the rack",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        }
+      }
+    }
+  },
+  "overall_avg": 0.82,
+  "meta": {
+    "base": "openvla",
+    "base_ckpt": "/model",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_goal"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 7589.1882429122925
+  }
+}
