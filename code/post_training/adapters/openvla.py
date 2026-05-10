@@ -317,7 +317,11 @@ class OpenVLAAdapter(VLABase):
             log_p_actions = log_p_all.gather(
                 dim=-1, index=action_tokens_flat.unsqueeze(-1)
             ).squeeze(-1)                             # (n_action,)
-            log_probs.append(log_p_actions.sum())
+            # MEAN, not sum — long chunks (220×7 tokens) blow up DPO margin
+            # to ±100 scale otherwise. Mean keeps the per-token-log-prob
+            # signal stable across different chunk lengths and enables
+            # numerically reasonable margin diffs.
+            log_probs.append(log_p_actions.mean())
 
         return torch.stack(log_probs)
 
@@ -599,7 +603,9 @@ class OpenVLAAdapter(VLABase):
           2. Fall back to HuggingFace dynamic module download. Requires
              internet on first use.
         """
-        # Strategy 1: patch via local openvla source (offline)
+        # Strategy 1: patch via local openvla source (offline).
+        # Wrap broadly — prismatic's overwatch init pulls in `rich` and
+        # other heavy deps that may not be installed in our docker image.
         try:
             from prismatic.extern.hf.modeling_prismatic import (
                 PrismaticPreTrainedModel,
@@ -614,24 +620,26 @@ class OpenVLAAdapter(VLABase):
                 type.__setattr__(cls, "_supports_sdpa", False)
                 type.__setattr__(cls, "_supports_flash_attn_2", False)
                 type.__setattr__(cls, "_supports_attention_backend", False)
-        except ImportError:
-            # Strategy 2: HF dynamic module (online)
-            try:
-                from transformers.dynamic_module_utils import get_class_from_dynamic_module
-                for cls_name in (
-                    "modeling_prismatic.OpenVLAForActionPrediction",
-                    "modeling_prismatic.PrismaticForConditionalGeneration",
-                    "modeling_prismatic.PrismaticPreTrainedModel",
-                ):
-                    try:
-                        cls = get_class_from_dynamic_module(cls_name, "openvla/openvla-7b")
-                        type.__setattr__(cls, "_supports_sdpa", False)
-                        type.__setattr__(cls, "_supports_flash_attn_2", False)
-                        type.__setattr__(cls, "_supports_attention_backend", False)
-                    except Exception:
-                        continue
-            except Exception:
-                pass
+        except Exception:
+            pass
+
+        # Strategy 2: HF dynamic module (online — first use only)
+        try:
+            from transformers.dynamic_module_utils import get_class_from_dynamic_module
+            for cls_name in (
+                "modeling_prismatic.OpenVLAForActionPrediction",
+                "modeling_prismatic.PrismaticForConditionalGeneration",
+                "modeling_prismatic.PrismaticPreTrainedModel",
+            ):
+                try:
+                    cls = get_class_from_dynamic_module(cls_name, "openvla/openvla-7b")
+                    type.__setattr__(cls, "_supports_sdpa", False)
+                    type.__setattr__(cls, "_supports_flash_attn_2", False)
+                    type.__setattr__(cls, "_supports_attention_backend", False)
+                except Exception:
+                    continue
+        except Exception:
+            pass
 
         # Strategy 3 (offline-friendly): import dynamic-module cache.
         # HF stores cache at ~/.cache/huggingface/modules/transformers_modules/.
