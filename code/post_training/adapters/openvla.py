@@ -592,24 +592,86 @@ class OpenVLAAdapter(VLABase):
         Fix: forcibly replace the @property on PrismaticPreTrainedModel
         with a plain class attribute False. Subclasses then inherit the
         plain attribute. Idempotent.
+
+        Two-step strategy (in order):
+          1. Try local openvla source (PYTHONPATH must include the
+             openvla repo). Works offline.
+          2. Fall back to HuggingFace dynamic module download. Requires
+             internet on first use.
         """
+        # Strategy 1: patch via local openvla source (offline)
         try:
-            from transformers.dynamic_module_utils import get_class_from_dynamic_module
-            for cls_name in (
-                "modeling_prismatic.OpenVLAForActionPrediction",
-                "modeling_prismatic.PrismaticForConditionalGeneration",
-                "modeling_prismatic.PrismaticPreTrainedModel",
+            from prismatic.extern.hf.modeling_prismatic import (
+                PrismaticPreTrainedModel,
+                PrismaticForConditionalGeneration,
+                OpenVLAForActionPrediction,
+            )
+            for cls in (
+                PrismaticPreTrainedModel,
+                PrismaticForConditionalGeneration,
+                OpenVLAForActionPrediction,
             ):
-                try:
-                    cls = get_class_from_dynamic_module(cls_name, "openvla/openvla-7b")
-                    # Forcibly replace property descriptor (if any) with
-                    # a plain class attribute. type.__setattr__ avoids
-                    # the property's __set__ being invoked.
-                    type.__setattr__(cls, "_supports_sdpa", False)
-                    type.__setattr__(cls, "_supports_flash_attn_2", False)
-                    type.__setattr__(cls, "_supports_attention_backend", False)
-                except Exception:
-                    continue
+                type.__setattr__(cls, "_supports_sdpa", False)
+                type.__setattr__(cls, "_supports_flash_attn_2", False)
+                type.__setattr__(cls, "_supports_attention_backend", False)
+        except ImportError:
+            # Strategy 2: HF dynamic module (online)
+            try:
+                from transformers.dynamic_module_utils import get_class_from_dynamic_module
+                for cls_name in (
+                    "modeling_prismatic.OpenVLAForActionPrediction",
+                    "modeling_prismatic.PrismaticForConditionalGeneration",
+                    "modeling_prismatic.PrismaticPreTrainedModel",
+                ):
+                    try:
+                        cls = get_class_from_dynamic_module(cls_name, "openvla/openvla-7b")
+                        type.__setattr__(cls, "_supports_sdpa", False)
+                        type.__setattr__(cls, "_supports_flash_attn_2", False)
+                        type.__setattr__(cls, "_supports_attention_backend", False)
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        # Strategy 3 (offline-friendly): import dynamic-module cache.
+        # HF stores cache at ~/.cache/huggingface/modules/transformers_modules/.
+        # We add it to sys.path, then import openvla* modules and patch their
+        # PrismaticPreTrainedModel / Prismatic / OpenVLA classes.
+        try:
+            import importlib
+            cache_root = Path.home() / ".cache" / "huggingface" / "modules"
+            tm_root = cache_root / "transformers_modules"
+            if tm_root.exists():
+                # Make transformers_modules importable as a top-level package
+                cache_root_str = str(cache_root)
+                if cache_root_str not in sys.path:
+                    sys.path.insert(0, cache_root_str)
+                for entry in tm_root.iterdir():
+                    if not entry.is_dir():
+                        continue
+                    name = entry.name
+                    if "-" in name:  # hyphenated mirror, can't import
+                        continue
+                    if "openvla" not in name.lower():
+                        continue
+                    if not (entry / "modeling_prismatic.py").exists():
+                        continue
+                    dotted = f"transformers_modules.{name}.modeling_prismatic"
+                    try:
+                        mod = importlib.import_module(dotted)
+                    except Exception:
+                        continue
+                    for cls_name in (
+                        "PrismaticPreTrainedModel",
+                        "PrismaticForConditionalGeneration",
+                        "OpenVLAForActionPrediction",
+                    ):
+                        cls = getattr(mod, cls_name, None)
+                        if cls is None:
+                            continue
+                        type.__setattr__(cls, "_supports_sdpa", False)
+                        type.__setattr__(cls, "_supports_flash_attn_2", False)
+                        type.__setattr__(cls, "_supports_attention_backend", False)
         except Exception:
             pass
 
