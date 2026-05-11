@@ -162,6 +162,14 @@ def parse_args():
     p.add_argument("--pairs_file", required=True,
                    help="Pre-collected DPO pair dataset (.pt)")
     p.add_argument("--output_dir", required=True)
+    p.add_argument(
+        "--max_chunk_len",
+        type=int,
+        default=0,
+        help="Truncate chunks to at most this many steps (0 = no truncation). "
+             "Use 220 for Goal/Long10 on H20-144GB to avoid OOM "
+             "(Spatial pairs are already 220, Goal/Long10 rollouts are 300).",
+    )
 
     # Training
     p.add_argument("--batch_size", type=int, default=2)
@@ -226,6 +234,21 @@ def main():
     # Build dataset
     dataset = DPOPairDataset(args.pairs_file)
     print(f"[data] {len(dataset)} DPO pairs from {args.pairs_file}")
+
+    # Optional chunk truncation (avoid OOM on longer rollouts like Goal/Long10)
+    if args.max_chunk_len > 0:
+        T_before = dataset.chosen_chunks.shape[1]
+        if T_before > args.max_chunk_len:
+            dataset.chosen_chunks = dataset.chosen_chunks[:, : args.max_chunk_len]
+            dataset.rejected_chunks = dataset.rejected_chunks[:, : args.max_chunk_len]
+            print(
+                f"[data] truncated chunks: T={T_before} -> {args.max_chunk_len} "
+                f"(--max_chunk_len)"
+            )
+        else:
+            print(
+                f"[data] --max_chunk_len={args.max_chunk_len} >= current T={T_before}, no truncation"
+            )
 
     dl = DataLoader(
         dataset, batch_size=cfg.batch_size, shuffle=True,
