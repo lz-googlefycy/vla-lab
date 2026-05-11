@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_10": {
+      "rate": 0.6,
+      "success": 30,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "put both the alphabet soup and the tomato sauce in the basket",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "1": {
+          "task": "put both the cream cheese box and the butter in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "2": {
+          "task": "turn on the stove and put the moka pot on it",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        },
+        "3": {
+          "task": "put the black bowl in the bottom drawer of the cabinet and close it",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        },
+        "4": {
+          "task": "put the white mug on the left plate and put the yellow and white mug on the right plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "pick up the book and place it in the back compartment of the caddy",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "6": {
+          "task": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "7": {
+          "task": "put both the alphabet soup and the cream cheese box in the basket",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        },
+        "8": {
+          "task": "put both moka pots on the stove",
+          "success": 0,
+          "trials": 5,
+          "rate": 0.0
+        },
+        "9": {
+          "task": "put the yellow and white mug in the microwave and close it",
+          "success": 2,
+          "trials": 5,
+          "rate": 0.4
+        }
+      }
+    }
+  },
+  "overall_avg": 0.6,
+  "meta": {
+    "base": "openvla",
+    "base_ckpt": "/model",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_10"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 17906.80301785469
+  }
+}
