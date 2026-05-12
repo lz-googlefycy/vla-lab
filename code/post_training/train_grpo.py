@@ -114,8 +114,10 @@ def grpo_step_rollout(
     """
     from .rollout import rollout_one_episode, compute_episode_reward, RolloutConfig
 
+    # LIBERO suite key normalisation (long10 → 10 in the benchmark dict)
+    _suite_short = "10" if cfg.libero_suite == "long10" else cfg.libero_suite
     rcfg = RolloutConfig(
-        suite=f"libero_{cfg.libero_suite}",
+        suite=f"libero_{_suite_short}",
         n_candidates_per_init=group_size,
         sample_temperature=1.0,
         deterministic_first=False,    # for GRPO all K should be stochastic
@@ -247,7 +249,9 @@ def main():
     from libero.libero import benchmark, get_libero_path
     from libero.libero.envs import OffScreenRenderEnv
 
-    suite_name = f"libero_{cfg.libero_suite}"
+    # LIBERO benchmark dict uses "libero_10" (not "libero_long10"); normalise.
+    _suite_short = "10" if cfg.libero_suite == "long10" else cfg.libero_suite
+    suite_name = f"libero_{_suite_short}"
     bench = benchmark.get_benchmark_dict()
     task_suite = bench[suite_name]()
     task_pool = []
