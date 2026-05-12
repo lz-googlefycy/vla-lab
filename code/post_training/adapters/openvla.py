@@ -134,6 +134,31 @@ class OpenVLAAdapter(VLABase):
 
         self.reference_state_dict: dict[str, torch.Tensor] | None = None
 
+        # Gradient checkpointing — trade recompute time for ~40% less activation
+        # memory. Required to fit GRPO on 96 GB H20 because policy_logp_with_ref
+        # does TWO forwards (current + ref) back-to-back and holds current's
+        # activations in autograd graph until backward(). Without this, Spatial
+        # GRPO OOMs at step 0 softmax (~93 GB used of 95 GB total).
+        # Enable on the Llama language model only (vision encoder is small).
+        lm = getattr(self.model, "language_model", None)
+        if lm is not None and hasattr(lm, "gradient_checkpointing_enable"):
+            lm.gradient_checkpointing_enable(
+                gradient_checkpointing_kwargs={"use_reentrant": False}
+            )
+            # gradient checkpointing needs use_cache=False on the backing config
+            lm_cfg = getattr(lm, "config", None)
+            if lm_cfg is not None:
+                lm_cfg.use_cache = False
+            # Input IDs are integers (no grad); but with LoRA only a small
+            # subset of weights requires_grad. gradient checkpointing needs at
+            # least one input tensor with requires_grad=True, so enable input
+            # require_grads on the embedding layer output.
+            if hasattr(lm, "enable_input_require_grads"):
+                lm.enable_input_require_grads()
+            elif hasattr(self.model, "enable_input_require_grads"):
+                self.model.enable_input_require_grads()
+            print("[openvla-adapter] gradient checkpointing enabled on language_model")
+
     # --------------- private helpers --------------- #
 
     def _infer_unnorm_key(self) -> str:
