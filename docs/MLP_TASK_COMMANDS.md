@@ -1,52 +1,66 @@
-# MLP 单卡任务启动命令清单（每 cell 一条，世纪互联 8×H20 96GB）
+# MLP 单卡任务启动命令清单（最终版，dev pod 数据已就绪）
 
-## 📦 镜像地址（MLP 任务选这一个）
+> 状态：2026-05-13 00:35 · **所有资源已在 `/e2e-data/users/liuzhi7/` 就位**。
+> 你只需在 MLP 控制台新建任务，填镜像 + 挂载 + 这里的启动命令。
+
+---
+
+## 📦 镜像地址（MLP 任务三选一）
 
 ```
 evad-ml-cn-bjdb-1-vecps.cr.cloud.vnet.com/infra_public/planning:vla-lab-v1.0-cu128-py311
 ```
 
-digest: `sha256:4ac541a377810e6bd5af7620b21e8b5428103493afe7e0192a8c5929179f1d7d`
-
-备选（同内容，任选一个能 pull 的）：
+备选：
 - `micr.cloud.mioffice.cn/world-model-lyk/planningmodel:vla-lab-v1.0-cu128-py311`
 - `test-lab-instance-cn-beijing.cr.volces.com/evad-infra-compute/planningmodel:vla-lab-v1.0-cu128-py311`
 
+三者 digest 一致：`sha256:4ac541a377810e6bd5af7620b21e8b5428103493afe7e0192a8c5929179f1d7d`
+
 ---
 
-## 🔧 挂载 / 前置配置（所有任务通用）
+## 🗂️ 挂载（每个任务统一）
 
-从 MLP 任务配置里挂载共享盘，把：
+在 MLP 任务的"数据挂载"配置：
+
 ```
 /e2e-data/users/liuzhi7  →  /workspace_data
 ```
-（或者 MLP 默认已挂载，用你熟悉的写法即可）
 
-所有任务的**共用环境变量**：
-```
-PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
-MUJOCO_GL=osmesa
-PYOPENGL_PLATFORM=osmesa
-HF_HUB_OFFLINE=1
-TRANSFORMERS_OFFLINE=1
-PYTHONUNBUFFERED=1
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-```
+（你起 TrajFlow 任务时用的数据挂载一样）
 
-所有任务单卡：`nproc_per_node=1`, 或 MLP UI 选 1 GPU 就行（不要 torch.distributed.run，代码没 DDP）。
+**已就绪的数据** `/e2e-data/users/liuzhi7/`：
+
+| 路径 | 内容 |
+|---|---|
+| `ro_planning/` | 代码（最新 commit `1ea4120`，含 --max_chunk_len）|
+| `vla_workspace/models/openvla-7b-finetuned-libero-{spatial,object,goal,10}/` | 4 × 15GB，已 patched |
+| `vla_workspace/datasets/openvla_{spatial,object,goal,long10}_pairs.pt` | 4 × ~60MB DPO pairs |
+| `vla_workspace/output/h20_dpo_{spatial,object,goal,long10}/checkpoint-500.pt` | 4 × 67MB DPO ckpts |
+| `vla_workspace/openvla/` | OpenVLA 源码 |
 
 ---
 
-## 🎯 批 D — multi-seed eval (最简单，已有 DPO ckpt)
+## 🎯 批 D — DPO multi-seed eval × 4 suite（paper §4.2 noise band）
 
-**目的**：给 Spatial+Object DPO 补 seed 1337+2026，4 suite 全齐 3-seed paper-grade noise band。
-**依赖**：`vla_workspace/output/h20_dpo_{spatial,object}/checkpoint-500.pt`（需要从 cloudml 额外拷进来，见 § 附录 B）
-**时长**：Spatial ~2.5h，Object ~4.2h。**建议 2 个单卡任务并行。**
+**目的**：给 paper §4.2 的 4 个 DPO cells 每个补 seed 1337 + 2026，消除单 seed 攻击。
+**依赖**：都在 dev pod ✅
+**时间**：Spatial 2.5h, Object 4.2h, Goal 3.7h, Long10 6.2h。4 个单卡任务并行。
+**回收**：结果写到 `/workspace_data/vla_workspace/output/h20_dpo_{suite}_eval_multiseed/`
 
-### 任务 D-1: Spatial DPO multi-seed eval
+---
+
+### 任务 D-1: Spatial DPO multi-seed（~2.5h）
 
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
@@ -54,12 +68,20 @@ python -m post_training.eval_libero \
     --suites libero_spatial \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
     --output_dir /workspace_data/vla_workspace/output/h20_dpo_spatial_eval_multiseed
+'
 ```
 
-### 任务 D-2: Object DPO multi-seed eval
+### 任务 D-2: Object DPO multi-seed（~4.2h）
 
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
@@ -67,20 +89,80 @@ python -m post_training.eval_libero \
     --suites libero_object \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
     --output_dir /workspace_data/vla_workspace/output/h20_dpo_object_eval_multiseed
+'
 ```
+
+### 任务 D-3: Goal DPO multi-seed（~3.7h，cloudml 正在跑 seed 42 已有；这里补 1337 2026）
+
+```bash
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+python -m post_training.eval_libero \
+    --base openvla \
+    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
+    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_goal/checkpoint-500.pt \
+    --suites libero_goal \
+    --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
+    --output_dir /workspace_data/vla_workspace/output/h20_dpo_goal_eval_multiseed
+'
+```
+
+**注意**：cloudml 正在跑这个，可以**跳过 D-3**免得重复。
+
+### 任务 D-4: Long10 DPO multi-seed（~6.2h）
+
+```bash
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+python -m post_training.eval_libero \
+    --base openvla \
+    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
+    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_long10/checkpoint-500.pt \
+    --suites libero_10 \
+    --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
+    --output_dir /workspace_data/vla_workspace/output/h20_dpo_long10_eval_multiseed
+'
+```
+
+**注意**：cloudml 正在跑这个，**跳过 D-4** 免得重复。
+
+**推荐起 D-1 + D-2**（Spatial + Object, 2 个任务，世纪互联承担；Goal + Long10 cloudml 承担）。
 
 ---
 
-## ⭐⭐ 批 B — OpenVLA × GRPO × 4 suite (paper §4.2 整行新数据)
+## ⭐⭐ 批 B — OpenVLA × GRPO × 4 suite（paper §4.2 整行新数据）
 
-**目的**：填 paper §4.2 OpenVLA + GRPO 这一整行。和 DPO 对照，验证 "on-policy 是否能救 DPO 在强 baseline 上的退步"。
-**依赖**：只需 `pairs.pt`（已在 dev pod）+ OpenVLA SFT ckpt（已在 dev pod）
-**时长**：每 cell 约 4-5h（on-policy rollout 是瓶颈），**建议 4 个单卡任务并行**，~4-5h 全完。
+**目的**：paper §4.2 OpenVLA + GRPO 这一整行（和 DPO 对照）。
+**依赖**：SFT ckpt + pair data 全在 dev pod ✅
+**时间**：每 cell ~4-5h（on-policy rollout），4 个单卡并行 → 4-5h 总
+**注意**：GRPO 是 on-policy，**不用 pairs file**，实时 rollout，但 LIBERO env 需要 mujoco 渲染
 
-### 任务 B-1: Spatial GRPO
+---
+
+### 任务 B-1: Spatial GRPO train + eval
 
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# Stage 1: GRPO train
 python -m post_training.train_grpo \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
@@ -91,7 +173,9 @@ python -m post_training.train_grpo \
     --batch_size 1 --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2 && \
+    --grpo_beta 0.1 --grpo_epsilon 0.2
+
+# Stage 2: eval
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
@@ -99,12 +183,22 @@ python -m post_training.eval_libero \
     --suites libero_spatial \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_spatial_eval
+'
 ```
 
 ### 任务 B-2: Object GRPO
 
+同 B-1，把 `spatial`→`object`, `libero_spatial`→`libero_object`。完整命令：
+
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python -m post_training.train_grpo \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
@@ -115,7 +209,8 @@ python -m post_training.train_grpo \
     --batch_size 1 --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2 && \
+    --grpo_beta 0.1 --grpo_epsilon 0.2
+
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
@@ -123,12 +218,20 @@ python -m post_training.eval_libero \
     --suites libero_object \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_object_eval
+'
 ```
 
 ### 任务 B-3: Goal GRPO
 
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python -m post_training.train_grpo \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
@@ -139,7 +242,8 @@ python -m post_training.train_grpo \
     --batch_size 1 --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2 && \
+    --grpo_beta 0.1 --grpo_epsilon 0.2
+
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
@@ -147,12 +251,20 @@ python -m post_training.eval_libero \
     --suites libero_goal \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_goal_eval
+'
 ```
 
 ### 任务 B-4: Long10 GRPO
 
 ```bash
-cd /workspace_data/ro_planning/code && \
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python -m post_training.train_grpo \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
@@ -163,7 +275,8 @@ python -m post_training.train_grpo \
     --batch_size 1 --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2 && \
+    --grpo_beta 0.1 --grpo_epsilon 0.2
+
 python -m post_training.eval_libero \
     --base openvla \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
@@ -171,71 +284,75 @@ python -m post_training.eval_libero \
     --suites libero_10 \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_long10_eval
+'
 ```
 
 ---
 
-## 附录 A: 起任务前 sanity check（在 dev pod 4321 上跑一次，验证一切就绪）
+## 📋 推荐起任务顺序
 
-```bash
-# ssh -p 4321 root@<dev_pod>
-docker run --rm --gpus '"device=0"' \
-    -v /e2e-data/users/liuzhi7/ro_planning:/workspace_data/ro_planning:ro \
-    -v /e2e-data/users/liuzhi7/vla_workspace:/workspace_data/vla_workspace \
-    -e PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla \
-    -e MUJOCO_GL=osmesa -e PYOPENGL_PLATFORM=osmesa \
-    -e HF_HUB_OFFLINE=1 -e TRANSFORMERS_OFFLINE=1 -e PYTHONUNBUFFERED=1 \
-    evad-ml-cn-bjdb-1-vecps.cr.cloud.vnet.com/infra_public/planning:vla-lab-v1.0-cu128-py311 \
-    python -m post_training.eval_libero \
-        --base openvla \
-        --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
-        --suites libero_spatial \
-        --n_tasks 1 --n_trials_per_task 5 --seeds 42 \
-        --output_dir /workspace_data/vla_workspace/output/sanity_test
-```
+### 今晚起（6 任务 = 6 张 H20）
 
-期望：**4-5/5 success** on the one task（验证 ckpt + patch + env 全 OK）。
+| # | 任务 | 时长 | 用途 |
+|---|---|---|---|
+| 1 | D-1 Spatial DPO multi-seed | 2.5h | noise band |
+| 2 | D-2 Object DPO multi-seed | 4.2h | noise band |
+| 3 | B-1 Spatial GRPO | 4-5h | paper §4.2 新行 |
+| 4 | B-2 Object GRPO | 4-5h | paper §4.2 新行 |
+| 5 | B-3 Goal GRPO | 4-5h | paper §4.2 新行 |
+| 6 | B-4 Long10 GRPO | 4-5h | paper §4.2 新行 |
+
+**D-3 / D-4（Goal/Long10 DPO multi-seed）** cloudml 上已经在跑，不用世纪互联重复。
+
+早上（~5-6h 后）所有任务应该都完成。
 
 ---
 
-## 附录 B: 补充 DPO ckpt（批 D 需要）
+## 🧪 Sanity check（可选，起正式任务前验证一次）
 
-批 D 需要 `h20_dpo_{spatial,object}/checkpoint-500.pt`，目前在 cloudml 上。转运方法（和 ckpt 同一路子，cloudml→本机→dev pod）：
+先起一个 1 task × 5 trial 的快速测试（~3 min）确认镜像+挂载+代码路径都对：
 
 ```bash
-# 在本机跑：
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+
+python -m post_training.eval_libero \
+    --base openvla \
+    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
+    --suites libero_spatial \
+    --n_tasks 1 --n_trials_per_task 5 --seeds 42 \
+    --output_dir /workspace_data/vla_workspace/output/sanity_test
+'
+```
+
+期望：**4-5/5 success** on task 0 → 一切通路 OK，起正式任务。
+
+---
+
+## ⚠️ 已知坑
+
+1. **OOM**：`--max_chunk_len 180` 已是 96GB H20 的保守值。如果 Object/Goal/Long10 GRPO 还 OOM，降到 150
+2. **PYTHONUNBUFFERED=1 必须**：不然 log 不出东西看似 hang
+3. **GRPO K=2**：H20 96GB 跑不动 K=4（显存 2× 不够）
+4. **LIBERO env 初始化第一次慢**：3-5 min 加载 BDDL + MuJoCo，之后每 task 快
+
+---
+
+## 📊 任务完成后我这边做什么
+
+你 MLP 任务跑完，我从 dev pod rsync 回本机 → 合进 paper `§4.2`：
+
+```bash
+# 我会在本机跑：
 for S in spatial object goal long10; do
-  mkdir -p /tmp/dpo_ckpt_transit/h20_dpo_$S
-  scp -P 4163 -o StrictHostKeyChecking=no \
-      root@127.0.0.1:/ad-alg/planning-users/liuzhi7/ro_planning/output/h20_dpo_$S/checkpoint-500.pt \
-      /tmp/dpo_ckpt_transit/h20_dpo_$S/checkpoint-500.pt
-  scp -rp -P 4321 -o StrictHostKeyChecking=no \
-      /tmp/dpo_ckpt_transit/h20_dpo_$S \
-      root@127.0.0.1:/e2e-data/users/liuzhi7/vla_workspace/output/
+  scp -rp -P 4321 root@127.0.0.1:/e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_${S}_eval_multiseed \
+      /tmp/; cp -r /tmp/h20_dpo_${S}_eval_multiseed \
+      ~/ro_planning/assets/paper_v1.5_eval/
+  # 同理 GRPO
 done
+# 然后重新生成 chart + 更新 paper skeleton + push 公开仓
 ```
-
-每个 67 MB，4 个共 268 MB，几分钟搞定。
-
----
-
-## 附录 C: 已有资源清单（dev pod /e2e-data/users/liuzhi7）
-
-| 路径 | 内容 | 大小 |
-|---|---|---|
-| `ro_planning/` | 代码（已 pull 最新 commit 1ea4120，含 --max_chunk_len）| ~500 MB |
-| `vla_workspace/datasets/openvla_{spatial,object,goal,long10}_pairs.pt` | DPO pair data | 4 × ~60 MB |
-| `vla_workspace/models/openvla-7b-finetuned-libero-{spatial,object,goal,10}/` | SFT ckpt，全 patched | 4 × 15 GB |
-| `vla_workspace/openvla/` | OpenVLA 源码（从 cloudml 拷）| ~50 MB |
-
-Docker image 会在每个 MLP 任务启动时 pull（有 `~/.docker/config.json` 凭证）。
-
----
-
-## 推荐起任务顺序
-
-1. **先起批 D**（2 个单卡任务）：简单、快、保险。约 4.2h 全完。
-2. **批 D 跑着的时候起批 B**（4 个单卡任务）：8×H20 恰好 2+4=6 卡占掉，留 2 卡备用。
-3. 所有跑完后，我这边（cloudml + 本机）把所有结果 scp 回来合并进 paper §4.2。
-
-**总预估**：批 D (4.2h) + 批 B (4-5h) = **明早所有 cell 全完**。
