@@ -24,7 +24,7 @@ evad-ml-cn-bjdb-1-vecps.cr.cloud.vnet.com/infra_public/planning:vla-lab-v1.0-cu1
 在 MLP 任务的"数据挂载"配置：
 
 ```
-/e2e-data/users/liuzhi7  →  /workspace_data
+/e2e-data/users/liuzhi7 (MLP pod 原生路径，无需 volume 改名)
 ```
 
 （你起 TrajFlow 任务时用的数据挂载一样）
@@ -46,7 +46,7 @@ evad-ml-cn-bjdb-1-vecps.cr.cloud.vnet.com/infra_public/planning:vla-lab-v1.0-cu1
 **目的**：给 paper §4.2 的 4 个 DPO cells 每个补 seed 1337 + 2026，消除单 seed 攻击。
 **依赖**：都在 dev pod ✅
 **时间**：Spatial 2.5h, Object 4.2h, Goal 3.7h, Long10 6.2h。4 个单卡任务并行。
-**回收**：结果写到 `/workspace_data/vla_workspace/output/h20_dpo_{suite}_eval_multiseed/`
+**回收**：结果写到 `/e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_{suite}_eval_multiseed/`
 
 ---
 
@@ -55,19 +55,19 @@ evad-ml-cn-bjdb-1-vecps.cr.cloud.vnet.com/infra_public/planning:vla-lab-v1.0-cu1
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_spatial/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_spatial/checkpoint-500.pt \
     --suites libero_spatial \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
-    --output_dir /workspace_data/vla_workspace/output/h20_dpo_spatial_eval_multiseed
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_spatial_eval_multiseed
 '
 ```
 
@@ -76,19 +76,19 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_object/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-object \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_object/checkpoint-500.pt \
     --suites libero_object \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
-    --output_dir /workspace_data/vla_workspace/output/h20_dpo_object_eval_multiseed
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_object_eval_multiseed
 '
 ```
 
@@ -97,19 +97,19 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_goal/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-goal \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_goal/checkpoint-500.pt \
     --suites libero_goal \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
-    --output_dir /workspace_data/vla_workspace/output/h20_dpo_goal_eval_multiseed
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_goal_eval_multiseed
 '
 ```
 
@@ -120,19 +120,19 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_dpo_long10/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-10 \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_long10/checkpoint-500.pt \
     --suites libero_10 \
     --n_tasks 10 --n_trials_per_task 5 --seeds 1337 2026 \
-    --output_dir /workspace_data/vla_workspace/output/h20_dpo_long10_eval_multiseed
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_dpo_long10_eval_multiseed
 '
 ```
 
@@ -156,8 +156,8 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
@@ -165,9 +165,9 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # Stage 1: GRPO train
 python -m post_training.train_grpo \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
     --suite spatial \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_spatial \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_spatial \
     --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
     --max_steps 500 --warmup 50 \
@@ -178,11 +178,11 @@ python -m post_training.train_grpo \
 # Stage 2: eval
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_grpo_spatial/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_spatial/checkpoint-500.pt \
     --suites libero_spatial \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_spatial_eval
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_spatial_eval
 '
 ```
 
@@ -193,17 +193,17 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.train_grpo \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-object \
     --suite object \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_object \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_object \
     --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
     --max_steps 500 --warmup 50 \
@@ -213,11 +213,11 @@ python -m post_training.train_grpo \
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_grpo_object/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-object \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_object/checkpoint-500.pt \
     --suites libero_object \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_object_eval
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_object_eval
 '
 ```
 
@@ -226,17 +226,17 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.train_grpo \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-goal \
     --suite goal \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_goal \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_goal \
     --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
     --max_steps 500 --warmup 50 \
@@ -246,11 +246,11 @@ python -m post_training.train_grpo \
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_grpo_goal/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-goal \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_goal/checkpoint-500.pt \
     --suites libero_goal \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_goal_eval
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_goal_eval
 '
 ```
 
@@ -259,17 +259,17 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python -m post_training.train_grpo \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-10 \
     --suite long10 \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_long10 \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_long10 \
     --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
     --max_steps 500 --warmup 50 \
@@ -279,11 +279,11 @@ python -m post_training.train_grpo \
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
-    --lora_ckpt /workspace_data/vla_workspace/output/h20_grpo_long10/checkpoint-500.pt \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-10 \
+    --lora_ckpt /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_long10/checkpoint-500.pt \
     --suites libero_10 \
     --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
-    --output_dir /workspace_data/vla_workspace/output/h20_grpo_long10_eval
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_long10_eval
 '
 ```
 
@@ -315,17 +315,17 @@ python -m post_training.eval_libero \
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 
 python -m post_training.eval_libero \
     --base openvla \
-    --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
     --suites libero_spatial \
     --n_tasks 1 --n_trials_per_task 5 --seeds 42 \
-    --output_dir /workspace_data/vla_workspace/output/sanity_test
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/sanity_test
 '
 ```
 
@@ -366,14 +366,14 @@ done
 ```bash
 bash -c '
 set -euo pipefail
-cd /workspace_data/ro_planning/code
-export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+cd /e2e-data/users/liuzhi7/ro_planning/code
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openvla
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 
 # Just load the model + compute one logp. ~30s, no mujoco.
 python -c "
-import sys; sys.path.insert(0, \"/workspace_data/ro_planning/code\")
-import os; os.environ[\"OPENVLA_CKPT\"] = \"/workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial\"
+import sys; sys.path.insert(0, \"/e2e-data/users/liuzhi7/ro_planning/code\")
+import os; os.environ[\"OPENVLA_CKPT\"] = \"/e2e-data/users/liuzhi7/vla_workspace/models/openvla-7b-finetuned-libero-spatial\"
 from post_training.debug_logp import main
 main()
 "
