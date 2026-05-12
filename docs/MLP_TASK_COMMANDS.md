@@ -356,3 +356,29 @@ for S in spatial object goal long10; do
 done
 # 然后重新生成 chart + 更新 paper skeleton + push 公开仓
 ```
+
+---
+
+## ⚡ 30-秒 smoke test（MLP 任务起来先跑这个）
+
+如果你想在起正式任务前最快验证镜像+挂载没问题：
+
+```bash
+bash -c '
+set -euo pipefail
+cd /workspace_data/ro_planning/code
+export PYTHONPATH=/workspace_data/ro_planning/code:/workspace_data/vla_workspace/openvla
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+
+# Just load the model + compute one logp. ~30s, no mujoco.
+python -c "
+import sys; sys.path.insert(0, \"/workspace_data/ro_planning/code\")
+import os; os.environ[\"OPENVLA_CKPT\"] = \"/workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial\"
+from post_training.debug_logp import main
+main()
+"
+'
+```
+
+期望：最后一行 `Done. (At step 0 of training, cur ≈ ref because LoRA init is 0.)`
+意思：ckpt + code + openvla src + GPU 全 OK，可以起正式任务。
