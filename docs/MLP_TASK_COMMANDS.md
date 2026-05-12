@@ -168,12 +168,12 @@ python -m post_training.train_grpo \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-spatial \
     --suite spatial \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_spatial \
-    --n_rollout_tasks 10 --n_inits_per_task 3 --k_samples 2 \
+    --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
-    --batch_size 1 --max_steps 500 --warmup 50 \
+    --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2
+    --beta 0.1 --epsilon 0.2
 
 # Stage 2: eval
 python -m post_training.eval_libero \
@@ -204,12 +204,12 @@ python -m post_training.train_grpo \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-object \
     --suite object \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_object \
-    --n_rollout_tasks 10 --n_inits_per_task 3 --k_samples 2 \
+    --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
-    --batch_size 1 --max_steps 500 --warmup 50 \
+    --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2
+    --beta 0.1 --epsilon 0.2
 
 python -m post_training.eval_libero \
     --base openvla \
@@ -237,12 +237,12 @@ python -m post_training.train_grpo \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-goal \
     --suite goal \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_goal \
-    --n_rollout_tasks 10 --n_inits_per_task 3 --k_samples 2 \
+    --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
-    --batch_size 1 --max_steps 500 --warmup 50 \
+    --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2
+    --beta 0.1 --epsilon 0.2
 
 python -m post_training.eval_libero \
     --base openvla \
@@ -270,12 +270,12 @@ python -m post_training.train_grpo \
     --base_ckpt /workspace_data/vla_workspace/models/openvla-7b-finetuned-libero-10 \
     --suite long10 \
     --output_dir /workspace_data/vla_workspace/output/h20_grpo_long10 \
-    --n_rollout_tasks 10 --n_inits_per_task 3 --k_samples 2 \
+    --n_tasks 10 --n_inits_per_task 3 --group_size 2 \
     --max_chunk_len 180 \
-    --batch_size 1 --max_steps 500 --warmup 50 \
+    --max_steps 500 --warmup 50 \
     --log_every 10 --save_every 500 \
     --lora_r 16 --lr 3e-5 \
-    --grpo_beta 0.1 --grpo_epsilon 0.2
+    --beta 0.1 --epsilon 0.2
 
 python -m post_training.eval_libero \
     --base openvla \

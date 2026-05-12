@@ -173,6 +173,15 @@ def parse_args():
     p.add_argument("--group_size", type=int, default=4,
                    help="K — number of candidate samples per step")
     p.add_argument("--output_dir", required=True)
+    p.add_argument(
+        "--max_chunk_len",
+        type=int,
+        default=0,
+        help="Truncate rollout chunks to at most this many steps before "
+             "policy_logp forward (0 = no truncation). Recommended: 220 on "
+             "144GB H20, 180 on 96GB H20. Goal/Long10 episodes reach 300/520 "
+             "steps and will OOM without truncation.",
+    )
 
     # Training
     p.add_argument("--max_steps", type=int, default=500)
@@ -306,6 +315,9 @@ def main():
         # 2. Compute logp of each chunk under current + ref policy
         chunks = chunks.to(adapter.device)
         rewards = rewards.to(adapter.device)
+        # Optional chunk truncation to avoid OOM on Goal/Long10 with 96GB H20
+        if args.max_chunk_len > 0 and chunks.shape[1] > args.max_chunk_len:
+            chunks = chunks[:, : args.max_chunk_len]
         # Build a per-K batch (each K shares same image + instruction)
         K = chunks.shape[0]
         batch = {
