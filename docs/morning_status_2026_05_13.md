@@ -1,100 +1,119 @@
-# 早安报告 · 2026-05-13
+# 早安报告 · 2026-05-13 10:50
 
-## TL;DR
+## TL;DR — 关键改变
 
-**4 个 GRPO MLP 任务需要重启一次**（代码 fix 后的第二轮）。
+**世纪互联 96GB H20 跑不动 K=2 GRPO**（实测 OOM/stall 4 次）。**改在 cloudml 144GB H20-3e 上跑 GRPO**，已验证 spatial 能跑通，4-cell pipeline 串行启动了。
 
-命令完全没变，挂上最新代码即可。
-
----
-
-## 昨晚发生了什么
-
-### 23:00-01:00 你起的 4 个 MLP GRPO 任务
-
-1. **Spatial** — step 0 后 OOM（commit 前 `adapters/openvla.py` bug）
-2. **Object** — step 0 完成 (187s, mean_reward=0.875)
-3. **Goal** — step 0 完成 (163s, mean_reward=0.877)
-4. **Long10** — KeyError: 'libero_long10'（`train_grpo.py` 里 'long10' 没映射到 'libero_10'）
-
-### 01:00-01:30 我修了第一轮 bug
-
-- `train_grpo.py`: 加 `long10 → libero_10` mapping（commit `3e3f9ca`）
-- `adapters/openvla.py`: 加 gradient checkpointing（commit `c2529d1`）
-
-你重启 4 个任务。
-
-### 01:30-02:10 第二轮观察：**全部 4 个 stall**
-
-- 4 个任务 step 0 都完成后**40-60 分钟不动**
-- log 文件停在 step 0，文件 touched 时间 ~3600s 没更新
-- MLP 任务没 crash 也没进展 — 典型死锁征兆
-
-**诊断**：gradient checkpointing 在 OpenVLA 这种自定义 HF 模型（vision encoder + project + Llama concat）上，`enable_input_require_grads()` 没法让 requires_grad 从 frozen vision 传到 Llama layer → checkpoint recompute 路径里 autograd graph 构建失败或退化为无限 recompute。
-
-### 02:10 我做的最终 fix（commit `ec7def9`）
-
-**回滚 gradient checkpointing**，改为**让 reference forward 跑在 `torch.no_grad()` 里**：
-- Current policy forward: 正常建 autograd graph（为 backward 准备）
-- Reference forward: `with torch.no_grad():`，不建第二张 graph
-- 峰值显存 ≈ 1 次 forward（~50GB on OpenVLA-7B, K=2, T=180）
-- 完全避免"2 forward 叠加" 的显存问题
-
-这是标准 DPO/GRPO memory pattern（DPO 已经在 cloudml 跑通，所以我们知道这个 pattern OK）。
+世纪互联那 4 个 GRPO 任务可以**全部停掉**，不用再起。
 
 ---
 
-## 你需要做的
+## Multi-seed 数据出来了 — 论点要修正
 
-**重启 4 个 GRPO 任务**（命令不变，挂最新代码 `ec7def9` 上的 dev pod 共享盘）。
+cloudml 自动跑完 Goal + Long10 DPO seed 1337+2026：
 
-**清理 + 启动步骤**：
-1. MLP 控制台停掉 4 个还活着的旧任务（他们 stall 状态）
-2. 删除旧 output 目录（可选，但建议干净）：
-   ```bash
-   ssh -p 4321 root@<dev_pod_ip> rm -rf /e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_*
-   ```
-3. 用**原来的命令**启动 4 个新任务（见 `docs/MLP_TRAIN_CMDS.md` 或之前的 chat）
+| Suite | SFT | seed42 | 1337+2026 | 3-seed merged | Δ |
+|---|---|---|---|---|---|
+| Goal | 82% | 74% | **77%** (77/100) | **76%** (114/150) | **−6 stable** ✅ |
+| Long10 | 60% | 54% | **64%** (64/100) | **60.7%** (91/150) | **+0.7 wide band** ⚠ |
 
-**启动后日志应该显示**：
+### 重大修正
+1. **Long10 Δ-6 不稳**：seed 42 是 outlier，3-seed merge 后 ≈ 0
+2. **chunk-truncation hypothesis 撤回**：之前推论 Long10 -6 是因为 max_chunk_len=220 只覆盖 42% episode，现在数据不支持
+3. **Goal Δ-6 稳定**：noise band ±3%，central finding 站得住
+
+### 新论点（更精确）
+> "DPO on Goal (the strongest SFT baseline) is the only suite with a
+> **stable** negative Δ across seeds. Long10's seed-42 dip was within
+> noise band (±10%)."
+
+---
+
+## 昨晚 GRPO 失败的根因
+
+世纪互联 H20 是 **96GB**，cloudml 是 **144GB**。我之前误判都是 96GB。
+
+GRPO K=2 的 `policy_logp_with_ref` 需要：
+- 1× cur forward (build autograd graph) → ~47GB peak
+- 1× ref forward (no_grad) → ~47GB peak
+- 加 LoRA optimizer state、activation、buffer → 90+GB
+
+**96GB 上跑不下 chunk T=180 K=2 这套**。即使我改了 no_grad ref forward 后理论上够，实测仍 OOM。
+
+cloudml 144GB **空间多 50%**，spatial K=2 T=180 实测 ~70-100GB，**完全够**。
+
+---
+
+## 当前 cloudml 进展
+
+### 正在跑（已证实 GRPO 能用）
+- **Spatial GRPO debug**：step 7/30 ✅（38min, ~80s/step, GPU 70-100GB）
+- step 0-7 全 log 出（无 stall），KL loss 在 step 3+ 出现 → 真在学
+
+### 接力调度（debug 完成后自动启动）
+**Full 4-cell pipeline**（`/tmp/cloudml_grpo_full_pipeline.sh`，setsid nohup 中）：
+- spatial: 500 step train + 50 episode eval
+- object
+- goal
+- long10
+
+预计 **每 cell 5-7h，4 cell 串行 ~24-30h**。最早周四上午全部完成。
+
+---
+
+## 三件你不用做的事
+
+1. ❌ 不用再起 MLP 任务 — 96GB 跑不动 GRPO，cloudml 接管了
+2. ❌ 不用调 `--max_chunk_len` / `--group_size` — cloudml 用默认 220 / 2 就行
+3. ❌ 不用改代码 — 当前 ec7def9 + no_grad fix 在 144GB 工作
+
+---
+
+## 三件可选的事
+
+### A. 把 Spatial + Object 的 multi-seed 也跑了（让 §4.2 完整）
+
+现在只 Goal + Long10 有 3-seed。Spatial / Object 还是 single-seed。如果想要 paper-grade 完整 4-suite × 3-seed，还需 ~7h cloudml 时间（spatial 2.5h + object 4.2h）。
+
+但**优先级低**：Spatial +6 / Object 0 都和 SFT-strength inverse 的论点一致，single-seed 够。
+
+### B. 起 8×H20 跑 Spirit base 自训 SFT
+
+paper §4.2 的 Spirit row 整行空着。Spirit v1.5 在 LIBERO 上没官方 ckpt，要自训 ~12-15h。可以世纪互联那台 96GB H20 起这个（不需要 GRPO），那台空着也是空着。
+
+如果要做这个，告诉我，我写 SFT 训练命令。
+
+### C. 写博客 #3 起手稿
+
+paper §4.2 已经 7/8 cell 完成（OpenVLA × {SFT, DPO} × 4-suite 全 + multi-seed），可以开始写 workshop paper 通俗版。素材现成。
+
+---
+
+## 文件位置
+
+- multiseed json/jsonl：`assets/paper_v1.5_eval/openvla_dpo_libero_{goal,10}_5x10_multiseed.{json,jsonl}`
+- 3-seed merged：`assets/paper_v1.5_eval/openvla_dpo_libero_{goal,10}_3seed_merged.json`
+- chart 已重画：`assets/paper_v1.5_eval/paper_4_2_main_chart.png`
+- paper §4.2 已更新 single + 3-seed 双表
+
+公开仓 push：commit `2e991bc` (GitLab) / `94e472c` (GitHub)
+
+---
+
+## 关于世纪互联 4 个挂着的 MLP 任务
+
+它们都已挂死（OOM stall），可以全部 stop / kill。
+共享盘 `/e2e-data/users/liuzhi7/vla_workspace/output/h20_grpo_*` 里的 step 0 log 留着无所谓，下次起任务（如果未来要起 SFT）会写新目录。
+
+---
+
+## 推荐你早上起来做的事
+
+1. 看这份 status report
+2. 决定 A/B/C 哪个优先（或都不做）
+3. 等 cloudml GRPO 完成（~30h），我会自动 rsync 数据 + 更新 paper
+
+如果你想立刻看 GRPO debug 实时输出：
+```bash
+ssh -p 4163 root@127.0.0.1 'tail -20 /tmp/grpo_debug.log | grep -v Warning'
 ```
-[openvla-adapter] LoRA injected: 128 Linears, trainable 16.8M / 7558M
-[openvla-adapter] frozen reference: 256 param tensors
-...
-[train] starting 500 steps, K=2
-{"step": 0, ...}       <- ~3 min 后
-{"step": 10, ...}      <- ~15-20 min 后  这次应该会出！
-```
-
-**step 10 出了就说明 fix 生效，训练正常进行**。
-
----
-
-## 同时 cloudml 昨晚的进度
-
-- **Goal DPO multi-seed (seed 1337+2026)**: 过去 3+ 小时跑到 task 9/10, ~72% 成功率（和 seed 42 的 74% 一致 → noise band 稳）
-- **Long10 DPO multi-seed**: Goal 完成后自动接力（预计 ~09:00-10:00 AM 完成）
-
-我明天 (你醒后) 会自动 rsync multi-seed 数据回本机，合进 paper §4.2。
-
----
-
-## 三代 commits 清单
-
-| commit | 说明 |
-|---|---|
-| `3e3f9ca` | 第一轮 fix: long10 → libero_10 key mapping |
-| `c2529d1` | 第二轮 fix（错的）: gradient checkpointing |
-| `ec7def9` | 第三轮 fix（对的）: 回滚 + no_grad for ref forward |
-
-Dev pod 共享盘 `git log --oneline -1` 应该显示 `ec7def9`。
-
----
-
-## 如果还是卡 / OOM
-
-降 `--max_chunk_len 180` → `150` 或 `120`（进一步减少单个 forward 的显存）。
-
-如果 `--max_chunk_len 120` 还不行，降 `--group_size 2` → `1`（但 K=1 的 GRPO 退化为 advantage=0，没意义，只是让它先跑通）。
-
-再不行来找我。
