@@ -185,80 +185,139 @@ class Pi05Adapter(VLABase):
     ) -> torch.Tensor:
         """Surrogate flow-matching logp for π0.5.
 
-        Same approach as Spirit adapter: average over T_EVAL random
-        timesteps of -||v_θ(x_t, t) - v_target||^2.
+        Direct hook into PI0Pytorch.forward(observation, actions) which
+        returns per-element MSE between predicted velocity v_t and target
+        velocity u_t = noise - actions. The mean MSE over (T_action × A)
+        averaged over PI05_T_EVAL noise samples is our surrogate −logp.
 
-        TODO: hook the actual π0.5 velocity field forward — the
-        openpi Policy.infer doesn't directly expose it. Currently
-        falls back to comparing against select_action output as a
-        proxy (which is suboptimal but functional).
+        We negate so that "higher logp = lower MSE = better fit" (DPO/GRPO
+        compatible). The averaging over noise/time samples reduces variance.
+
+        NOTE: PI0Pytorch.forward samples both noise and time internally
+        each call. We rely on monte-carlo averaging across PI05_T_EVAL calls.
         """
-        B = chunk.shape[0]
-        device = self.device
-        dtype = next(self.model.parameters()).dtype
+        from openpi.models.pi0_config import Pi0Config  # noqa: F401  ensure path
+
+        # Build openpi Observation tensor batch
+        observation = self._batch_to_openpi_observation(batch, chunk.shape[0])
+        # actions: (B, T, A) — chunk is in normalised [-1, 1] action space
+        # by the time it reaches us (rollout.py / DPO pair files store
+        # post-norm actions).
+        actions = chunk.to(self.device).to(next(self.model.parameters()).dtype)
 
         scores = []
         for _ in range(PI05_T_EVAL):
-            t = torch.rand(B, device=device).to(dtype) * 0.999 + 0.001
-            noise = torch.randn_like(chunk).to(device).to(dtype)
-            chunk_d = chunk.to(device).to(dtype)
-            t_expand = t.view(-1, 1, 1)
-            x_t = (1.0 - t_expand) * noise + t_expand * chunk_d
-            v_target = chunk_d - noise
-            # Proxy: predict the chunk via openpi Policy and use the
-            # difference from x_t as a velocity estimate. NOT the
-            # actual flow-matching velocity field.
-            v_pred = self._proxy_velocity(batch, x_t, t)
-            mse = ((v_pred - v_target) ** 2).mean(dim=(-2, -1))
-            scores.append(-mse)
+            # PI0Pytorch.forward returns per-element MSE (B, T, A)
+            mse = self.model(observation, actions)   # (B, T, A)
+            score = -mse.mean(dim=(-2, -1))           # (B,) — surrogate logp
+            scores.append(score)
         return torch.stack(scores, dim=0).mean(dim=0).float()
 
-    def _proxy_velocity(
-        self, batch: dict, x_t: torch.Tensor, t: torch.Tensor
-    ) -> torch.Tensor:
-        """Placeholder velocity field — returns Pi05's predicted action
-        chunk. Not the actual v_θ but lets the pipeline run end-to-end."""
-        B = x_t.shape[0]
-        # Build a per-sample obs dict for openpi.Policy.infer
-        actions_list = []
-        for b in range(B):
-            obs = self._batch_to_openpi_obs(batch, b)
-            out = self.openpi_policy.infer(obs)
-            actions_list.append(torch.from_numpy(np.asarray(out["actions"])))
-        return torch.stack(actions_list).to(x_t.device).to(x_t.dtype)
-
     def _batch_to_openpi_obs(self, batch: dict, b_idx: int) -> dict:
-        """Convert v1.5-style batch[b_idx] into openpi observation dict.
+        """Convert v1.5-style batch[b_idx] into openpi inference dict.
 
-        openpi LIBERO config expects:
-            observation/exterior_image_1_left:  (H, W, 3) uint8
-            observation/wrist_image_left:        (H, W, 3) uint8 — for LIBERO
-                                                  pi0_libero uses both
-            state:                                 (8,) — per LIBERO data spec
-            prompt:                                str
+        openpi LIBERO LiberoInputs transform expects:
+            observation/state:        (8,) — robot proprioception (joints+gripper)
+            observation/image:        (H, W, 3) uint8 — base camera
+            observation/wrist_image:  (H, W, 3) uint8 — wrist camera
+            prompt:                   str
+
+        rollout.py / DPO pair generation must populate these in batch under
+        keys: image_uint8 (base, list of (H,W,3) uint8), wrist_uint8 (list,
+        same shape), state (B, 8 tensor), instruction (list[str]).
         """
-        if "image" in batch:
-            img = batch["image"][b_idx]
-            if isinstance(img, torch.Tensor):
-                img_np = (img.permute(1, 2, 0).cpu().clamp(0, 1).numpy()
-                          * 255).astype(np.uint8)
+        # Base camera
+        if "image_uint8" in batch:
+            base = np.asarray(batch["image_uint8"][b_idx])
+        elif "image" in batch:
+            t = batch["image"][b_idx]
+            if isinstance(t, torch.Tensor):
+                base = (t.permute(1, 2, 0).cpu().clamp(0, 1).numpy() * 255).astype(np.uint8)
             else:
-                img_np = np.asarray(img)
+                base = np.asarray(t)
         else:
-            img_np = np.zeros((224, 224, 3), dtype=np.uint8)
+            base = np.zeros((224, 224, 3), dtype=np.uint8)
 
-        # We don't have wrist image in our v1.5 batch — duplicate exterior
-        # (paper §3 acknowledges this limitation; π0.5 is most affected since
-        # it's trained with wrist images).
+        # Wrist camera (zeros if missing — π0.5 may degrade but won't crash)
+        if "wrist_uint8" in batch:
+            wrist = np.asarray(batch["wrist_uint8"][b_idx])
+        else:
+            wrist = np.zeros_like(base)
+
+        # State (8-dim for LIBERO: 7 joint + 1 gripper)
+        if "state" in batch:
+            s = batch["state"][b_idx]
+            state = s.cpu().numpy() if isinstance(s, torch.Tensor) else np.asarray(s)
+        else:
+            state = np.zeros(8, dtype=np.float32)
+
         instruction = batch["instruction"][b_idx] if "instruction" in batch else ""
 
         return {
-            "observation/exterior_image_1_left": img_np,
-            "observation/wrist_image_left": img_np,
-            "observation/joint_position": np.zeros(7, dtype=np.float32),
-            "observation/gripper_position": np.zeros(1, dtype=np.float32),
+            "observation/state": state.astype(np.float32),
+            "observation/image": base,
+            "observation/wrist_image": wrist,
             "prompt": instruction,
         }
+
+    def _batch_to_openpi_observation(self, batch: dict, B: int):
+        """Build a batched openpi Observation suitable for PI0Pytorch.forward.
+
+        For training-time logp we need to bypass the openpi Policy's transform
+        chain (which is inference-only and does normalisation/RDS-style aug).
+        Instead build an Observation directly from the per-sample dicts.
+
+        This is the single most fragile bit of the adapter — kept simple.
+        """
+        from openpi.models import model as _model
+
+        per_sample = [self._batch_to_openpi_obs(batch, b) for b in range(B)]
+
+        # Stack tensors / arrays
+        states = np.stack([d["observation/state"] for d in per_sample]).astype(np.float32)
+        bases = np.stack([d["observation/image"] for d in per_sample])
+        wrists = np.stack([d["observation/wrist_image"] for d in per_sample])
+        prompts = [d["prompt"] for d in per_sample]
+
+        # Tokenize prompt via the model's PaliGemma tokenizer
+        tokenized, mask = self._tokenize_prompts_batch(prompts)
+
+        # Convert to torch (preprocess_observation_pytorch handles uint8→float)
+        device = self.device
+        data = {
+            "image": {
+                "base_0_rgb": torch.from_numpy(bases).to(device),
+                "left_wrist_0_rgb": torch.from_numpy(wrists).to(device),
+                "right_wrist_0_rgb": torch.zeros_like(torch.from_numpy(bases)).to(device),
+            },
+            "image_mask": {
+                "base_0_rgb": torch.ones(B, dtype=torch.bool, device=device),
+                "left_wrist_0_rgb": torch.ones(B, dtype=torch.bool, device=device),
+                "right_wrist_0_rgb": torch.zeros(B, dtype=torch.bool, device=device),
+            },
+            "state": torch.from_numpy(states).to(device),
+            "tokenized_prompt": torch.from_numpy(tokenized).to(device).long(),
+            "tokenized_prompt_mask": torch.from_numpy(mask).to(device).bool(),
+        }
+        return _model.Observation.from_dict(data)
+
+    def _tokenize_prompts_batch(self, prompts: list[str]) -> tuple[np.ndarray, np.ndarray]:
+        """Tokenize a list of prompts using PaliGemma tokenizer (cached)."""
+        if not hasattr(self, "_paligemma_tok"):
+            from openpi.models import tokenizer as _tok
+            self._paligemma_tok = _tok.PaligemmaTokenizer()
+        tokens, masks = [], []
+        for p in prompts:
+            t, m = self._paligemma_tok.tokenize(p)
+            tokens.append(t); masks.append(m)
+        # Pad to common length
+        max_len = max(t.shape[0] for t in tokens)
+        pad_t = np.zeros((len(tokens), max_len), dtype=np.int64)
+        pad_m = np.zeros((len(masks), max_len), dtype=bool)
+        for i, (t, m) in enumerate(zip(tokens, masks)):
+            pad_t[i, :t.shape[0]] = t
+            pad_m[i, :m.shape[0]] = m
+        return pad_t, pad_m
 
     def policy_logp_with_ref(
         self, batch: dict, chunk: torch.Tensor
