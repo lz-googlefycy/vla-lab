@@ -270,14 +270,45 @@ def rollout_one_episode(
         if first_image is None:
             first_image = img_t.clone()
 
+        # Optional pi0.5 inputs: wrist camera + 8-dim robot state
+        # LIBERO env exposes both — extract if present, else fill zeros so
+        # batch schema is consistent.
+        wrist_arr = obs.get("robot0_eye_in_hand_image")
+        if wrist_arr is None:
+            for k in ("wrist_image", "robot_eye_in_hand_image"):
+                if k in obs:
+                    wrist_arr = obs[k]; break
+        if wrist_arr is not None:
+            w = wrist_arr[::-1, ::-1] if wrist_arr.ndim == 3 else wrist_arr
+            if w.dtype != np.uint8:
+                w = (w * 255).astype(np.uint8)
+            if w.shape[0] != cfg.model_input_size:
+                w = _resize_image_rlds(w, cfg.model_input_size)
+            wrist_uint8 = w.copy()
+        else:
+            wrist_uint8 = np.zeros_like(img_uint8)
+
+        # Robot state: 7 joint pos + 1 gripper (LIBERO standard)
+        try:
+            jpos = np.asarray(obs.get("robot0_joint_pos", np.zeros(7)), dtype=np.float32)
+            gpos = np.asarray(obs.get("robot0_gripper_qpos", np.zeros(1)), dtype=np.float32)
+            state_8 = np.concatenate([jpos[:7], gpos[:1]]).astype(np.float32)
+            if state_8.shape[0] < 8:
+                state_8 = np.pad(state_8, (0, 8 - state_8.shape[0]))
+        except Exception:
+            state_8 = np.zeros(8, dtype=np.float32)
+
         # Build batch — include BOTH float tensor (back-compat) and raw
         # uint8 ndarray. OpenVLA adapter prefers the uint8 path because
         # the float→uint8 round-trip causes ~1/255 quantisation drift
         # which is enough to OOD the visual encoder on LIBERO.
+        # pi0.5 adapter additionally consumes wrist_uint8 + state.
         batch = {
             "instruction": [task_description],
             "image": img_t.unsqueeze(0),
-            "image_uint8": [img_uint8],   # list of (H, W, 3) uint8 per sample
+            "image_uint8": [img_uint8],     # base camera, list of (H,W,3) uint8
+            "wrist_uint8": [wrist_uint8],   # wrist camera (zeros if absent)
+            "state": torch.from_numpy(state_8).unsqueeze(0),  # (1, 8)
         }
         with torch.no_grad():
             # OpenVLA single-step prediction
