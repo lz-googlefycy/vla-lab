@@ -1,0 +1,154 @@
+{
+  "suite": "libero_goal",
+  "sft_baseline": 82.0,
+  "per_seed": {
+    "42": {
+      "success": 37,
+      "trials": 50,
+      "rate": 74.0
+    },
+    "1337+2026": {
+      "success": 77,
+      "trials": 100,
+      "rate": 77.0
+    }
+  },
+  "merged_3seed": {
+    "success": 114,
+    "trials": 150,
+    "rate": 76.0
+  },
+  "delta_vs_sft": -6.0,
+  "per_task": {
+    "0": {
+      "task": "open the middle drawer of the cabinet",
+      "seeds": {
+        "42": {
+          "success": 3,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 9,
+          "trials": 10
+        }
+      }
+    },
+    "1": {
+      "task": "put the bowl on the stove",
+      "seeds": {
+        "42": {
+          "success": 5,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 10,
+          "trials": 10
+        }
+      }
+    },
+    "2": {
+      "task": "put the wine bottle on top of the cabinet",
+      "seeds": {
+        "42": {
+          "success": 3,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 9,
+          "trials": 10
+        }
+      }
+    },
+    "3": {
+      "task": "open the top drawer and put the bowl inside",
+      "seeds": {
+        "42": {
+          "success": 2,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 2,
+          "trials": 10
+        }
+      }
+    },
+    "4": {
+      "task": "put the bowl on top of the cabinet",
+      "seeds": {
+        "42": {
+          "success": 4,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 8,
+          "trials": 10
+        }
+      }
+    },
+    "5": {
+      "task": "push the plate to the front of the stove",
+      "seeds": {
+        "42": {
+          "success": 5,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 7,
+          "trials": 10
+        }
+      }
+    },
+    "6": {
+      "task": "put the cream cheese in the bowl",
+      "seeds": {
+        "42": {
+          "success": 3,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 4,
+          "trials": 10
+        }
+      }
+    },
+    "7": {
+      "task": "turn on the stove",
+      "seeds": {
+        "42": {
+          "success": 4,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 10,
+          "trials": 10
+        }
+      }
+    },
+    "8": {
+      "task": "put the bowl on the plate",
+      "seeds": {
+        "42": {
+          "success": 5,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 10,
+          "trials": 10
+        }
+      }
+    },
+    "9": {
+      "task": "put the wine bottle on the rack",
+      "seeds": {
+        "42": {
+          "success": 3,
+          "trials": 5
+        },
+        "1337+2026": {
+          "success": 8,
+          "trials": 10
+        }
+      }
+    }
+  }
+}
