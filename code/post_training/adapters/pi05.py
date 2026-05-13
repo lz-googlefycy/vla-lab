@@ -61,7 +61,10 @@ for _p in _OPENPI_CANDIDATES:
 
 # π0.5 LIBERO action defaults
 PI05_ACTION_HORIZON = 10
-PI05_ACTION_DIM = 7
+PI05_ACTION_DIM = 7         # LIBERO robot action dim
+PI05_MODEL_ACTION_DIM = 32  # pi0.5 internal "universal action space"; we pad
+                            # 7-dim LIBERO chunks to 32 with zeros for forward,
+                            # and slice [:, :, :7] when consuming sample_actions
 PI05_T_EVAL = 4    # samples for surrogate logp estimation
 
 
@@ -200,16 +203,28 @@ class Pi05Adapter(VLABase):
 
         # Build openpi Observation tensor batch
         observation = self._batch_to_openpi_observation(batch, chunk.shape[0])
-        # actions: (B, T, A) — chunk is in normalised [-1, 1] action space
-        # by the time it reaches us (rollout.py / DPO pair files store
-        # post-norm actions).
-        actions = chunk.to(self.device).to(next(self.model.parameters()).dtype)
+        # actions: (B, T, A=7) — chunk is in normalised [-1, 1] action space.
+        # pi0.5's model.forward expects action_dim=32 (universal action space);
+        # we pad with zeros for unused dims (LIBERO uses 7-dim slice).
+        dtype = next(self.model.parameters()).dtype
+        chunk_dev = chunk.to(self.device).to(dtype)              # (B, T, 7)
+        B, T, _ = chunk_dev.shape
+        if PI05_MODEL_ACTION_DIM > PI05_ACTION_DIM:
+            pad = torch.zeros(B, T, PI05_MODEL_ACTION_DIM - PI05_ACTION_DIM,
+                              dtype=dtype, device=self.device)
+            actions = torch.cat([chunk_dev, pad], dim=-1)        # (B, T, 32)
+        else:
+            actions = chunk_dev
 
         scores = []
         for _ in range(PI05_T_EVAL):
-            # PI0Pytorch.forward returns per-element MSE (B, T, A)
-            mse = self.model(observation, actions)   # (B, T, A)
-            score = -mse.mean(dim=(-2, -1))           # (B,) — surrogate logp
+            # PI0Pytorch.forward returns per-element MSE (B, T, 32)
+            # We only score the first 7 dims (LIBERO action dims) — the
+            # padded dims contribute meaningless MSE that would dilute
+            # the signal.
+            mse = self.model(observation, actions)               # (B, T, 32)
+            mse = mse[..., :PI05_ACTION_DIM]                      # (B, T, 7)
+            score = -mse.mean(dim=(-2, -1))                       # (B,)
             scores.append(score)
         return torch.stack(scores, dim=0).mean(dim=0).float()
 
