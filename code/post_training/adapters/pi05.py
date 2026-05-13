@@ -317,22 +317,51 @@ class Pi05Adapter(VLABase):
         return _model.Observation.from_dict(data)
 
     def _tokenize_prompts_batch(self, prompts: list[str]) -> tuple[np.ndarray, np.ndarray]:
-        """Tokenize a list of prompts using PaliGemma tokenizer (cached)."""
-        if not hasattr(self, "_paligemma_tok"):
-            from openpi.models import tokenizer as _tok
-            self._paligemma_tok = _tok.PaligemmaTokenizer()
-        tokens, masks = [], []
+        """Tokenize a list of prompts using PaliGemma tokenizer (cached).
+
+        On dev pod / cloudml the network can't reach gs://big_vision/ which
+        is what openpi.models.tokenizer.PaligemmaTokenizer hits by default.
+        We bypass openpi's tokenizer wrapper and load sentencepiece directly
+        from a known local path. The tokenizer model file (~4.2MB) lives at:
+          - $PALIGEMMA_TOKENIZER_PATH (env)
+          - /e2e-data/users/liuzhi7/vla_workspace/paligemma_tokenizer.model (dev pod)
+          - ~/pi_assets/tokenizer/paligemma_tokenizer.model (local machine)
+        """
+        if not hasattr(self, "_paligemma_sp"):
+            import sentencepiece
+            cands = [
+                os.environ.get("PALIGEMMA_TOKENIZER_PATH"),
+                "/e2e-data/users/liuzhi7/vla_workspace/paligemma_tokenizer.model",
+                str(Path.home() / "pi_assets/tokenizer/paligemma_tokenizer.model"),
+            ]
+            tok_path = next((c for c in cands if c and Path(c).exists()), None)
+            if tok_path is None:
+                raise FileNotFoundError(
+                    "PaliGemma tokenizer model not found. Set $PALIGEMMA_TOKENIZER_PATH "
+                    f"or place the file at one of: {cands}"
+                )
+            with open(tok_path, "rb") as f:
+                self._paligemma_sp = sentencepiece.SentencePieceProcessor(model_proto=f.read())
+            print(f"[pi05-adapter] loaded tokenizer from {tok_path}")
+
+        # openpi's tokenize() prepends "...\n" but for surrogate-logp scoring
+        # we want a stable encoding. Use the same prompt template:
+        #   prompt + "\n"   then encode with BOS.
+        tokens_list, masks_list = [], []
+        max_len = 200  # openpi default
         for p in prompts:
-            t, m = self._paligemma_tok.tokenize(p)
-            tokens.append(t); masks.append(m)
-        # Pad to common length
-        max_len = max(t.shape[0] for t in tokens)
-        pad_t = np.zeros((len(tokens), max_len), dtype=np.int64)
-        pad_m = np.zeros((len(masks), max_len), dtype=bool)
-        for i, (t, m) in enumerate(zip(tokens, masks)):
-            pad_t[i, :t.shape[0]] = t
-            pad_m[i, :m.shape[0]] = m
-        return pad_t, pad_m
+            text = p.lower() + "\n"
+            tokens = self._paligemma_sp.encode(text, add_bos=True, add_eos=True)
+            t = np.asarray(tokens, dtype=np.int64)
+            if t.shape[0] > max_len:
+                t = t[:max_len]
+            mask = np.zeros(max_len, dtype=bool)
+            mask[: t.shape[0]] = True
+            padded = np.zeros(max_len, dtype=np.int64)
+            padded[: t.shape[0]] = t
+            tokens_list.append(padded)
+            masks_list.append(mask)
+        return np.stack(tokens_list), np.stack(masks_list)
 
     def policy_logp_with_ref(
         self, batch: dict, chunk: torch.Tensor
