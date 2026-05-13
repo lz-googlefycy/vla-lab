@@ -334,7 +334,10 @@ def main():
         logp_old = logp_cur.detach()
 
         # GRPO loss expects (B=1, K) shape
-        out = grpo_loss(
+        # NOTE: name is `out_grpo`, not `out`, to avoid shadowing the
+        # `out = Path(args.output_dir)` defined at the top of main(),
+        # which we need below for checkpoint paths.
+        out_grpo = grpo_loss(
             logp_cur.unsqueeze(0),
             logp_old.unsqueeze(0),
             logp_ref.unsqueeze(0),
@@ -342,7 +345,7 @@ def main():
             grpo_cfg,
             mask=masks.any().unsqueeze(0).to(adapter.device),
         )
-        loss = out.loss
+        loss = out_grpo.loss
 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(trainable, cfg.grad_clip_norm)
@@ -354,12 +357,12 @@ def main():
             entry = {
                 "step": step,
                 "loss": float(loss.item()),
-                "pg_loss": float(out.pg_loss.item()),
-                "kl_loss": float(out.kl_loss.item()),
-                "mean_advantage": float(out.mean_advantage.item()),
-                "mean_ratio": float(out.mean_ratio.item()),
-                "mean_kl": float(out.mean_kl.item()),
-                "clip_fraction": float(out.clip_fraction.item()),
+                "pg_loss": float(out_grpo.pg_loss.item()),
+                "kl_loss": float(out_grpo.kl_loss.item()),
+                "mean_advantage": float(out_grpo.mean_advantage.item()),
+                "mean_ratio": float(out_grpo.mean_ratio.item()),
+                "mean_kl": float(out_grpo.mean_kl.item()),
+                "clip_fraction": float(out_grpo.clip_fraction.item()),
                 "mean_reward": float(rewards.mean().item()),
                 "max_reward": float(rewards.max().item()),
                 "lr": sched.get_last_lr()[0],
@@ -369,10 +372,10 @@ def main():
             log_f.flush()
             print(
                 f"[step {step:4d}] loss={loss.item():+.4f}  "
-                f"pg={out.pg_loss.item():+.4f}  kl={out.kl_loss.item():+.4f}  "
+                f"pg={out_grpo.pg_loss.item():+.4f}  kl={out_grpo.kl_loss.item():+.4f}  "
                 f"r̄={rewards.mean().item():+.3f}  r↑={rewards.max().item():+.3f}  "
-                f"adv̄={out.mean_advantage.item():+.3f}  "
-                f"clip={out.clip_fraction.item():.2f}"
+                f"adv̄={out_grpo.mean_advantage.item():+.3f}  "
+                f"clip={out_grpo.clip_fraction.item():.2f}"
             )
 
         if (step + 1) % cfg.save_steps == 0:
