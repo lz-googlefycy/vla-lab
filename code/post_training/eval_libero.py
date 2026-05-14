@@ -129,6 +129,9 @@ def run_one_trial(
     t0 = time.time()
 
     for t in range(max_steps):
+        # Hard outer cap: stop if we already issued max_steps env actions
+        if n_steps >= max_steps:
+            break
         img_arr = obs.get("agentview_image")
         if img_arr is None:
             for k in ("image", "rgb_static"):
@@ -153,35 +156,75 @@ def run_one_trial(
         img_uint8 = img.copy()
         img_t = torch.from_numpy(img_uint8).permute(2, 0, 1).float() / 255.0
 
-        # Pass BOTH float tensor (back-compat) and raw uint8 ndarray
-        # (preferred by OpenVLA adapter — avoids float→uint8 round-trip
-        # quantisation that OOD's the visual encoder).
+        # Optional pi0.5 inputs (wrist + state). Always populate; pi05 adapter
+        # uses them, openvla / spirit ignore them.
+        wrist_arr = obs.get("robot0_eye_in_hand_image")
+        if wrist_arr is None:
+            for k in ("wrist_image", "robot_eye_in_hand_image"):
+                if k in obs:
+                    wrist_arr = obs[k]; break
+        if wrist_arr is not None:
+            w = wrist_arr[::-1, ::-1] if wrist_arr.ndim == 3 else wrist_arr
+            if w.dtype != np.uint8:
+                w = (w * 255).astype(np.uint8)
+            wrist_uint8 = w if w.shape[0] == img_uint8.shape[0] else _resize_image_rlds(w, img_uint8.shape[0])
+        else:
+            wrist_uint8 = np.zeros_like(img_uint8)
+        try:
+            jpos = np.asarray(obs.get("robot0_joint_pos", np.zeros(7)), dtype=np.float32)
+            gpos = np.asarray(obs.get("robot0_gripper_qpos", np.zeros(1)), dtype=np.float32)
+            state_8 = np.concatenate([jpos[:7], gpos[:1]]).astype(np.float32)
+            if state_8.shape[0] < 8:
+                state_8 = np.pad(state_8, (0, 8 - state_8.shape[0]))
+        except Exception:
+            state_8 = np.zeros(8, dtype=np.float32)
+
         batch = {
             "instruction": [instruction],
             "image": img_t.unsqueeze(0),
             "image_uint8": [img_uint8],
+            "wrist_uint8": [wrist_uint8],
+            "state": torch.from_numpy(state_8).unsqueeze(0),
         }
         with torch.no_grad():
             chunk = adapter.select_action(batch)
-        action = chunk.squeeze(0).squeeze(0).cpu().numpy()
+        # chunk shape: (B=1, T, 7). For OpenVLA T=1, for pi0.5 T=10.
+        chunk_np = chunk.squeeze(0).cpu().numpy()  # (T, 7)
+        if chunk_np.ndim == 1:
+            chunk_np = chunk_np[None, :]  # back-compat: (1, 7)
+        T = chunk_np.shape[0]
 
-        # Gripper handling: OpenVLA → invert sign for LIBERO (see rollout.py).
-        # Other bases: simple binarisation.
-        if hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "openvla":
-            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
-            action[-1] = -action[-1]
-        else:
-            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+        is_openvla = (hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "openvla")
 
-        try:
-            obs, _, done, _ = env.step(action.tolist())
-        except Exception as e:
-            return {"success": False, "n_steps": n_steps, "elapsed_s": time.time()-t0,
-                    "error": f"env.step: {e}"}
-        n_steps = t + 1
+        # Execute the chunk step-by-step in env (each chunk step = one env.step)
+        chunk_done = False
+        for t_chunk in range(T):
+            action = chunk_np[t_chunk].copy()  # (7,)
+            # Gripper handling
+            if is_openvla:
+                action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+                action[-1] = -action[-1]
+            else:
+                # pi0.5 / spirit: binarise to {-1, +1}
+                action[-1] = 1.0 if action[-1] > 0.5 else -1.0
 
-        if done or (hasattr(env, "check_success") and env.check_success()):
-            success = True
+            try:
+                obs, _, done, _ = env.step(action.tolist())
+            except Exception as e:
+                return {"success": False, "n_steps": n_steps, "elapsed_s": time.time()-t0,
+                        "error": f"env.step: {e}"}
+            n_steps += 1
+
+            if done or (hasattr(env, "check_success") and env.check_success()):
+                success = True
+                chunk_done = True
+                break
+            # Stop chunk early if we exceed suite max steps
+            if n_steps >= max_steps:
+                chunk_done = True
+                break
+
+        if chunk_done:
             break
 
     return {
