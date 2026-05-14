@@ -377,9 +377,15 @@ class Pi05Adapter(VLABase):
         device = self.device
 
         def _normalize_img(arr: np.ndarray) -> torch.Tensor:
+            # arr is (B, H, W, C) uint8. Convert to (B, C, H, W) float in [-1, 1]
+            # because openpi.preprocess_observation_pytorch's `is_channels_first`
+            # detection requires shape[1] == 3 to trigger its permute pipeline.
+            # Without channels-first, F.conv2d gets 224-channel input → crash.
             t = torch.from_numpy(arr).to(device).float()
-            t = t / 255.0           # [0, 1]
-            t = t * 2.0 - 1.0       # [-1, 1]
+            if t.ndim == 4 and t.shape[-1] == 3:
+                t = t.permute(0, 3, 1, 2)   # NHWC → NCHW
+            t = t / 255.0                    # [0, 1]
+            t = t * 2.0 - 1.0                # [-1, 1]
             return t
 
         data = {
