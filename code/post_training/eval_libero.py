@@ -326,6 +326,11 @@ def parse_args():
     p.add_argument("--output_dir", required=True)
     p.add_argument("--capture_videos", type=int, default=0,
                    help="Save MP4s for the first N successful trials per suite")
+    p.add_argument("--lora_r", type=int, default=32,
+                   help="LoRA rank — MUST match the rank used at train time. "
+                        "(GRPO trains used r=16, DPO trains used r=32)")
+    p.add_argument("--lora_alpha", type=int, default=64,
+                   help="LoRA alpha — MUST match train time")
     return p.parse_args()
 
 
@@ -348,6 +353,8 @@ def main():
         base_ckpt_path=args.base_ckpt,
         libero_suite="spatial",
         use_lora=bool(args.lora_ckpt),
+        lora_r=args.lora_r,
+        lora_alpha=args.lora_alpha,
     )
     adapter = build_adapter(cfg)
 

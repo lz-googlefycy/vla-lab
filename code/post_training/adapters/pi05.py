@@ -96,47 +96,49 @@ class Pi05Adapter(VLABase):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.reference_state_dict: dict[str, torch.Tensor] | None = None
 
-        # Lazy import — openpi has heavy JAX deps
+        # We bypass openpi.policies.policy_config.create_trained_policy because
+        # it pulls in lerobot.common.* which is removed in lerobot >= 0.4. Our
+        # PyTorch model + safetensors weights load just fine without it.
         try:
-            from openpi.training import config as _config
-            from openpi.policies import policy_config
+            from openpi.models import pi0_config
+            from openpi.models_pytorch.pi0_pytorch import PI0Pytorch
         except ImportError as e:
             raise ImportError(
                 f"openpi import failed: {e}. Make sure openpi is on PYTHONPATH "
-                "(set OPENPI_SRC env or clone to ~/openpi or /workspace/openpi)."
+                "(set OPENPI_SRC env or place under "
+                "/e2e-data/users/liuzhi7/vla_workspace/openpi)."
             ) from e
 
-        # Resolve openpi train config
-        train_config_name = self._resolve_openpi_config()
-        train_config = _config.get_config(train_config_name)
-
-        # Build openpi Policy (handles ckpt loading + transforms + norm stats)
-        self.openpi_policy = policy_config.create_trained_policy(
-            train_config,
-            cfg.base_ckpt_path,
-            pytorch_device=str(self.device),
+        # Build PI0Pytorch with pi05 LIBERO defaults
+        # (pi05_libero TrainConfig uses these — see openpi/training/config.py)
+        pt_cfg = pi0_config.Pi0Config(
+            pi05=True, action_horizon=10, discrete_state_input=False,
         )
-        # Hold reference to the underlying torch model for param iteration
-        self.model = getattr(self.openpi_policy, "_model", None)
-        if self.model is None:
-            # try alternate attribute names
-            for attr in ("model", "_model_pytorch", "_pytorch_model"):
-                m = getattr(self.openpi_policy, attr, None)
-                if m is not None and isinstance(m, torch.nn.Module):
-                    self.model = m
-                    break
-        if self.model is None or not isinstance(self.model, torch.nn.Module):
-            raise RuntimeError(
-                "Could not locate the underlying torch.nn.Module inside "
-                "openpi's Policy. The Policy class may have changed; "
-                "inspect Policy attributes and update Pi05Adapter."
-            )
+        self.model = PI0Pytorch(pt_cfg)
 
-        # LoRA (TODO — openpi PyTorch doesn't officially support; will
-        # require manual injection like our other adapters)
+        # Load weights from converted safetensors if base_ckpt_path is a
+        # directory containing model.safetensors. Random init otherwise.
+        from pathlib import Path as _Path
+        ckpt_dir = _Path(cfg.base_ckpt_path)
+        weight_file = ckpt_dir / "model.safetensors"
+        if weight_file.exists():
+            import safetensors.torch
+            safetensors.torch.load_model(self.model, str(weight_file), device="cpu")
+            print(f"[pi05-adapter] loaded weights from {weight_file}")
+        else:
+            print(f"[pi05-adapter] WARNING: {weight_file} missing; "
+                  "model is RANDOM-INITIALISED (smoke-test only)")
+
+        self.model = self.model.to(self.device)
+        # pi0.5 uses bf16 for paligemma + expert (mirrors openpi convention)
+        self.model.paligemma_with_expert.to_bfloat16_for_selected_params("bfloat16")
+        # Stash a no-op handle so legacy code paths that read self.openpi_policy
+        # don't crash (no longer used for anything).
+        self.openpi_policy = None
+
+        # LoRA (experimental for pi0.5 — same scheme as openvla / spirit)
         if cfg.use_lora:
-            print("[pi05-adapter] WARNING: LoRA support for π0.5 is "
-                  "experimental. See class docstring TODO list.")
+            print("[pi05-adapter] LoRA injection (experimental)")
             self._inject_lora_experimental()
 
     def _resolve_openpi_config(self) -> str:
@@ -387,29 +389,45 @@ class Pi05Adapter(VLABase):
     def policy_sample(
         self, batch: dict, n_samples: int, deterministic: bool = False
     ) -> torch.Tensor:
-        B = batch["image"].shape[0] if "image" in batch else 1
-        chunks = []
-        for k in range(n_samples):
-            sample = []
-            for b in range(B):
-                obs = self._batch_to_openpi_obs(batch, b)
-                # K different noise seeds via openpi's noise param
-                noise = np.random.randn(PI05_ACTION_HORIZON,
-                                        PI05_ACTION_DIM).astype(np.float32)
-                out = self.openpi_policy.infer(obs, noise=noise)
-                sample.append(torch.from_numpy(np.asarray(out["actions"])))
-            chunks.append(torch.stack(sample))
-        return torch.stack(chunks, dim=1).float()    # (B, K, T, A)
+        """K stochastic action chunks per batch element via model.sample_actions.
+
+        Returns: (B, K, T, 7) — sliced to LIBERO's 7 action dims.
+        """
+        B = self._infer_batch_size(batch)
+        observation = self._batch_to_openpi_observation(batch, B)
+
+        # K samples by calling sample_actions K times with random noise
+        chunks_per_k = []
+        for _ in range(n_samples):
+            actions_32 = self.model.sample_actions(  # (B, T, 32)
+                self.device, observation, num_steps=10,
+            )
+            chunks_per_k.append(actions_32[..., :PI05_ACTION_DIM].float().cpu())
+        # (K, B, T, 7) -> (B, K, T, 7)
+        return torch.stack(chunks_per_k, dim=0).permute(1, 0, 2, 3).contiguous()
 
     @torch.no_grad()
     def select_action(self, batch: dict) -> torch.Tensor:
-        B = batch["image"].shape[0] if "image" in batch else 1
-        out_list = []
-        for b in range(B):
-            obs = self._batch_to_openpi_obs(batch, b)
-            out = self.openpi_policy.infer(obs)
-            out_list.append(torch.from_numpy(np.asarray(out["actions"])))
-        return torch.stack(out_list).float()    # (B, T, A)
+        """Single deterministic action chunk per batch element.
+
+        Returns: (B, T, 7).
+        """
+        B = self._infer_batch_size(batch)
+        observation = self._batch_to_openpi_observation(batch, B)
+        actions_32 = self.model.sample_actions(   # (B, T, 32)
+            self.device, observation, num_steps=10,
+        )
+        return actions_32[..., :PI05_ACTION_DIM].float().cpu()
+
+    @staticmethod
+    def _infer_batch_size(batch: dict) -> int:
+        if "image" in batch and isinstance(batch["image"], torch.Tensor):
+            return batch["image"].shape[0]
+        if "image_uint8" in batch:
+            return len(batch["image_uint8"])
+        if "instruction" in batch:
+            return len(batch["instruction"])
+        return 1
 
     # --------------- weight management --------------- #
 
