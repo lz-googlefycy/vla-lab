@@ -136,6 +136,22 @@ class Pi05Adapter(VLABase):
         # don't crash (no longer used for anything).
         self.openpi_policy = None
 
+        # Load norm_stats so we can unnormalize action chunks back into raw
+        # LIBERO robot commands. Without this, env.step() gets normalised
+        # [-1, 1] values which cause 0% success.
+        # norm_stats search order:
+        #   1. {ckpt_dir}/assets/physical-intelligence/libero/norm_stats.json
+        #   2. {ckpt_dir}/../pi05_libero_jax/assets/.../norm_stats.json (sibling)
+        #   3. /e2e-data/users/liuzhi7/vla_workspace/pi05_libero_jax/.../norm_stats.json
+        self._action_norm = self._load_norm_stats(ckpt_dir)
+        if self._action_norm is None:
+            print("[pi05-adapter] WARNING: norm_stats not found — actions will "
+                  "stay in normalised [-1, 1] (env.step will likely fail).")
+        else:
+            print("[pi05-adapter] loaded action norm_stats "
+                  f"(q01={self._action_norm['q01'][:3].tolist()}..., "
+                  f"q99={self._action_norm['q99'][:3].tolist()}...)")
+
         # LoRA (experimental for pi0.5 — same scheme as openvla / spirit)
         if cfg.use_lora:
             print("[pi05-adapter] LoRA injection (experimental)")
@@ -147,6 +163,62 @@ class Pi05Adapter(VLABase):
         if suite in ("spatial", "object", "goal", "long10", "all4"):
             return "pi05_libero"
         raise ValueError(f"unknown LIBERO suite: {suite}")
+
+    @staticmethod
+    def _load_norm_stats(ckpt_dir):
+        """Locate + load openpi norm_stats.json (action q01/q99 for unnorm)."""
+        from pathlib import Path as _P
+        candidates = [
+            ckpt_dir / "assets/physical-intelligence/libero/norm_stats.json",
+            ckpt_dir.parent / "pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json",
+            _P("/e2e-data/users/liuzhi7/vla_workspace/pi05_libero_jax/assets/physical-intelligence/libero/norm_stats.json"),
+            _P.home() / "pi_assets/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+        ]
+        for path in candidates:
+            if path.exists():
+                import json
+                with open(path) as f:
+                    raw = json.load(f)
+                a = raw["norm_stats"]["actions"]
+                return {
+                    "q01": np.asarray(a["q01"], dtype=np.float32),  # (7,)
+                    "q99": np.asarray(a["q99"], dtype=np.float32),  # (7,)
+                    "mean": np.asarray(a["mean"], dtype=np.float32),
+                    "std": np.asarray(a["std"], dtype=np.float32),
+                }
+        return None
+
+    def _unnormalize_actions(self, actions_norm):
+        """Convert normalised actions [-1,1] -> raw robot commands.
+
+        openpi uses Quantile normalisation: x_norm = (x - q01) * 2/(q99-q01) - 1
+        Inverse: x_raw = (x_norm + 1) * (q99 - q01) / 2 + q01
+
+        Note: openpi excludes the gripper (last dim) from normalisation; we
+        match that convention. Gripper stays in [-1, +1] / {-1, +1}.
+        """
+        if self._action_norm is None:
+            return actions_norm
+        # actions_norm shape: (..., 7); torch tensor on any device
+        if isinstance(actions_norm, torch.Tensor):
+            q01 = torch.from_numpy(self._action_norm["q01"]).to(actions_norm.device)
+            q99 = torch.from_numpy(self._action_norm["q99"]).to(actions_norm.device)
+            scale = (q99 - q01) / 2
+            offset = (q99 + q01) / 2
+            out = actions_norm.clone()
+            # First 6 dims: position+rotation, normalised → unnormalize
+            out[..., :6] = actions_norm[..., :6] * scale[:6] + offset[:6]
+            # Gripper (dim 6): pass-through (LIBERO env binarises {-1,+1})
+            return out
+        else:
+            arr = np.asarray(actions_norm)
+            q01 = self._action_norm["q01"]
+            q99 = self._action_norm["q99"]
+            scale = (q99 - q01) / 2
+            offset = (q99 + q01) / 2
+            out = arr.copy()
+            out[..., :6] = arr[..., :6] * scale[:6] + offset[:6]
+            return out
 
     def _inject_lora_experimental(self) -> None:
         """Manual LoRA injection for π0.5 — experimental, may need
@@ -299,13 +371,22 @@ class Pi05Adapter(VLABase):
         # Tokenize prompt via the model's PaliGemma tokenizer
         tokenized, mask = self._tokenize_prompts_batch(prompts)
 
-        # Convert to torch (preprocess_observation_pytorch handles uint8→float)
+        # Convert image: uint8 [0,255] → float [-1, 1]
+        # (openpi.preprocess_observation_pytorch expects this normalized form;
+        # see preprocessing_pytorch.py line 142 `image = image * 2.0 - 1.0`)
         device = self.device
+
+        def _normalize_img(arr: np.ndarray) -> torch.Tensor:
+            t = torch.from_numpy(arr).to(device).float()
+            t = t / 255.0           # [0, 1]
+            t = t * 2.0 - 1.0       # [-1, 1]
+            return t
+
         data = {
             "image": {
-                "base_0_rgb": torch.from_numpy(bases).to(device),
-                "left_wrist_0_rgb": torch.from_numpy(wrists).to(device),
-                "right_wrist_0_rgb": torch.zeros_like(torch.from_numpy(bases)).to(device),
+                "base_0_rgb": _normalize_img(bases),
+                "left_wrist_0_rgb": _normalize_img(wrists),
+                "right_wrist_0_rgb": torch.zeros_like(_normalize_img(bases)),
             },
             "image_mask": {
                 "base_0_rgb": torch.ones(B, dtype=torch.bool, device=device),
@@ -391,18 +472,17 @@ class Pi05Adapter(VLABase):
     ) -> torch.Tensor:
         """K stochastic action chunks per batch element via model.sample_actions.
 
-        Returns: (B, K, T, 7) — sliced to LIBERO's 7 action dims.
+        Returns: (B, K, T, 7) — unnormalised LIBERO action commands.
         """
         B = self._infer_batch_size(batch)
         observation = self._batch_to_openpi_observation(batch, B)
 
-        # K samples by calling sample_actions K times with random noise
         chunks_per_k = []
         for _ in range(n_samples):
-            actions_32 = self.model.sample_actions(  # (B, T, 32)
-                self.device, observation, num_steps=10,
-            )
-            chunks_per_k.append(actions_32[..., :PI05_ACTION_DIM].float().cpu())
+            actions_32 = self.model.sample_actions(self.device, observation, num_steps=10)
+            actions_7 = actions_32[..., :PI05_ACTION_DIM].float().cpu()
+            actions_7 = self._unnormalize_actions(actions_7)
+            chunks_per_k.append(actions_7)
         # (K, B, T, 7) -> (B, K, T, 7)
         return torch.stack(chunks_per_k, dim=0).permute(1, 0, 2, 3).contiguous()
 
@@ -410,14 +490,13 @@ class Pi05Adapter(VLABase):
     def select_action(self, batch: dict) -> torch.Tensor:
         """Single deterministic action chunk per batch element.
 
-        Returns: (B, T, 7).
+        Returns: (B, T, 7) — unnormalised LIBERO action commands ready for env.step.
         """
         B = self._infer_batch_size(batch)
         observation = self._batch_to_openpi_observation(batch, B)
-        actions_32 = self.model.sample_actions(   # (B, T, 32)
-            self.device, observation, num_steps=10,
-        )
-        return actions_32[..., :PI05_ACTION_DIM].float().cpu()
+        actions_32 = self.model.sample_actions(self.device, observation, num_steps=10)
+        actions_7 = actions_32[..., :PI05_ACTION_DIM].float().cpu()
+        return self._unnormalize_actions(actions_7)
 
     @staticmethod
     def _infer_batch_size(batch: dict) -> int:
