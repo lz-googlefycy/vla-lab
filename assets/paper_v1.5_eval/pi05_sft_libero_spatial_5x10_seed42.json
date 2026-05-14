@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_spatial": {
+      "rate": 1.0,
+      "success": 50,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "1": {
+          "task": "pick up the black bowl next to the ramekin and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "2": {
+          "task": "pick up the black bowl from table center and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "3": {
+          "task": "pick up the black bowl on the cookie box and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "4": {
+          "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "pick up the black bowl on the ramekin and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "6": {
+          "task": "pick up the black bowl next to the cookie box and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "7": {
+          "task": "pick up the black bowl on the stove and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "pick up the black bowl next to the plate and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "9": {
+          "task": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "overall_avg": 1.0,
+  "meta": {
+    "base": "pi05",
+    "base_ckpt": "/e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_spatial"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 1239.1232106685638
+  }
+}
