@@ -17,6 +17,9 @@
 ## 🏗️ Pod 启动后必跑（一次）
 
 ```bash
+# 0. 拉最新代码（共享盘 ro_planning 是 git checkout，每次 pod 重启都该 pull）
+cd /e2e-data/users/liuzhi7/ro_planning && git pull
+
 # 1. 一键装 pi0.5 依赖（基础 transformers/sentencepiece/flax/jax/orbax 等）
 bash /e2e-data/users/liuzhi7/.persist/install-pi05-deps.sh
 
