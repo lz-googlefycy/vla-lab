@@ -68,7 +68,68 @@ python -m post_training.eval_libero \
 '
 ```
 
-### P-2/3/4: 改 `libero_spatial` → `libero_object` / `libero_goal` / `libero_10`
+### P-2: pi0.5 spatial → **object**
+
+```bash
+bash -c '
+set -euo pipefail
+bash /e2e-data/users/liuzhi7/.persist/install-pi05-deps.sh
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openpi/src:/e2e-data/users/liuzhi7/vla_workspace/openpi/packages/openpi-client/src
+export PALIGEMMA_TOKENIZER_PATH=/e2e-data/users/liuzhi7/vla_workspace/paligemma_tokenizer.model
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+
+cd /e2e-data/users/liuzhi7/ro_planning/code
+python -m post_training.eval_libero \
+    --base pi05 \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch \
+    --suites libero_object \
+    --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/mlp_pi05_sft_object_eval
+'
+```
+
+### P-3: pi0.5 → **goal**
+
+```bash
+bash -c '
+set -euo pipefail
+bash /e2e-data/users/liuzhi7/.persist/install-pi05-deps.sh
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openpi/src:/e2e-data/users/liuzhi7/vla_workspace/openpi/packages/openpi-client/src
+export PALIGEMMA_TOKENIZER_PATH=/e2e-data/users/liuzhi7/vla_workspace/paligemma_tokenizer.model
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+
+cd /e2e-data/users/liuzhi7/ro_planning/code
+python -m post_training.eval_libero \
+    --base pi05 \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch \
+    --suites libero_goal \
+    --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/mlp_pi05_sft_goal_eval
+'
+```
+
+### P-4: pi0.5 → **long10**（注意 `libero_10`，不是 `libero_long10`）
+
+```bash
+bash -c '
+set -euo pipefail
+bash /e2e-data/users/liuzhi7/.persist/install-pi05-deps.sh
+export PYTHONPATH=/e2e-data/users/liuzhi7/ro_planning/code:/e2e-data/users/liuzhi7/vla_workspace/openpi/src:/e2e-data/users/liuzhi7/vla_workspace/openpi/packages/openpi-client/src
+export PALIGEMMA_TOKENIZER_PATH=/e2e-data/users/liuzhi7/vla_workspace/paligemma_tokenizer.model
+export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
+
+cd /e2e-data/users/liuzhi7/ro_planning/code
+python -m post_training.eval_libero \
+    --base pi05 \
+    --base_ckpt /e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch \
+    --suites libero_10 \
+    --n_tasks 10 --n_trials_per_task 5 --seeds 42 \
+    --output_dir /e2e-data/users/liuzhi7/vla_workspace/output/mlp_pi05_sft_long10_eval
+'
+```
 
 期望（paper §5.3）: spatial 98.8 / object 98.2 / goal 98.0 / long10 92.4
 
