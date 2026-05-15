@@ -374,6 +374,9 @@ def parse_args():
                         "(GRPO trains used r=16, DPO trains used r=32)")
     p.add_argument("--lora_alpha", type=int, default=64,
                    help="LoRA alpha — MUST match train time")
+    p.add_argument("--use_dora", action="store_true",
+                   help="MUST match train time. Pass when ckpt was trained "
+                        "with --use_dora (loads _DoRALinear instead of _LoRALinear).")
     return p.parse_args()
 
 
@@ -398,6 +401,7 @@ def main():
         use_lora=bool(args.lora_ckpt),
         lora_r=args.lora_r,
         lora_alpha=args.lora_alpha,
+        use_dora=args.use_dora,
     )
     adapter = build_adapter(cfg)
 

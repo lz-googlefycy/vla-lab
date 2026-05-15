@@ -75,13 +75,19 @@ class PostTrainConfig:
     weight_decay: float = 1e-4
     grad_clip_norm: float = 1.0
 
-    # LoRA
+    # LoRA / DoRA (parameter-efficient fine-tuning)
     use_lora: bool = True
     lora_r: int = 32
     lora_alpha: int = 64
     lora_dropout: float = 0.05
     lora_target_modules: tuple[str, ...] = ("to_q", "to_k", "to_v", "to_out.0")
     also_train_proj: bool = True       # full-train state/action projection layers
+    # DoRA = Weight-Decomposed LoRA (NVIDIA, ICML 2024 spotlight).
+    # When True, peft will decompose W = m * (W_dir / ||W_dir||) and apply LoRA
+    # only to the direction component; magnitude `m` is trained as a separate
+    # vector. Same memory footprint as LoRA, training ~10% slower, +1~3 acc points
+    # on LLM/VL benchmarks. Recommended for VLA where pretrain prior matters.
+    use_dora: bool = False
 
     # DPO-specific
     dpo_beta: float = 0.1

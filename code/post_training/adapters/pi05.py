@@ -221,17 +221,22 @@ class Pi05Adapter(VLABase):
             return out
 
     def _inject_lora_experimental(self) -> None:
-        """Manual LoRA injection for π0.5 — experimental, may need
-        per-version tuning of target_modules."""
+        """Manual LoRA / DoRA injection for π0.5 — experimental.
+
+        Selects between vanilla LoRA and weight-decomposed DoRA via
+        ``cfg.use_dora`` (default False). DoRA gives +1~3 acc points at the
+        same parameter count. PaLI-Gemma + Gemma-Expert dual-tower architecture
+        means we hit attention modules in BOTH towers when target names match.
+        """
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-        from spirit_adapter.train_lora import _LoRALinear, _replace_module_by_path
+        from spirit_adapter.train_lora import (
+            _LoRALinear, _DoRALinear, _replace_module_by_path,
+        )
 
         for p in self.model.parameters():
             p.requires_grad = False
 
-        # PaLI-Gemma uses different attention names than Llama
-        # (k_proj/v_proj are present but module hierarchy differs).
-        # Default targets:
+        # PaLI-Gemma uses q_proj/k_proj/v_proj/o_proj names; Gemma-Expert too
         targets = ["q_proj", "k_proj", "v_proj", "o_proj"]
 
         replacements = []
@@ -242,15 +247,18 @@ class Pi05Adapter(VLABase):
                 if name.endswith("." + t) or name == t:
                     replacements.append((name, m))
                     break
+
+        WrapperCls = _DoRALinear if getattr(self.cfg, "use_dora", False) else _LoRALinear
         for name, orig in replacements:
-            new_m = _LoRALinear(orig, r=self.cfg.lora_r,
-                                alpha=self.cfg.lora_alpha,
-                                dropout=self.cfg.lora_dropout)
+            new_m = WrapperCls(orig, r=self.cfg.lora_r,
+                               alpha=self.cfg.lora_alpha,
+                               dropout=self.cfg.lora_dropout)
             _replace_module_by_path(self.model, name, new_m)
         n_trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         n_total = sum(p.numel() for p in self.model.parameters())
+        kind = "DoRA" if getattr(self.cfg, "use_dora", False) else "LoRA"
         print(
-            f"[pi05-adapter] LoRA injected: {len(replacements)} Linears, "
+            f"[pi05-adapter] {kind} injected: {len(replacements)} Linears, "
             f"trainable {n_trainable/1e6:.1f}M / {n_total/1e6:.0f}M "
             f"({100*n_trainable/n_total:.2f}%)"
         )

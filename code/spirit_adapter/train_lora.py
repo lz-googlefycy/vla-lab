@@ -244,6 +244,67 @@ class _LoRALinear(torch.nn.Module):
         return out + self.scale * lora_path
 
 
+class _DoRALinear(torch.nn.Module):
+    """Weight-Decomposed LoRA (DoRA, Liu et al., NVIDIA, ICML 2024 spotlight).
+
+    Idea: decompose pretrained weight W = m * (W / ||W||_c) where m is a
+    column-norm scalar (one per output dim) and W/||W||_c is the unit-norm
+    direction. LoRA updates the *direction* only; magnitude m is a separate
+    trainable vector. This decoupling matches full-finetuning's update
+    patterns better than vanilla LoRA, gaining +1~3 acc points on common
+    LLM/VL benchmarks at the same parameter count.
+
+    Forward:
+        W_dir + ΔW = orig.weight + scale * lora_B @ lora_A          # (out, in)
+        m_new = magnitude                                           # (out,)
+        W_eff = W_dir+ΔW * (m_new / ||W_dir+ΔW||_c)                 # rescale columns
+
+    Equivalent to W_eff = (W_dir+ΔW) / col_norm * m_new
+
+    Memory: same as LoRA + (out,) mag vec (~few KB per Linear).
+    Compute: forward +1 col-norm + scale; ~10% slower than LoRA.
+    Inference: can merge back to a regular Linear (zero overhead).
+    """
+
+    def __init__(
+        self, orig: torch.nn.Linear, r: int = 32, alpha: int = 64,
+        dropout: float = 0.0,
+    ):
+        super().__init__()
+        self.orig = orig
+        for p in self.orig.parameters():
+            p.requires_grad = False
+        self.r = r
+        self.scale = alpha / r
+        in_f = orig.in_features
+        out_f = orig.out_features
+        device = orig.weight.device
+        dtype = orig.weight.dtype
+        # Same A/B as LoRA (B init zero, A Kaiming)
+        self.lora_A = torch.nn.Parameter(
+            torch.zeros(r, in_f, device=device, dtype=dtype)
+        )
+        self.lora_B = torch.nn.Parameter(
+            torch.zeros(out_f, r, device=device, dtype=dtype)
+        )
+        torch.nn.init.kaiming_uniform_(self.lora_A, a=5 ** 0.5)
+        # Magnitude initialised to current column-norm of pretrained weight,
+        # so at step 0 W_eff == orig.weight (init effect = 0, identical to LoRA).
+        with torch.no_grad():
+            init_mag = orig.weight.norm(dim=1)  # (out_f,) per-column L2 norm
+        self.magnitude = torch.nn.Parameter(init_mag.clone())
+        self.dropout = torch.nn.Dropout(dropout) if dropout > 0 else torch.nn.Identity()
+
+    def forward(self, x):
+        # Compose effective weight: W_eff = (W_orig + scale * BA) / col_norm * m
+        W_dir = self.orig.weight + self.scale * (self.lora_B @ self.lora_A)
+        # column-wise L2 norm (one scalar per output unit). +eps for numerical safety.
+        col_norm = W_dir.norm(dim=1, keepdim=True).clamp(min=1e-8)  # (out, 1)
+        W_eff = W_dir * (self.magnitude.unsqueeze(1) / col_norm)
+        b = self.orig.bias
+        return torch.nn.functional.linear(self.dropout(x), W_eff, b)
+
+
 def _replace_module_by_path(root: torch.nn.Module, path: str, new_module: torch.nn.Module):
     """Replace root.<path> with new_module.
 

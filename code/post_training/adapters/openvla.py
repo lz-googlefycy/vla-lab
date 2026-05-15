@@ -150,14 +150,22 @@ class OpenVLAAdapter(VLABase):
         return "default"
 
     def _inject_lora(self) -> None:
-        """Inject LoRA into Llama-2 attention modules. Manual, no peft.
+        """Inject LoRA or DoRA into Llama-2 attention modules. Manual, no peft.
 
-        Uses the same _LoRALinear class as our Spirit train_lora.py for
-        consistency and to avoid the peft dependency.
+        Selection via ``cfg.use_dora``:
+          - False (default): _LoRALinear → vanilla LoRA (Hu et al., 2021)
+          - True:           _DoRALinear → Weight-Decomposed LoRA
+                            (Liu et al., NVIDIA, ICML 2024 spotlight)
+
+        DoRA decouples magnitude (per-output-channel scalar, learned separately)
+        from direction (rank-r update via A/B matrices), giving +1~3 acc points
+        at same trainable parameter count for ~10% extra train compute.
         """
         # Lazy import — avoids circular imports
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-        from spirit_adapter.train_lora import _LoRALinear, _replace_module_by_path  # type: ignore
+        from spirit_adapter.train_lora import (
+            _LoRALinear, _DoRALinear, _replace_module_by_path,
+        )  # type: ignore
 
         # Freeze all params first
         for p in self.model.parameters():
@@ -178,16 +186,19 @@ class OpenVLAAdapter(VLABase):
                 if name.endswith("." + t) or name == t:
                     replacements.append((name, m))
                     break
+
+        WrapperCls = _DoRALinear if getattr(self.cfg, "use_dora", False) else _LoRALinear
         for name, orig in replacements:
-            new_m = _LoRALinear(
+            new_m = WrapperCls(
                 orig, r=self.cfg.lora_r, alpha=self.cfg.lora_alpha,
                 dropout=self.cfg.lora_dropout,
             )
             _replace_module_by_path(self.model, name, new_m)
         n_trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         n_total = sum(p.numel() for p in self.model.parameters())
+        kind = "DoRA" if getattr(self.cfg, "use_dora", False) else "LoRA"
         print(
-            f"[openvla-adapter] LoRA injected: {len(replacements)} Linears, "
+            f"[openvla-adapter] {kind} injected: {len(replacements)} Linears, "
             f"trainable {n_trainable/1e6:.1f}M / {n_total/1e6:.0f}M "
             f"({100*n_trainable/n_total:.2f}%)"
         )

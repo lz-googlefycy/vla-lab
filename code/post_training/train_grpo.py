@@ -202,6 +202,8 @@ def parse_args():
     # LoRA
     p.add_argument("--lora_r", type=int, default=32)
     p.add_argument("--lora_alpha", type=int, default=64)
+    p.add_argument("--use_dora", action="store_true",
+                   help="Use Weight-Decomposed LoRA (DoRA, ICML 2024).")
     p.add_argument("--no_lora", action="store_true")
 
     return p.parse_args()
@@ -228,6 +230,7 @@ def main():
         use_lora=not args.no_lora,
         lora_r=args.lora_r,
         lora_alpha=args.lora_alpha,
+        use_dora=args.use_dora,
         n_rollouts_for_pair_gen=args.group_size,
         grpo_beta=args.beta,
         grpo_epsilon=args.epsilon,
