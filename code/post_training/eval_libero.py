@@ -114,10 +114,23 @@ def run_one_trial(
     max_steps: int,
     num_steps_wait: int = 10,
     capture_video: bool = False,
+    chunk_cache=None,
 ) -> dict:
-    """Run one trial, return outcome dict."""
+    """Run one trial, return outcome dict.
+
+    Args:
+        chunk_cache: optional VLAChunkCache instance. When provided, the
+            chunk's individual steps after step 0 may be served from cache
+            (skipping VLA forward) when visual scene similarity is high.
+            Caller must call ``chunk_cache.reset_episode()`` between trials.
+    """
     env.reset()
     obs = env.set_init_state(initial_state)
+    # Per-trial latency tracker
+    vla_forward_count = 0
+    cache_hit_count = 0
+    if chunk_cache is not None:
+        chunk_cache.reset_episode()
 
     # Settling phase
     for _ in range(num_steps_wait):
@@ -186,13 +199,36 @@ def run_one_trial(
             "wrist_uint8": [wrist_uint8],
             "state": torch.from_numpy(state_8).unsqueeze(0),
         }
-        with torch.no_grad():
-            chunk = adapter.select_action(batch)
-        # chunk shape: (B=1, T, 7). For OpenVLA T=1, for pi0.5 T=10.
-        chunk_np = chunk.squeeze(0).cpu().numpy()  # (T, 7)
-        if chunk_np.ndim == 1:
-            chunk_np = chunk_np[None, :]  # back-compat: (1, 7)
-        T = chunk_np.shape[0]
+        # ---- VLA forward (with optional chunk cache) ----
+        # current_visual: a low-dim signature for similarity check.
+        # We use the resized base camera flattened tensor, downsampled to
+        # 32×32 mean to keep cosine similarity meaningful and cheap.
+        if chunk_cache is not None:
+            # 32×32 mean-pool of normalized [0, 1] base image as the signature
+            sig = (img_t.unsqueeze(0) if img_t.ndim == 3 else img_t)
+            sig = torch.nn.functional.adaptive_avg_pool2d(sig, (32, 32)).flatten()
+            cached_action = chunk_cache.try_get_action(sig)
+        else:
+            cached_action = None
+
+        if cached_action is not None:
+            # Cache hit: take a single action this iteration, skip VLA
+            chunk_np = cached_action.cpu().numpy()[None, :]
+            T = 1
+            cache_hit_count += 1
+        else:
+            with torch.no_grad():
+                chunk = adapter.select_action(batch)
+            vla_forward_count += 1
+            # chunk shape: (B=1, T, 7). For OpenVLA T=1, for pi0.5 T=10.
+            chunk_full = chunk.squeeze(0).cpu()  # (T, 7) tensor
+            chunk_np = chunk_full.numpy()
+            if chunk_np.ndim == 1:
+                chunk_np = chunk_np[None, :]
+                chunk_full = chunk_full.unsqueeze(0)
+            T = chunk_np.shape[0]
+            if chunk_cache is not None:
+                chunk_cache.put(sig, chunk_full)
 
         is_openvla = (hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "openvla")
 
@@ -232,6 +268,8 @@ def run_one_trial(
         "n_steps": n_steps,
         "elapsed_s": time.time() - t0,
         "frames": frames if capture_video else None,
+        "vla_forwards": vla_forward_count,
+        "cache_hits": cache_hit_count,
     }
 
 
@@ -244,6 +282,7 @@ def evaluate_suite(
     out_dir: Path,
     capture_videos: int = 0,
     print_progress: bool = True,
+    chunk_cache=None,
 ) -> dict:
     """Eval one LIBERO suite. Returns nested dict: {task_id: per-trial list}."""
     from libero.libero import benchmark
@@ -277,6 +316,7 @@ def evaluate_suite(
                     adapter, env, task_description,
                     init_states[init_idx], max_steps,
                     capture_video=want_video,
+                    chunk_cache=chunk_cache,
                 )
                 if want_video and outcome.get("frames"):
                     cap_path = out_dir / "videos" / suite_name / \
@@ -377,6 +417,15 @@ def parse_args():
     p.add_argument("--use_dora", action="store_true",
                    help="MUST match train time. Pass when ckpt was trained "
                         "with --use_dora (loads _DoRALinear instead of _LoRALinear).")
+    p.add_argument("--use_chunk_cache", action="store_true",
+                   help="Enable VLAChunkCache: reuse cached action chunk when "
+                        "consecutive obs are >= sim_threshold cosine-similar. "
+                        "Reference: VLA-Cache (NeurIPS 2025).")
+    p.add_argument("--cache_sim_threshold", type=float, default=0.95,
+                   help="Cosine similarity threshold for chunk cache reuse "
+                        "(default 0.95). Higher = more conservative, more re-queries.")
+    p.add_argument("--cache_max_consecutive_reuses", type=int, default=5,
+                   help="Hard cap on consecutive chunk reuses (safety) (default 5).")
     return p.parse_args()
 
 
@@ -409,6 +458,23 @@ def main():
         adapter.load(args.lora_ckpt)
         print(f"[eval] loaded LoRA: {args.lora_ckpt}")
 
+    # Optional VLA-Cache style chunk cache
+    chunk_cache = None
+    if args.use_chunk_cache:
+        from inference.kv_cache import VLAChunkCache
+        # Pi0.5 chunks T=10, OpenVLA T=1; with T=1 cache is no-op (no consecutive
+        # action steps to skip), but the API still records similarity stats.
+        chunk_size = 10 if args.base == "pi05" else 1
+        chunk_cache = VLAChunkCache(
+            sim_threshold=args.cache_sim_threshold,
+            chunk_size=chunk_size,
+            max_consecutive_reuses=args.cache_max_consecutive_reuses,
+        )
+        print(f"[eval] VLAChunkCache enabled "
+              f"(sim_threshold={args.cache_sim_threshold}, "
+              f"chunk_size={chunk_size}, "
+              f"max_reuses={args.cache_max_consecutive_reuses})")
+
     # Evaluate each suite
     per_suite = {}
     t_start = time.time()
@@ -417,8 +483,25 @@ def main():
         results = evaluate_suite(
             adapter, suite, args.n_tasks, args.n_trials_per_task,
             args.seeds, out, capture_videos=args.capture_videos,
+            chunk_cache=chunk_cache,
         )
         per_suite[suite] = results
+
+    # Cache stats summary if enabled
+    if chunk_cache is not None:
+        cache_summary = {
+            "n_steps": chunk_cache.stats.n_steps,
+            "n_reused_chunks": chunk_cache.stats.n_reused_chunks,
+            "n_recomputed_chunks": chunk_cache.stats.n_recomputed_chunks,
+            "chunk_reuse_rate": chunk_cache.stats.chunk_reuse_rate,
+            "mean_similarity": (
+                float(np.mean(chunk_cache.stats.similarities))
+                if chunk_cache.stats.similarities else 0.0
+            ),
+        }
+        with open(out / "chunk_cache_stats.json", "w") as f:
+            json.dump(cache_summary, f, indent=2)
+        print(f"\n=== ChunkCache Summary ===\n{json.dumps(cache_summary, indent=2)}")
 
     # Aggregate + print
     summary = aggregate(per_suite)
