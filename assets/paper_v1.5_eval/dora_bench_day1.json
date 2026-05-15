@@ -1,0 +1,28 @@
+{
+  "LoRA-r32": {
+    "label": "LoRA-r32",
+    "use_lora": true,
+    "use_dora": false,
+    "peak_gpu_gb": 17.93059328,
+    "after_load_gb": 15.163093504,
+    "trainable_M": 33.554432,
+    "total_M": 7574.791616,
+    "trainable_pct": 0.44297498467316254,
+    "logp_cur": -15.6875,
+    "logp_ref": -15.6875,
+    "init_diff": 0.0
+  },
+  "DoRA-r32": {
+    "label": "DoRA-r32",
+    "use_lora": true,
+    "use_dora": true,
+    "peak_gpu_gb": 26.167493632,
+    "after_load_gb": 15.231250944,
+    "trainable_M": 34.07872,
+    "total_M": 7575.315904,
+    "trainable_pct": 0.4498653314511331,
+    "logp_cur": -14.5625,
+    "logp_ref": -14.5625,
+    "init_diff": 0.0
+  }
+}
