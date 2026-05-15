@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_object": {
+      "rate": 0.98,
+      "success": 49,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "pick up the alphabet soup and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "1": {
+          "task": "pick up the cream cheese and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "2": {
+          "task": "pick up the salad dressing and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "3": {
+          "task": "pick up the bbq sauce and place it in the basket",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "4": {
+          "task": "pick up the ketchup and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "pick up the tomato sauce and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "6": {
+          "task": "pick up the butter and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "7": {
+          "task": "pick up the milk and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "pick up the chocolate pudding and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "9": {
+          "task": "pick up the orange juice and place it in the basket",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "overall_avg": 0.98,
+  "meta": {
+    "base": "pi05",
+    "base_ckpt": "/e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_object"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 979.6183667182922
+  }
+}
