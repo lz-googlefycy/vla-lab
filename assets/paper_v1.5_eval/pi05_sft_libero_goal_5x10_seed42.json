@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_goal": {
+      "rate": 1.0,
+      "success": 50,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "open the middle drawer of the cabinet",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "1": {
+          "task": "put the bowl on the stove",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "2": {
+          "task": "put the wine bottle on top of the cabinet",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "3": {
+          "task": "open the top drawer and put the bowl inside",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "4": {
+          "task": "put the bowl on top of the cabinet",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "push the plate to the front of the stove",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "6": {
+          "task": "put the cream cheese in the bowl",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "7": {
+          "task": "turn on the stove",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "put the bowl on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "9": {
+          "task": "put the wine bottle on the rack",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "overall_avg": 1.0,
+  "meta": {
+    "base": "pi05",
+    "base_ckpt": "/e2e-data/users/liuzhi7/vla_workspace/models/pi05_libero_pytorch",
+    "lora_ckpt": "",
+    "suites": [
+      "libero_goal"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 1148.5797305107117
+  }
+}
