@@ -1,0 +1,86 @@
+{
+  "per_suite": {
+    "libero_object": {
+      "rate": 0.75,
+      "success": 75,
+      "trials": 100,
+      "per_task": {
+        "0": {
+          "task": "pick up the alphabet soup and place it in the basket",
+          "success": 8,
+          "trials": 10,
+          "rate": 0.8
+        },
+        "1": {
+          "task": "pick up the cream cheese and place it in the basket",
+          "success": 4,
+          "trials": 10,
+          "rate": 0.4
+        },
+        "2": {
+          "task": "pick up the salad dressing and place it in the basket",
+          "success": 10,
+          "trials": 10,
+          "rate": 1.0
+        },
+        "3": {
+          "task": "pick up the bbq sauce and place it in the basket",
+          "success": 6,
+          "trials": 10,
+          "rate": 0.6
+        },
+        "4": {
+          "task": "pick up the ketchup and place it in the basket",
+          "success": 10,
+          "trials": 10,
+          "rate": 1.0
+        },
+        "5": {
+          "task": "pick up the tomato sauce and place it in the basket",
+          "success": 9,
+          "trials": 10,
+          "rate": 0.9
+        },
+        "6": {
+          "task": "pick up the butter and place it in the basket",
+          "success": 6,
+          "trials": 10,
+          "rate": 0.6
+        },
+        "7": {
+          "task": "pick up the milk and place it in the basket",
+          "success": 7,
+          "trials": 10,
+          "rate": 0.7
+        },
+        "8": {
+          "task": "pick up the chocolate pudding and place it in the basket",
+          "success": 6,
+          "trials": 10,
+          "rate": 0.6
+        },
+        "9": {
+          "task": "pick up the orange juice and place it in the basket",
+          "success": 9,
+          "trials": 10,
+          "rate": 0.9
+        }
+      }
+    }
+  },
+  "overall_avg": 0.75,
+  "meta": {
+    "base": "openvla",
+    "base_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-object",
+    "lora_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/output/h20_dpo_object/checkpoint-500.pt",
+    "suites": [
+      "libero_object"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      1337,
+      2026
+    ],
+    "elapsed_s": 11111.112537145615
+  }
+}
