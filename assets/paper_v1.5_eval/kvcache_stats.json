@@ -1,0 +1,7 @@
+{
+  "n_steps": 3031,
+  "n_reused_chunks": 2490,
+  "n_recomputed_chunks": 541,
+  "chunk_reuse_rate": 0.8215110524579347,
+  "mean_similarity": 0.9900952722594615
+}
