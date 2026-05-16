@@ -1,0 +1,85 @@
+{
+  "per_suite": {
+    "libero_spatial": {
+      "rate": 0.78,
+      "success": 39,
+      "trials": 50,
+      "per_task": {
+        "0": {
+          "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "1": {
+          "task": "pick up the black bowl next to the ramekin and place it on the plate",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        },
+        "2": {
+          "task": "pick up the black bowl from table center and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "3": {
+          "task": "pick up the black bowl on the cookie box and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "4": {
+          "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "success": 3,
+          "trials": 5,
+          "rate": 0.6
+        },
+        "5": {
+          "task": "pick up the black bowl on the ramekin and place it on the plate",
+          "success": 1,
+          "trials": 5,
+          "rate": 0.2
+        },
+        "6": {
+          "task": "pick up the black bowl next to the cookie box and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "7": {
+          "task": "pick up the black bowl on the stove and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        },
+        "8": {
+          "task": "pick up the black bowl next to the plate and place it on the plate",
+          "success": 4,
+          "trials": 5,
+          "rate": 0.8
+        },
+        "9": {
+          "task": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "success": 5,
+          "trials": 5,
+          "rate": 1.0
+        }
+      }
+    }
+  },
+  "overall_avg": 0.78,
+  "meta": {
+    "base": "openvla",
+    "base_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial",
+    "lora_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/output/h20_dpo_spatial_dora/checkpoint-500.pt",
+    "suites": [
+      "libero_spatial"
+    ],
+    "n_trials_per_task": 5,
+    "seeds": [
+      42
+    ],
+    "elapsed_s": 4940.879698038101
+  }
+}
