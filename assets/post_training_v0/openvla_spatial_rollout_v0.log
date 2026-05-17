@@ -1,0 +1,71 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.8.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+/opt/conda/lib/python3.11/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+'(ReadTimeoutError("HTTPSConnectionPool(host='hf-mirror.com', port=443): Read timed out. (read timeout=10)"), '(Request ID: 9d9cf951-8fa5-435f-af14-1ff1f661b2a0)')' thrown while requesting HEAD https://hf-mirror.com/openvla/openvla-7b/resolve/main/modeling_prismatic.py
+Retrying in 1s [Retry 1/5].
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- configuration_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- modeling_prismatic.py
+- configuration_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- modeling_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- modeling_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- processing_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- processing_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+/opt/conda/lib/python3.11/site-packages/transformers/models/auto/modeling_auto.py:2284: FutureWarning: The class `AutoModelForVision2Seq` is deprecated and will be removed in v5.0. Please use `AutoModelForImageTextToText` instead.
+  warnings.warn(
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- configuration_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+`torch_dtype` is deprecated! Use `dtype` instead!
+A new version of the following files was downloaded from https://huggingface.co/openvla/openvla-7b:
+- modeling_prismatic.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+Expected `transformers==4.40.1` and `tokenizers==0.19.1` but got `transformers==4.57.1` and `tokenizers==0.22.2`; there might be inference-time regressions due to dependency changes. If in doubt, pleaseuse the above versions.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  3.05it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 10.36it/s]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /workspace/LIBERO/libero/libero/../datasets does not exist!
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /opt/conda/lib/python3.11/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[Warning]: datasets path /workspace/LIBERO/libero/libero/../datasets does not exist!
+
+=== Task 1/1: pick up the black bowl between the plate and the ramekin and place it on the plate
+  group   0  k=0  len=220  success=False  reward=+0.000  (63.0s)
+  group   0  k=1  len=220  success=False  reward=-0.017  (59.3s)
+  group   0  k=2  len=220  success=False  reward=-0.018  (59.4s)
+  group   0  k=3  len=220  success=False  reward=-0.018  (59.1s)
+
+[done] saved 2 pairs from 4 episodes
+  success rate: 0.0%
+  elapsed: 4.1 min
+  → /output/spatial_real_pairs_v3.pt
