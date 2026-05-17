@@ -108,9 +108,36 @@ class LiberoPretrainDataset(Dataset):
     def __getitem__(self, idx) -> dict:
         s = self.samples[idx]
         if self.synthetic:
-            agent_t = np.random.randint(0, 256, (224, 224, 3), dtype=np.uint8)
-            wrist_t = np.random.randint(0, 256, (224, 224, 3), dtype=np.uint8)
-            agent_t_delta = np.random.randint(0, 256, (224, 224, 3), dtype=np.uint8)
+            # Structured-noise synthetic data: each sample's 3 views share a
+            # latent "scene code" (deterministic from idx) so InfoNCE has a
+            # real signal to learn. Without this, all 3 views are i.i.d.
+            # noise and the model can't possibly do better than random
+            # (loss stuck at log(B)).
+            #
+            # Recipe:
+            #   scene_code (D=64) ~ N(seed=idx)              shared across 3 views
+            #   view_offset_a / _w / _td (D=64) ~ N(view_seed) per-view perturbation
+            #   each view = scene_code + 0.3 * view_offset, broadcast to image
+            # This gives the model a recoverable signal that matches the
+            # multi-view + temporal contrast premise.
+            rng = np.random.default_rng(idx + 1)
+            scene = rng.standard_normal(64).astype(np.float32)
+            offset_a = rng.standard_normal(64).astype(np.float32) * 0.3
+            offset_w = rng.standard_normal(64).astype(np.float32) * 0.3
+            offset_td = rng.standard_normal(64).astype(np.float32) * 0.3
+
+            def _materialize(scene_code: np.ndarray) -> np.ndarray:
+                # broadcast 64-d code to 224×224×3 via tile + small noise
+                tile = np.tile(scene_code[:48].reshape(4, 4, 3), (56, 56, 1))
+                tile = (tile - tile.min()) / (tile.max() - tile.min() + 1e-6)
+                # +5% pixel noise to prevent trivial memorization
+                tile = tile + rng.standard_normal(tile.shape).astype(np.float32) * 0.05
+                tile = np.clip(tile, 0, 1)
+                return (tile * 255).astype(np.uint8)
+
+            agent_t = _materialize(scene + offset_a)
+            wrist_t = _materialize(scene + offset_w)
+            agent_t_delta = _materialize(scene + offset_td)
         else:
             # TODO Day 7: load from HDF5
             agent_t = wrist_t = agent_t_delta = np.zeros((224, 224, 3), dtype=np.uint8)
