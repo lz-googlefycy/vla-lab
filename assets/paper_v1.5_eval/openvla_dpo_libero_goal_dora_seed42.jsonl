@@ -1,0 +1,50 @@
+{"suite": "libero_goal", "task_id": 0, "task": "open the middle drawer of the cabinet", "trial": 0, "seed": 42, "init_idx": 0, "success": false, "n_steps": 300, "elapsed_s": 202.75905418395996}
+{"suite": "libero_goal", "task_id": 0, "task": "open the middle drawer of the cabinet", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 142, "elapsed_s": 95.65666675567627}
+{"suite": "libero_goal", "task_id": 0, "task": "open the middle drawer of the cabinet", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 126, "elapsed_s": 85.2665765285492}
+{"suite": "libero_goal", "task_id": 0, "task": "open the middle drawer of the cabinet", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 118, "elapsed_s": 80.78000736236572}
+{"suite": "libero_goal", "task_id": 0, "task": "open the middle drawer of the cabinet", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 140, "elapsed_s": 95.22019147872925}
+{"suite": "libero_goal", "task_id": 1, "task": "put the bowl on the stove", "trial": 0, "seed": 42, "init_idx": 0, "success": false, "n_steps": 300, "elapsed_s": 206.3093044757843}
+{"suite": "libero_goal", "task_id": 1, "task": "put the bowl on the stove", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 85, "elapsed_s": 58.28499984741211}
+{"suite": "libero_goal", "task_id": 1, "task": "put the bowl on the stove", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 79, "elapsed_s": 54.34345984458923}
+{"suite": "libero_goal", "task_id": 1, "task": "put the bowl on the stove", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 86, "elapsed_s": 58.891146659851074}
+{"suite": "libero_goal", "task_id": 1, "task": "put the bowl on the stove", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 78, "elapsed_s": 53.40935564041138}
+{"suite": "libero_goal", "task_id": 2, "task": "put the wine bottle on top of the cabinet", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 74, "elapsed_s": 51.7294487953186}
+{"suite": "libero_goal", "task_id": 2, "task": "put the wine bottle on top of the cabinet", "trial": 1, "seed": 42, "init_idx": 1, "success": false, "n_steps": 300, "elapsed_s": 205.72360014915466}
+{"suite": "libero_goal", "task_id": 2, "task": "put the wine bottle on top of the cabinet", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 101, "elapsed_s": 70.4878602027893}
+{"suite": "libero_goal", "task_id": 2, "task": "put the wine bottle on top of the cabinet", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 115, "elapsed_s": 79.90949702262878}
+{"suite": "libero_goal", "task_id": 2, "task": "put the wine bottle on top of the cabinet", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 103, "elapsed_s": 72.19953441619873}
+{"suite": "libero_goal", "task_id": 3, "task": "open the top drawer and put the bowl inside", "trial": 0, "seed": 42, "init_idx": 0, "success": false, "n_steps": 300, "elapsed_s": 206.4360692501068}
+{"suite": "libero_goal", "task_id": 3, "task": "open the top drawer and put the bowl inside", "trial": 1, "seed": 42, "init_idx": 1, "success": false, "n_steps": 300, "elapsed_s": 207.370760679245}
+{"suite": "libero_goal", "task_id": 3, "task": "open the top drawer and put the bowl inside", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 178, "elapsed_s": 122.40035367012024}
+{"suite": "libero_goal", "task_id": 3, "task": "open the top drawer and put the bowl inside", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 232, "elapsed_s": 159.83014702796936}
+{"suite": "libero_goal", "task_id": 3, "task": "open the top drawer and put the bowl inside", "trial": 4, "seed": 42, "init_idx": 4, "success": false, "n_steps": 300, "elapsed_s": 206.5686070919037}
+{"suite": "libero_goal", "task_id": 4, "task": "put the bowl on top of the cabinet", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 97, "elapsed_s": 66.51162385940552}
+{"suite": "libero_goal", "task_id": 4, "task": "put the bowl on top of the cabinet", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 115, "elapsed_s": 78.95314311981201}
+{"suite": "libero_goal", "task_id": 4, "task": "put the bowl on top of the cabinet", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 101, "elapsed_s": 69.5474922657013}
+{"suite": "libero_goal", "task_id": 4, "task": "put the bowl on top of the cabinet", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 86, "elapsed_s": 59.52543354034424}
+{"suite": "libero_goal", "task_id": 4, "task": "put the bowl on top of the cabinet", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 82, "elapsed_s": 56.560373067855835}
+{"suite": "libero_goal", "task_id": 5, "task": "push the plate to the front of the stove", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 142, "elapsed_s": 96.8546130657196}
+{"suite": "libero_goal", "task_id": 5, "task": "push the plate to the front of the stove", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 148, "elapsed_s": 100.75246477127075}
+{"suite": "libero_goal", "task_id": 5, "task": "push the plate to the front of the stove", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 147, "elapsed_s": 100.69031310081482}
+{"suite": "libero_goal", "task_id": 5, "task": "push the plate to the front of the stove", "trial": 3, "seed": 42, "init_idx": 3, "success": false, "n_steps": 300, "elapsed_s": 203.49191093444824}
+{"suite": "libero_goal", "task_id": 5, "task": "push the plate to the front of the stove", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 134, "elapsed_s": 91.2796585559845}
+{"suite": "libero_goal", "task_id": 6, "task": "put the cream cheese in the bowl", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 124, "elapsed_s": 85.25021433830261}
+{"suite": "libero_goal", "task_id": 6, "task": "put the cream cheese in the bowl", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 109, "elapsed_s": 75.54619669914246}
+{"suite": "libero_goal", "task_id": 6, "task": "put the cream cheese in the bowl", "trial": 2, "seed": 42, "init_idx": 2, "success": false, "n_steps": 300, "elapsed_s": 206.7332363128662}
+{"suite": "libero_goal", "task_id": 6, "task": "put the cream cheese in the bowl", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 106, "elapsed_s": 72.91627764701843}
+{"suite": "libero_goal", "task_id": 6, "task": "put the cream cheese in the bowl", "trial": 4, "seed": 42, "init_idx": 4, "success": false, "n_steps": 300, "elapsed_s": 206.7819263935089}
+{"suite": "libero_goal", "task_id": 7, "task": "turn on the stove", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 97, "elapsed_s": 64.5910439491272}
+{"suite": "libero_goal", "task_id": 7, "task": "turn on the stove", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 109, "elapsed_s": 72.77780222892761}
+{"suite": "libero_goal", "task_id": 7, "task": "turn on the stove", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 107, "elapsed_s": 71.9478120803833}
+{"suite": "libero_goal", "task_id": 7, "task": "turn on the stove", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 78, "elapsed_s": 52.10973882675171}
+{"suite": "libero_goal", "task_id": 7, "task": "turn on the stove", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 78, "elapsed_s": 52.17911505699158}
+{"suite": "libero_goal", "task_id": 8, "task": "put the bowl on the plate", "trial": 0, "seed": 42, "init_idx": 0, "success": true, "n_steps": 76, "elapsed_s": 51.631235122680664}
+{"suite": "libero_goal", "task_id": 8, "task": "put the bowl on the plate", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 80, "elapsed_s": 54.87472224235535}
+{"suite": "libero_goal", "task_id": 8, "task": "put the bowl on the plate", "trial": 2, "seed": 42, "init_idx": 2, "success": true, "n_steps": 82, "elapsed_s": 55.88020730018616}
+{"suite": "libero_goal", "task_id": 8, "task": "put the bowl on the plate", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 70, "elapsed_s": 47.565924882888794}
+{"suite": "libero_goal", "task_id": 8, "task": "put the bowl on the plate", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 73, "elapsed_s": 49.585991859436035}
+{"suite": "libero_goal", "task_id": 9, "task": "put the wine bottle on the rack", "trial": 0, "seed": 42, "init_idx": 0, "success": false, "n_steps": 300, "elapsed_s": 204.48787641525269}
+{"suite": "libero_goal", "task_id": 9, "task": "put the wine bottle on the rack", "trial": 1, "seed": 42, "init_idx": 1, "success": true, "n_steps": 199, "elapsed_s": 135.03638815879822}
+{"suite": "libero_goal", "task_id": 9, "task": "put the wine bottle on the rack", "trial": 2, "seed": 42, "init_idx": 2, "success": false, "n_steps": 300, "elapsed_s": 203.3381106853485}
+{"suite": "libero_goal", "task_id": 9, "task": "put the wine bottle on the rack", "trial": 3, "seed": 42, "init_idx": 3, "success": true, "n_steps": 121, "elapsed_s": 82.57382535934448}
+{"suite": "libero_goal", "task_id": 9, "task": "put the wine bottle on the rack", "trial": 4, "seed": 42, "init_idx": 4, "success": true, "n_steps": 166, "elapsed_s": 113.3675479888916}

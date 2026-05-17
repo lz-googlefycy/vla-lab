@@ -1,0 +1,9 @@
+{
+  "n_steps": 19,
+  "n_hits": 0,
+  "n_misses": 19,
+  "hit_rate": 0.0,
+  "mean_similarity": 0.8824782026441473,
+  "avg_prefix_ms": 59.291158067552665,
+  "avg_sample_actions_ms": 278.11645441933683
+}
