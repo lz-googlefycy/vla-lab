@@ -79,39 +79,112 @@ class MockEncoder(nn.Module):
 
 
 class SiglipEncoderWrapper(nn.Module):
-    """Wraps HuggingFace SiglipVisionModel for our pretraining pipeline.
+    """Wraps timm SigLIP-so400m vision tower (frozen) for pretraining.
+
+    Why timm not HF transformers:
+      OpenVLA uses timm `vit_so400m_patch14_siglip_224` and we want to
+      reuse the exact same weights (so our pretrained features stack
+      cleanly on top of OpenVLA's vision encoder downstream). Loading
+      via timm + state_dict from OpenVLA safetensors avoids the timm→HF
+      key remap and keeps weights bit-identical.
 
     Args:
-        siglip_path: HF model id (e.g. "google/siglip-so400m-patch14-384")
-                     or local checkpoint path.
+        siglip_path: either
+          (a) "timm" → timm-init random weights (sanity)
+          (b) path to OpenVLA safetensors directory → extract
+              vision_backbone.featurizer.<...> keys and load.
+          (c) None → MockEncoder used instead (handled by _build_encoder)
 
-    Output: (B, hidden_size) — pooler_output (== CLS-equivalent for SigLIP).
-            For so400m-patch14-384: hidden_size=1152.
-
-    All parameters are frozen; gradient does not flow through encoder.
+    Output: (B, 1152) pooled features (timm forward_features→head).
     """
+    TIMM_ARCH = "vit_so400m_patch14_siglip_224"
+
     def __init__(self, siglip_path: str):
         super().__init__()
-        from transformers import SiglipVisionModel
-        self.model = SiglipVisionModel.from_pretrained(siglip_path)
+        import timm
+        self.model = timm.create_model(self.TIMM_ARCH, pretrained=False, num_classes=0)
+        self.image_size = 224
+
+        if siglip_path != "timm" and Path(siglip_path).exists():
+            self._load_from_openvla(siglip_path)
+            print(f"[encoder] loaded SigLIP from OpenVLA ckpt: {siglip_path}")
+        else:
+            print(f"[encoder] SigLIP timm-init RANDOM weights (siglip_path={siglip_path}); "
+                  f"this is for sanity/smoke ONLY — features won't be meaningful.")
+
         self.model.eval()
         for p in self.model.parameters():
             p.requires_grad = False
-        self.image_size = self.model.config.image_size
-        print(f"[encoder] loaded SigLIP from {siglip_path}, "
-              f"hidden_size={self.model.config.hidden_size}, "
-              f"image_size={self.image_size}")
+        n_params = sum(p.numel() for p in self.model.parameters())
+        print(f"[encoder] SigLIP frozen, {n_params/1e6:.1f}M params, output_dim=1152")
+
+    def _load_from_openvla(self, openvla_dir: str):
+        """Extract vision_backbone.featurizer.<x> from OpenVLA safetensors.
+
+        OpenVLA stores the SigLIP under prefix `vision_backbone.featurizer.`
+        in the same timm key naming as the underlying timm model — so we
+        just strip the prefix and load.
+
+        OpenVLA also has DINOv2 fused with SigLIP (dinosiglip backbone).
+        We pick only the SigLIP half. The fused backbone uses
+        `vision_backbone.featurizer` for the FIRST encoder (SigLIP per
+        OpenVLA config order) — but timm keys are `blocks.0.norm1.weight`
+        etc. We filter by looking for keys that start with
+        `vision_backbone.featurizer.` and remap.
+
+        Reference: openvla/prismatic/models/backbones/vision/dinosiglip_vit.py
+        """
+        from safetensors.torch import load_file
+        oroot = Path(openvla_dir)
+        # OpenVLA-7B = 4 shards. Iterate all and merge.
+        merged = {}
+        for shard in sorted(oroot.glob("model-*-of-*.safetensors")):
+            sd = load_file(shard)
+            for k, v in sd.items():
+                if k.startswith("vision_backbone.featurizer."):
+                    new_k = k[len("vision_backbone.featurizer."):]
+                    merged[new_k] = v
+        if not merged:
+            raise RuntimeError(f"no vision_backbone.featurizer.* keys in {openvla_dir}")
+        # The OpenVLA 'featurizer' is the FIRST encoder of the dinosiglip
+        # fused backbone — by config inspection, the first listed
+        # timm_model_ids is DINOv2, second is SigLIP. So 'featurizer' is
+        # actually DINOv2! For SigLIP we need 'fused_featurizer'.
+        # → Re-extract with the correct prefix.
+        merged = {}
+        for shard in sorted(oroot.glob("model-*-of-*.safetensors")):
+            sd = load_file(shard)
+            for k, v in sd.items():
+                if k.startswith("vision_backbone.fused_featurizer."):
+                    new_k = k[len("vision_backbone.fused_featurizer."):]
+                    merged[new_k] = v
+        if not merged:
+            # Fallback: use featurizer (DINOv2). Still useful pretrained
+            # features even if not SigLIP.
+            print("[encoder] WARNING: no fused_featurizer.* keys found, "
+                  "falling back to featurizer.* (likely DINOv2)")
+            for shard in sorted(oroot.glob("model-*-of-*.safetensors")):
+                sd = load_file(shard)
+                for k, v in sd.items():
+                    if k.startswith("vision_backbone.featurizer."):
+                        new_k = k[len("vision_backbone.featurizer."):]
+                        merged[new_k] = v
+        # Load with strict=False (timm vs OpenVLA may have small diffs)
+        missing, unexpected = self.model.load_state_dict(merged, strict=False)
+        print(f"[encoder] state_dict load: {len(merged)} keys, "
+              f"missing={len(missing)}, unexpected={len(unexpected)}")
+        if missing[:3]:
+            print(f"[encoder]   first missing: {missing[:3]}")
+        if unexpected[:3]:
+            print(f"[encoder]   first unexpected: {unexpected[:3]}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Args: x — (B, 3, H, W) in [-1, 1] (SigLIP normalisation convention).
-                  H == self.image_size, W == self.image_size required.
-        Returns: (B, hidden_size) pooled features.
+        """Args: x — (B, 3, 224, 224) in [-1, 1] (SigLIP normalisation).
+        Returns: (B, 1152) pooled features (timm head with num_classes=0
+                 returns the pre-head pooled feature directly).
         """
         with torch.no_grad():
-            out = self.model(pixel_values=x)
-            # pooler_output may be None on some HF versions; fall back to mean of last_hidden
-            pooled = out.pooler_output if out.pooler_output is not None else out.last_hidden_state.mean(dim=1)
-        return pooled
+            return self.model(x)
 
 
 def _build_encoder(args, device) -> tuple[nn.Module, int]:
@@ -119,7 +192,7 @@ def _build_encoder(args, device) -> tuple[nn.Module, int]:
 
     Returns:
         encoder: nn.Module
-        image_size: int (224 for mock; 384 for SigLIP-so400m)
+        image_size: int (224 for mock; 224 for SigLIP-so400m via timm)
     """
     if args.siglip_path:
         encoder = SiglipEncoderWrapper(args.siglip_path).to(device)
