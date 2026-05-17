@@ -115,6 +115,7 @@ def run_one_trial(
     num_steps_wait: int = 10,
     capture_video: bool = False,
     chunk_cache=None,
+    prefix_cache=None,
 ) -> dict:
     """Run one trial, return outcome dict.
 
@@ -123,6 +124,9 @@ def run_one_trial(
             chunk's individual steps after step 0 may be served from cache
             (skipping VLA forward) when visual scene similarity is high.
             Caller must call ``chunk_cache.reset_episode()`` between trials.
+        prefix_cache: optional PrefixKVCache instance (token-level KV cache).
+            When provided, must call reset_episode() between trials so the
+            next trial's first call rebuilds the prefix.
     """
     env.reset()
     obs = env.set_init_state(initial_state)
@@ -131,6 +135,8 @@ def run_one_trial(
     cache_hit_count = 0
     if chunk_cache is not None:
         chunk_cache.reset_episode()
+    if prefix_cache is not None:
+        prefix_cache.reset_episode()
 
     # Settling phase
     for _ in range(num_steps_wait):
@@ -283,6 +289,7 @@ def evaluate_suite(
     capture_videos: int = 0,
     print_progress: bool = True,
     chunk_cache=None,
+    prefix_cache=None,
 ) -> dict:
     """Eval one LIBERO suite. Returns nested dict: {task_id: per-trial list}."""
     from libero.libero import benchmark
@@ -317,6 +324,7 @@ def evaluate_suite(
                     init_states[init_idx], max_steps,
                     capture_video=want_video,
                     chunk_cache=chunk_cache,
+                    prefix_cache=prefix_cache,
                 )
                 if want_video and outcome.get("frames"):
                     cap_path = out_dir / "videos" / suite_name / \
@@ -426,6 +434,19 @@ def parse_args():
                         "(default 0.95). Higher = more conservative, more re-queries.")
     p.add_argument("--cache_max_consecutive_reuses", type=int, default=5,
                    help="Hard cap on consecutive chunk reuses (safety) (default 5).")
+    p.add_argument("--use_prefix_cache", action="store_true",
+                   help="Enable token-level prefix KV-Cache for π0.5: reuse "
+                        "PaliGemma vision+lang KV across env timesteps when "
+                        "visual scene barely changes. The action expert "
+                        "(suffix) still runs every step (reactive control "
+                        "preserved). Reference: VLA-Cache (NeurIPS 2025).")
+    p.add_argument("--prefix_cache_threshold", type=float, default=0.92,
+                   help="Cosine similarity threshold for prefix KV reuse "
+                        "(default 0.92, lower than chunk cache because the "
+                        "suffix still re-runs reactively).")
+    p.add_argument("--prefix_cache_max_reuses", type=int, default=50,
+                   help="Hard cap on consecutive prefix KV reuses; force "
+                        "re-compute every N hits to bound drift.")
     return p.parse_args()
 
 
@@ -475,6 +496,22 @@ def main():
               f"chunk_size={chunk_size}, "
               f"max_reuses={args.cache_max_consecutive_reuses})")
 
+    # Optional token-level prefix KV cache (π0.5 only)
+    prefix_cache = None
+    if args.use_prefix_cache:
+        if args.base != "pi05":
+            raise ValueError("--use_prefix_cache only works with --base pi05 "
+                             "(OpenVLA has no separable prefix KV).")
+        from inference.prefix_kv_cache import install_prefix_cache
+        prefix_cache = install_prefix_cache(
+            adapter.model,
+            sim_threshold=args.prefix_cache_threshold,
+            max_reuses=args.prefix_cache_max_reuses,
+        )
+        print(f"[eval] PrefixKVCache enabled "
+              f"(sim_threshold={args.prefix_cache_threshold}, "
+              f"max_reuses={args.prefix_cache_max_reuses})")
+
     # Evaluate each suite
     per_suite = {}
     t_start = time.time()
@@ -484,6 +521,7 @@ def main():
             adapter, suite, args.n_tasks, args.n_trials_per_task,
             args.seeds, out, capture_videos=args.capture_videos,
             chunk_cache=chunk_cache,
+            prefix_cache=prefix_cache,
         )
         per_suite[suite] = results
 
@@ -502,6 +540,12 @@ def main():
         with open(out / "chunk_cache_stats.json", "w") as f:
             json.dump(cache_summary, f, indent=2)
         print(f"\n=== ChunkCache Summary ===\n{json.dumps(cache_summary, indent=2)}")
+
+    if prefix_cache is not None:
+        prefix_summary = prefix_cache.stats.to_dict()
+        with open(out / "prefix_cache_stats.json", "w") as f:
+            json.dump(prefix_summary, f, indent=2)
+        print(f"\n=== PrefixKVCache Summary ===\n{json.dumps(prefix_summary, indent=2)}")
 
     # Aggregate + print
     summary = aggregate(per_suite)
