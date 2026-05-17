@@ -1,0 +1,123 @@
+[retrieval] loading dataset from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779017822.850505   98649 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779017824.150979   98649 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[rlds] loading suite spatial from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds/libero_spatial_no_noops/1.0.0
+[rlds]   spatial: 50 eps in 13s (3.8 ep/s)
+[rlds] spatial: 50 episodes, 1500 samples (13s)
+[rlds] loading suite object from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds/libero_object_no_noops/1.0.0
+[rlds]   object: 50 eps in 17s (2.9 ep/s)
+[rlds] object: 50 episodes, 1500 samples (17s)
+[rlds] loading suite goal from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds/libero_goal_no_noops/1.0.0
+[rlds]   goal: 50 eps in 11s (4.6 ep/s)
+[rlds] goal: 50 episodes, 1500 samples (11s)
+[rlds] loading suite 10 from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds/libero_10_no_noops/1.0.0
+[rlds]   10: 50 eps in 30s (1.7 ep/s)
+[rlds] 10: 50 episodes, 1500 samples (30s)
+[rlds] total: 200 episodes, 6000 samples
+[retrieval] 6000 samples across 200 episodes
+[retrieval] loading SigLIP from /ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial
+[encoder] state_dict load: 342 keys, missing=0, unexpected=0
+[encoder] loaded SigLIP from OpenVLA ckpt: /ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial
+[encoder] SigLIP frozen, 427.7M params, output_dim=1152
+[retrieval] loading proj_head from /ad-alg/planning-users/liuzhi7/ro_planning/output/pretrain_rlds_siglip_day8/proj_head.pt
+[retrieval] computing embeddings for 6000 frames (batch=64)...
+  64/6000 (1%)  t=6s
+  704/6000 (12%)  t=56s
+  1344/6000 (22%)  t=108s
+  1984/6000 (33%)  t=157s
+  2624/6000 (44%)  t=204s
+  3264/6000 (54%)  t=255s
+  3904/6000 (65%)  t=305s
+  4544/6000 (76%)  t=353s
+  5184/6000 (86%)  t=401s
+  5824/6000 (97%)  t=458s
+[retrieval] embeddings done in 473s, shape=(6000, 128), dtype=torch.float32
+[retrieval] computing pairwise cosine sim matrix...
+
+=== RESULTS ===
+{
+  "n_total": 6000,
+  "n_episodes": 200,
+  "config": {
+    "rlds_root": "/ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds",
+    "siglip_path": "/ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial",
+    "proj_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/output/pretrain_rlds_siglip_day8/proj_head.pt",
+    "max_episodes_per_suite": 50,
+    "max_per_episode": 30,
+    "batch_size": 64,
+    "output_dir": "/ad-alg/planning-users/liuzhi7/ro_planning/output/retrieval_eval_day8",
+    "device": "cuda",
+    "n_examples_to_plot": 6
+  },
+  "global": {
+    "recall@1_same_task": 0.9953333333333333,
+    "recall@1_same_episode": 0.914,
+    "recall@1_temporal": 0.9243333333333333,
+    "recall@5_same_task": 0.9993333333333333,
+    "recall@5_same_episode": 0.977,
+    "recall@5_temporal": 0.982,
+    "recall@10_same_task": 0.9995,
+    "recall@10_same_episode": 0.99,
+    "recall@10_temporal": 0.99
+  },
+  "per_suite": {
+    "spatial": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9926666666666667,
+      "recall@1_same_episode": 0.9546666666666667,
+      "recall@1_temporal": 0.9686666666666667,
+      "recall@5_same_task": 0.9986666666666667,
+      "recall@5_same_episode": 0.9906666666666667,
+      "recall@5_temporal": 0.9946666666666667,
+      "recall@10_same_task": 0.9986666666666667,
+      "recall@10_same_episode": 0.994,
+      "recall@10_temporal": 0.9966666666666667
+    },
+    "object": {
+      "n_samples": 1500,
+      "recall@1_same_task": 1.0,
+      "recall@1_same_episode": 0.8273333333333334,
+      "recall@1_temporal": 0.95,
+      "recall@5_same_task": 1.0,
+      "recall@5_same_episode": 0.9553333333333334,
+      "recall@5_temporal": 0.9973333333333333,
+      "recall@10_same_task": 1.0,
+      "recall@10_same_episode": 0.9773333333333334,
+      "recall@10_temporal": 0.998
+    },
+    "goal": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9933333333333333,
+      "recall@1_same_episode": 0.9593333333333334,
+      "recall@1_temporal": 0.9493333333333334,
+      "recall@5_same_task": 0.9993333333333333,
+      "recall@5_same_episode": 0.992,
+      "recall@5_temporal": 0.994,
+      "recall@10_same_task": 0.9993333333333333,
+      "recall@10_same_episode": 0.998,
+      "recall@10_temporal": 0.9953333333333333
+    },
+    "10": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9953333333333333,
+      "recall@1_same_episode": 0.9146666666666666,
+      "recall@1_temporal": 0.8293333333333334,
+      "recall@5_same_task": 0.9993333333333333,
+      "recall@5_same_episode": 0.97,
+      "recall@5_temporal": 0.942,
+      "recall@10_same_task": 1.0,
+      "recall@10_same_episode": 0.9906666666666667,
+      "recall@10_temporal": 0.97
+    }
+  },
+  "random_baseline": {
+    "recall@1_same_task": 0.0275,
+    "recall@5_same_task": 0.13233333333333333,
+    "recall@10_same_task": 0.24166666666666667
+  }
+}
+
+[retrieval] generating qualitative examples figure...
+[retrieval] saved figure to /ad-alg/planning-users/liuzhi7/ro_planning/output/retrieval_eval_day8/retrieval_examples.png

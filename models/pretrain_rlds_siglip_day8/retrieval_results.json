@@ -1,0 +1,81 @@
+{
+  "n_total": 6000,
+  "n_episodes": 200,
+  "config": {
+    "rlds_root": "/ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds",
+    "siglip_path": "/ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial",
+    "proj_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/output/pretrain_rlds_siglip_day8/proj_head.pt",
+    "max_episodes_per_suite": 50,
+    "max_per_episode": 30,
+    "batch_size": 64,
+    "output_dir": "/ad-alg/planning-users/liuzhi7/ro_planning/output/retrieval_eval_day8",
+    "device": "cuda",
+    "n_examples_to_plot": 6
+  },
+  "global": {
+    "recall@1_same_task": 0.9953333333333333,
+    "recall@1_same_episode": 0.914,
+    "recall@1_temporal": 0.9243333333333333,
+    "recall@5_same_task": 0.9993333333333333,
+    "recall@5_same_episode": 0.977,
+    "recall@5_temporal": 0.982,
+    "recall@10_same_task": 0.9995,
+    "recall@10_same_episode": 0.99,
+    "recall@10_temporal": 0.99
+  },
+  "per_suite": {
+    "spatial": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9926666666666667,
+      "recall@1_same_episode": 0.9546666666666667,
+      "recall@1_temporal": 0.9686666666666667,
+      "recall@5_same_task": 0.9986666666666667,
+      "recall@5_same_episode": 0.9906666666666667,
+      "recall@5_temporal": 0.9946666666666667,
+      "recall@10_same_task": 0.9986666666666667,
+      "recall@10_same_episode": 0.994,
+      "recall@10_temporal": 0.9966666666666667
+    },
+    "object": {
+      "n_samples": 1500,
+      "recall@1_same_task": 1.0,
+      "recall@1_same_episode": 0.8273333333333334,
+      "recall@1_temporal": 0.95,
+      "recall@5_same_task": 1.0,
+      "recall@5_same_episode": 0.9553333333333334,
+      "recall@5_temporal": 0.9973333333333333,
+      "recall@10_same_task": 1.0,
+      "recall@10_same_episode": 0.9773333333333334,
+      "recall@10_temporal": 0.998
+    },
+    "goal": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9933333333333333,
+      "recall@1_same_episode": 0.9593333333333334,
+      "recall@1_temporal": 0.9493333333333334,
+      "recall@5_same_task": 0.9993333333333333,
+      "recall@5_same_episode": 0.992,
+      "recall@5_temporal": 0.994,
+      "recall@10_same_task": 0.9993333333333333,
+      "recall@10_same_episode": 0.998,
+      "recall@10_temporal": 0.9953333333333333
+    },
+    "10": {
+      "n_samples": 1500,
+      "recall@1_same_task": 0.9953333333333333,
+      "recall@1_same_episode": 0.9146666666666666,
+      "recall@1_temporal": 0.8293333333333334,
+      "recall@5_same_task": 0.9993333333333333,
+      "recall@5_same_episode": 0.97,
+      "recall@5_temporal": 0.942,
+      "recall@10_same_task": 1.0,
+      "recall@10_same_episode": 0.9906666666666667,
+      "recall@10_temporal": 0.97
+    }
+  },
+  "random_baseline": {
+    "recall@1_same_task": 0.0275,
+    "recall@5_same_task": 0.13233333333333333,
+    "recall@10_same_task": 0.24166666666666667
+  }
+}
