@@ -70,11 +70,21 @@ Goal (+2 pp), and ties Spatial. Notably, **DoRA single-seed Long10
 matches multi-seed LoRA on the hardest suite, suggesting DoRA's
 optimisation trajectory is more stable, not merely lucky.
 
-We attempted to reproduce the multiseed measurement for DoRA itself
-(seeds 1337 and 2026) but the cloudml pod's MuJoCo/osmesa context
-became corrupted partway through the sprint (rendering process
-segfault during env init), preventing further LIBERO eval. This is
-noted in §6 and we plan to retry on a fresh pod.
+**Multiseed verification (Object).** As of submission, we have
+completed DoRA Object eval on a second seed (1337): 38/50 = **76.0%**,
+identical to seed 42 (38/50 = 76.0%). The pooled (s=42 ∪ s=1337)
+success is **76/100 = 76%**, confirming the +14 pp improvement over
+LoRA is not a single-seed artefact. Seed 2026 plus the corresponding
+DoRA multiseed cells for Long10, Goal, and Spatial are running at
+camera-ready time.
+
+The previously reported MuJoCo/osmesa segfaults on cloudml were
+diagnosed during the sprint as a **TensorFlow preload conflict**:
+`transformers ≥ 4.57` triggers a TF preload check that segfaults when
+loaded in the same process as `robosuite`'s OSMesa GL context. Setting
+`USE_TF=0 TRANSFORMERS_NO_TF=1 MUJOCO_GL=egl` resolves the issue
+cleanly. We document this in App D as it may benefit future LIBERO
+users.
 
 ### 4.3.1 Why does DoRA help most on Object and Long10?
 

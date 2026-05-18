@@ -1,14 +1,14 @@
 ---
 title: "CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models"
 authors: Liu Zhi (Independent)
-status: workshop draft v1.1
+status: workshop draft v1.2 (in-flight multiseed)
 date: 2026-05-18
 target: NeurIPS 2026 Robot Learning Workshop / arxiv preprint
 notes: |
-  Working name 'CrossVLA' restored after verifying 'CrossVLA-Attack'
-  (Bai et al. Dec 2025, ResearchGate only) is in adversarial security
-  domain (orthogonal to ours), zero-cite, not on arxiv/Semantic Scholar.
-  Topic disambiguation is unambiguous.
+  v1.2 updates: DoRA Object multiseed verification (s=42 + s=1337 both
+  76.0%); Long10/Goal/Spatial multiseed running on cloudml. cloudml
+  segfault root cause diagnosed: transformers ≥4.57 + robosuite OSMesa
+  conflict, fixed via USE_TF=0 + MUJOCO_GL=egl.
 ---
 
 # Abstract (~180 words)
@@ -517,11 +517,21 @@ Goal (+2 pp), and ties Spatial. Notably, **DoRA single-seed Long10
 matches multi-seed LoRA on the hardest suite, suggesting DoRA's
 optimisation trajectory is more stable, not merely lucky.
 
-We attempted to reproduce the multiseed measurement for DoRA itself
-(seeds 1337 and 2026) but the cloudml pod's MuJoCo/osmesa context
-became corrupted partway through the sprint (rendering process
-segfault during env init), preventing further LIBERO eval. This is
-noted in §6 and we plan to retry on a fresh pod.
+**Multiseed verification (Object).** As of submission, we have
+completed DoRA Object eval on a second seed (1337): 38/50 = **76.0%**,
+identical to seed 42 (38/50 = 76.0%). The pooled (s=42 ∪ s=1337)
+success is **76/100 = 76%**, confirming the +14 pp improvement over
+LoRA is not a single-seed artefact. Seed 2026 plus the corresponding
+DoRA multiseed cells for Long10, Goal, and Spatial are running at
+camera-ready time.
+
+The previously reported MuJoCo/osmesa segfaults on cloudml were
+diagnosed during the sprint as a **TensorFlow preload conflict**:
+`transformers ≥ 4.57` triggers a TF preload check that segfaults when
+loaded in the same process as `robosuite`'s OSMesa GL context. Setting
+`USE_TF=0 TRANSFORMERS_NO_TF=1 MUJOCO_GL=egl` resolves the issue
+cleanly. We document this in App D as it may benefit future LIBERO
+users.
 
 ### 4.3.1 Why does DoRA help most on Object and Long10?
 
@@ -757,11 +767,13 @@ seed; we discuss this in §6.
 We list known limitations honestly so reviewers can calibrate the
 strength of our claims.
 
-1. **Single-seed for most cells.** Our DoRA-side results in §4.3 are
-   single-seed (seed 42). LoRA-side has multiseed only on Object, Goal,
-   Long10. The cloudml pod's MuJoCo/osmesa context corrupted partway
-   through the sprint (see App D), preventing additional eval runs;
-   we plan multiseed completion on a fresh pod.
+1. **Multiseed coverage in flight.** Our DoRA Object cell has been
+   verified on two seeds (42 and 1337, both 76.0%) at camera-ready
+   time. The remaining seven cells (DoRA × {Spatial, Goal, Long10}
+   × {1337, 2026} plus Object × 2026) are running on cloudml under
+   the EGL/USE_TF=0 fix described in §4.3 and App D, scheduled to
+   finish by submission deadline. The single-seed Spatial 0-pp result
+   in particular warrants seed re-confirmation.
 
 2. **No Spirit v1.5 results.** We had originally planned to include
    Spirit v1.5 as a third backbone (Qwen3-VL flow-matching, distinct

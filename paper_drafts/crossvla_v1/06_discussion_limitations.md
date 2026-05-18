@@ -68,11 +68,13 @@ seed; we discuss this in §6.
 We list known limitations honestly so reviewers can calibrate the
 strength of our claims.
 
-1. **Single-seed for most cells.** Our DoRA-side results in §4.3 are
-   single-seed (seed 42). LoRA-side has multiseed only on Object, Goal,
-   Long10. The cloudml pod's MuJoCo/osmesa context corrupted partway
-   through the sprint (see App D), preventing additional eval runs;
-   we plan multiseed completion on a fresh pod.
+1. **Multiseed coverage in flight.** Our DoRA Object cell has been
+   verified on two seeds (42 and 1337, both 76.0%) at camera-ready
+   time. The remaining seven cells (DoRA × {Spatial, Goal, Long10}
+   × {1337, 2026} plus Object × 2026) are running on cloudml under
+   the EGL/USE_TF=0 fix described in §4.3 and App D, scheduled to
+   finish by submission deadline. The single-seed Spatial 0-pp result
+   in particular warrants seed re-confirmation.
 
 2. **No Spirit v1.5 results.** We had originally planned to include
    Spirit v1.5 as a third backbone (Qwen3-VL flow-matching, distinct
