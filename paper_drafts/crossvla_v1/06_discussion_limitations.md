@@ -47,7 +47,7 @@ seed; we discuss this in §6.
 
 1. **Denoise-loop-targeting acceleration** is the productive direction
    for flow-matching VLA inference. Consistency model distillation
-   (Salimans & Ho 2022) is a natural fit but has not, to our
+   (\cite{salimans2022progressive}) is a natural fit but has not, to our
    knowledge, been applied to VLAs.
 2. **DoRA on Spirit v1.5 / π0.5** is unstudied. Our work covers OpenVLA
    only; extending the DoRA+DPO combination to flow-matching backbones

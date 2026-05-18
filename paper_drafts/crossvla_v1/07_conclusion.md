@@ -1,6 +1,6 @@
 # 7. Conclusion
 
-We present **VLA-PostTrain**, an empirical study of cross-paradigm
+We present **CrossVLA**, an empirical study of cross-paradigm
 post-training for Vision-Language-Action models. Our work makes four
 contributions:
 

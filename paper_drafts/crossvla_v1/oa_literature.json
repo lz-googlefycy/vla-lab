@@ -1,0 +1,1970 @@
+[
+  {
+    "openalex_id": "W4362515116",
+    "title": "A Survey of Large Language Models",
+    "year": 2026,
+    "publication_date": "2026-05-09",
+    "cited_by_count": 1394,
+    "arxiv_id": "2303.18223",
+    "doi": "10.1007/s11704-026-60308-3",
+    "authors": [
+      "Wayne Xin Zhao",
+      "Kun Zhou",
+      "Junyi Li",
+      "Tianyi Tang",
+      "Xiaolei Wang"
+    ],
+    "abstract": "Abstract The rapid evolution of large language models (LLMs) has driven a transformative shift in artificial intelligence (AI), reshaping both research paradigms and practical applications. Distinguished from their predecessors by unprecedented scale and advanced capabilities, LLMs necessitate new frameworks for understanding their development, behavior, and societal impact. This survey systematically reviews recent advancements in LLM techniques across four key dimensions: (1) pre-training methodologies, which establish core model capabilities through large-scale self-supervised training, arc",
+    "queries": [
+      "Direct Preference Optimization implicit reward language",
+      "GRPO group relative policy optimization DeepSeek",
+      "KV cache transformer inference acceleration",
+      "speculative decoding fast LLM inference"
+    ]
+  },
+  {
+    "openalex_id": "W2168909179",
+    "title": "Initial sequencing and analysis of the human genome",
+    "year": 2001,
+    "publication_date": "2001-02-01",
+    "cited_by_count": 24524,
+    "arxiv_id": null,
+    "doi": "10.1038/35057062",
+    "authors": [
+      "Eric S. Lander",
+      "Lauren Linton",
+      "Bruce W. Birren",
+      "Chad Nusbaum",
+      "Michael C. Zody"
+    ],
+    "abstract": "The human genome holds an extraordinary trove of information about human development, physiology, medicine and evolution. Here we report the results of an international collaboration to produce and make freely available a draft sequence of the human genome. We also present an initial analysis of the data, describing some of the insights that can be gleaned from the sequence.",
+    "queries": [
+      "preference alignment robotic policy"
+    ]
+  },
+  {
+    "openalex_id": "W2020155291",
+    "title": "Fostering implementation of health services research findings into practice: a consolidated framework for advancing implementation science",
+    "year": 2009,
+    "publication_date": "2009-08-07",
+    "cited_by_count": 14648,
+    "arxiv_id": null,
+    "doi": "10.1186/1748-5908-4-50",
+    "authors": [
+      "Laura J. Damschroder",
+      "David C. Aron",
+      "Rosalind E. Keith",
+      "Susan Kirsh",
+      "J Alexander"
+    ],
+    "abstract": "BACKGROUND: Many interventions found to be effective in health services research studies fail to translate into meaningful patient care outcomes across multiple contexts. Health services researchers recognize the need to evaluate not only summative outcomes but also formative outcomes to assess the extent to which implementation is effective in a specific setting, prolongs sustainability, and promotes dissemination into other settings. Many implementation theories have been published to help promote effective implementation. However, they overlap considerably in the constructs included in indi",
+    "queries": [
+      "RT-2 vision language action transfer web knowledge"
+    ]
+  },
+  {
+    "openalex_id": "W4406779522",
+    "title": "Can Open Large Language Models Catch Vulnerabilities?",
+    "year": 2025,
+    "publication_date": "2025-01-01",
+    "cited_by_count": 482,
+    "arxiv_id": "2501.12948",
+    "doi": "10.4230/oasics.icpec.2025.4",
+    "authors": [
+      "DeepSeek-AI"
+    ],
+    "abstract": "As Large Language Models (LLMs) become increasingly integrated into secure software development workflows, a critical question remains unanswered: can these models not only detect insecure code but also reliably classify vulnerabilities according to standardized taxonomies? In this work, we conduct a systematic evaluation of three state-of-the-art LLMs - Llama3, Codestral, and Deepseek R1 - using a carefully filtered subset of the Big-Vul dataset annotated with eight representative Common Weakness Enumeration categories. Adopting a closed-world classification setup, we assess each model’s perf",
+    "queries": [
+      "GRPO group relative policy optimization DeepSeek"
+    ]
+  },
+  {
+    "openalex_id": "W4414281281",
+    "title": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning",
+    "year": 2025,
+    "publication_date": "2025-09-17",
+    "cited_by_count": 479,
+    "arxiv_id": null,
+    "doi": "10.1038/s41586-025-09422-z",
+    "authors": [
+      "Daya Guo",
+      "Dejian Yang",
+      "Haowei Zhang",
+      "Junxiao Song",
+      "Peiyi Wang"
+    ],
+    "abstract": "Abstract General reasoning represents a long-standing and formidable challenge in artificial intelligence (AI). Recent breakthroughs, exemplified by large language models (LLMs) 1,2 and chain-of-thought (CoT) prompting 3 , have achieved considerable success on foundational reasoning tasks. However, this success is heavily contingent on extensive human-annotated demonstrations and the capabilities of models are still insufficient for more complex problems. Here we show that the reasoning abilities of LLMs can be incentivized through pure reinforcement learning (RL), obviating the need for human",
+    "queries": [
+      "GRPO group relative policy optimization DeepSeek",
+      "DeepSeek-R1 reasoning reinforcement learning"
+    ]
+  },
+  {
+    "openalex_id": "W2165429918",
+    "title": "Geographic Localization of Knowledge Spillovers as Evidenced by Patent Citations",
+    "year": 1993,
+    "publication_date": "1993-08-01",
+    "cited_by_count": 7763,
+    "arxiv_id": null,
+    "doi": "10.2307/2118401",
+    "authors": [
+      "Adam B. Jaffe",
+      "Manuel Trajtenberg",
+      "Rebecca Henderson"
+    ],
+    "abstract": "We compare the geographic location of patent citations to those of the cited patents, as evidence of the extent to which knowledge spillovers are geographically localized. We find that citations to U.S. patents are more likely to come from the U.S., and more likely to come from the same state and SMSA as the cited patents than one would expect based only on the preexisting concentration of related research activity. These effects are particularly significant at the local (SMSA) level, and are particularly apparent in early citations.",
+    "queries": [
+      "flow matching one-step distillation"
+    ]
+  },
+  {
+    "openalex_id": "W4402733585",
+    "title": "Wonder3D: Single Image to 3D Using Cross-Domain Diffusion",
+    "year": 2024,
+    "publication_date": "2024-06-16",
+    "cited_by_count": 274,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr52733.2024.00951",
+    "authors": [
+      "Xiaoxiao Long",
+      "Yuan–Chen Guo",
+      "Cheng Lin",
+      "Yuan Liu",
+      "Zhiyang Dou"
+    ],
+    "abstract": "In this work, we introduce Wonder3D, a novel method for efficiently generating high-fidelity textured meshes from single-view images. Recent methods based on Score Distillation Sampling (SDS) have shown the potential to recover 3D geometry from 2D diffusion priors, but they typically suffer from time-consuming per-shape optimization and inconsistent geometry. In contrast, certain works di-rectly produce 3D information via fast network inferences, but their results are often of low quality and lack geometric details. To holistically improve the quality, consistency, and efficiency of single-vie",
+    "queries": [
+      "consistency model distillation diffusion fast sampling"
+    ]
+  },
+  {
+    "openalex_id": "W2995022099",
+    "title": "Advances and Open Problems in Federated Learning",
+    "year": 2020,
+    "publication_date": "2020-12-02",
+    "cited_by_count": 4553,
+    "arxiv_id": "1912.04977",
+    "doi": "10.1561/2200000083",
+    "authors": [
+      "Peter Kairouz",
+      "H. Brendan McMahan"
+    ],
+    "abstract": "Federated learning (FL) is a machine learning setting where many clients (e.g., mobile devices or whole organizations) collaboratively train a model under the orchestration of a central server (e.g., service provider), while keeping the training data decentralized. FL embodies the principles of focused data collection and minimization, and can mitigate many of the systemic privacy risks and costs resulting from traditional, centralized machine learning and data science approaches. Motivated by the explosive growth in FL research, this monograph discusses recent advances and presents an extensi",
+    "queries": [
+      "flow matching one-step distillation"
+    ]
+  },
+  {
+    "openalex_id": "W2969625533",
+    "title": "Artificial Intelligence (AI): Multidisciplinary perspectives on emerging challenges, opportunities, and agenda for research, practice and policy",
+    "year": 2019,
+    "publication_date": "2019-08-27",
+    "cited_by_count": 3937,
+    "arxiv_id": null,
+    "doi": "10.1016/j.ijinfomgt.2019.08.002",
+    "authors": [
+      "Yogesh K. Dwivedi",
+      "Laurie Hughes",
+      "Elvira Ismagilova",
+      "Gert Aarts",
+      "Crispin Coombs"
+    ],
+    "abstract": "As far back as the industrial revolution, significant development in technical innovation has succeeded in transforming numerous manual tasks and processes that had been in existence for decades where humans had reached the limits of physical capacity. Artificial Intelligence (AI) offers this same transformative potential for the augmentation and potential replacement of human tasks and activities within a wide range of industrial, intellectual and social applications. The pace of change for this new AI technological age is staggering, with new breakthroughs in algorithmic machine learning and",
+    "queries": [
+      "preference alignment robotic policy",
+      "multi-view masked world model robot"
+    ]
+  },
+  {
+    "openalex_id": "W2100235918",
+    "title": "A Survey of Collaborative Filtering Techniques",
+    "year": 2009,
+    "publication_date": "2009-10-27",
+    "cited_by_count": 3596,
+    "arxiv_id": null,
+    "doi": "10.1155/2009/421425",
+    "authors": [
+      "Xiaoyuan Su",
+      "Taghi M. Khoshgoftaar"
+    ],
+    "abstract": "As one of the most successful approaches to building recommender systems, collaborative filtering ( CF ) uses the known preferences of a group of users to make recommendations or predictions of the unknown preferences for other users. In this paper, we first introduce CF tasks and their main challenges, such as data sparsity, scalability, synonymy, gray sheep, shilling attacks, privacy protection, etc., and their possible solutions. We then present three main categories of CF techniques: memory-based, model-based, and hybrid CF algorithms (that combine CF with other recommendation techniques),",
+    "queries": [
+      "Direct Preference Optimization implicit reward language"
+    ]
+  },
+  {
+    "openalex_id": "W2032568497",
+    "title": "Measurement Instruments for the Anthropomorphism, Animacy, Likeability, Perceived Intelligence, and Perceived Safety of Robots",
+    "year": 2008,
+    "publication_date": "2008-11-19",
+    "cited_by_count": 3009,
+    "arxiv_id": null,
+    "doi": "10.1007/s12369-008-0001-3",
+    "authors": [
+      "Christoph Bartneck",
+      "Dana Kulić",
+      "Elizabeth A. Croft",
+      "Susana Zoghbi"
+    ],
+    "abstract": "This study emphasizes the need for standardized measurement tools for human robot interaction (HRI). If we are to make progress in this field then we must be able to compare the results from different studies. A literature review has been performed on the measurements of five key concepts in HRI: anthropomorphism, animacy, likeability, perceived intelligence, and perceived safety. The results have been distilled into five consistent questionnaires using semantic differential scales. We report reliability and validity indicators based on several empirical studies that used these questionnaires.",
+    "queries": [
+      "multi-view masked world model robot"
+    ]
+  },
+  {
+    "openalex_id": "W2097686432",
+    "title": "The IPBES Conceptual Framework — connecting nature and people",
+    "year": 2014,
+    "publication_date": "2014-12-19",
+    "cited_by_count": 2544,
+    "arxiv_id": null,
+    "doi": "10.1016/j.cosust.2014.11.002",
+    "authors": [
+      "Sandra Dı́az",
+      "Sebsebe Demissew",
+      "Julia Carabias",
+      "Carlos Alfredo Joly",
+      "Mark Lonsdale"
+    ],
+    "abstract": "The first public product of the Intergovernmental Platform on Biodiversity and Ecosystem Services (IPBES) is its Conceptual Framework. This conceptual and analytical tool, presented here in detail, will underpin all IPBES functions and provide structure and comparability to the syntheses that IPBES will produce at different spatial scales, on different themes, and in different regions. Salient innovative aspects of the IPBES Conceptual Framework are its transparent and participatory construction process and its explicit consideration of diverse scientific disciplines, stakeholders, and knowled",
+    "queries": [
+      "RT-2 vision language action transfer web knowledge"
+    ]
+  },
+  {
+    "openalex_id": "W3168867926",
+    "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+    "year": 2021,
+    "publication_date": "2021-06-17",
+    "cited_by_count": 2423,
+    "arxiv_id": "2106.09685",
+    "doi": "10.48550/arxiv.2106.09685",
+    "authors": [
+      "J. Edward Hu",
+      "Yelong Shen",
+      "Phillip Wallis",
+      "Zeyuan Allen-Zhu",
+      "Yuanzhi Li"
+    ],
+    "abstract": "An important paradigm of natural language processing consists of large-scale pre-training on general domain data and adaptation to particular tasks or domains. As we pre-train larger models, full fine-tuning, which retrains all model parameters, becomes less feasible. Using GPT-3 175B as an example -- deploying independent instances of fine-tuned models, each with 175B parameters, is prohibitively expensive. We propose Low-Rank Adaptation, or LoRA, which freezes the pre-trained model weights and injects trainable rank decomposition matrices into each layer of the Transformer architecture, grea",
+    "queries": [
+      "LoRA low rank adaptation language model"
+    ]
+  },
+  {
+    "openalex_id": "W2620998106",
+    "title": "Deep Mutual Learning",
+    "year": 2018,
+    "publication_date": "2018-06-01",
+    "cited_by_count": 1754,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr.2018.00454",
+    "authors": [
+      "Ying Zhang",
+      "Tao Xiang",
+      "Timothy M. Hospedales",
+      "Huchuan Lu"
+    ],
+    "abstract": "Model distillation is an effective and widely used technique to transfer knowledge from a teacher to a student network. The typical application is to transfer from a powerful large network or ensemble to a small network, in order to meet the low-memory or fast execution requirements. In this paper, we present a deep mutual learning (DML) strategy. Different from the one-way transfer between a static pre-defined teacher and a student in model distillation, with DML, an ensemble of students learn collaboratively and teach each other throughout the training process. Our experiments show that a va",
+    "queries": [
+      "flow matching one-step distillation"
+    ]
+  },
+  {
+    "openalex_id": "W3176923149",
+    "title": "Text Data Augmentation for Deep Learning",
+    "year": 2021,
+    "publication_date": "2021-07-19",
+    "cited_by_count": 1665,
+    "arxiv_id": null,
+    "doi": "10.1186/s40537-021-00492-0",
+    "authors": [
+      "Connor Shorten",
+      "Taghi M. Khoshgoftaar",
+      "Borko Furht"
+    ],
+    "abstract": "Natural Language Processing (NLP) is one of the most captivating applications of Deep Learning. In this survey, we consider how the Data Augmentation training strategy can aid in its development. We begin with the major motifs of Data Augmentation summarized into strengthening local decision boundaries, brute force training, causality and counterfactual examples, and the distinction between meaning and form. We follow these motifs with a concrete list of augmentation frameworks that have been developed for text data. Deep Learning generally struggles with the measurement of generalization and ",
+    "queries": [
+      "RT-2 vision language action transfer web knowledge"
+    ]
+  },
+  {
+    "openalex_id": "W4390732526",
+    "title": "Blockchain security enhancement: an approach towards hybrid consensus algorithms and machine learning techniques",
+    "year": 2024,
+    "publication_date": "2024-01-11",
+    "cited_by_count": 128,
+    "arxiv_id": null,
+    "doi": "10.1038/s41598-024-51578-7",
+    "authors": [
+      "K. Venkatesan",
+      "Syarifah Bahiyah Rahayu"
+    ],
+    "abstract": "In this paper, we propose hybrid consensus algorithms that combine machine learning (ML) techniques to address the challenges and vulnerabilities in blockchain networks. Consensus Protocols make ensuring agreement among the applicants in the distributed systems difficult. However, existing mechanisms are more vulnerable to cyber-attacks. Previous studies extensively explore the influence of cyber attacks and highlight the necessity for effective preventive measures. This research presents the integration of ML techniques with the proposed hybrid consensus algorithms and advantages over predict",
+    "queries": [
+      "DPO robot manipulation policy preference"
+    ]
+  },
+  {
+    "openalex_id": "W2552810632",
+    "title": "Active Inference: A Process Theory",
+    "year": 2016,
+    "publication_date": "2016-11-21",
+    "cited_by_count": 1168,
+    "arxiv_id": null,
+    "doi": "10.1162/neco_a_00912",
+    "authors": [
+      "Karl Friston",
+      "Thomas H. B. FitzGerald",
+      "Francesco Rigoli",
+      "Philipp Schwartenbeck",
+      "Giovanni Pezzulo"
+    ],
+    "abstract": "This article describes a process theory based on active inference and belief propagation. Starting from the premise that all neuronal processing (and action selection) can be explained by maximizing Bayesian model evidence-or minimizing variational free energy-we ask whether neuronal responses can be described as a gradient descent on variational free energy. Using a standard (Markov decision process) generative model, we derive the neuronal dynamics implicit in this description and reproduce a remarkable range of well-characterized neuronal phenomena. These include repetition suppression, mis",
+    "queries": [
+      "Direct Preference Optimization implicit reward language"
+    ]
+  },
+  {
+    "openalex_id": "W2342925794",
+    "title": "Optimizing performance through intrinsic motivation and attention for learning: The OPTIMAL theory of motor learning",
+    "year": 2016,
+    "publication_date": "2016-01-29",
+    "cited_by_count": 1137,
+    "arxiv_id": null,
+    "doi": "10.3758/s13423-015-0999-9",
+    "authors": [
+      "Gabriele Wulf",
+      "Rebecca Lewthwaite"
+    ],
+    "abstract": "",
+    "queries": [
+      "Direct Preference Optimization implicit reward language"
+    ]
+  },
+  {
+    "openalex_id": "W4393138529",
+    "title": "Parameter-Efficient Fine-Tuning for Large Models: A Comprehensive Survey",
+    "year": 2024,
+    "publication_date": "2024-03-21",
+    "cited_by_count": 91,
+    "arxiv_id": "2403.14608",
+    "doi": "10.48550/arxiv.2403.14608",
+    "authors": [
+      "Zeyu Han",
+      "Chao Gao",
+      "Jinyang Liu",
+      "Jeff",
+      "Zhang"
+    ],
+    "abstract": "Large models represent a groundbreaking advancement in multiple application fields, enabling remarkable achievements across various tasks. However, their unprecedented scale comes with significant computational costs. These models, often consisting of billions of parameters, require vast amounts of computational resources for execution. Especially, the expansive scale and computational demands pose considerable challenges when customizing them for particular downstream tasks, particularly over the hardware platforms constrained by computational capabilities. Parameter Efficient Fine-Tuning (PE",
+    "queries": [
+      "FAST efficient action tokenization VLA",
+      "parameter efficient fine tuning survey",
+      "VLA-Cache vision language action inference cache"
+    ]
+  },
+  {
+    "openalex_id": "W4410061981",
+    "title": "Parameter-efficient fine-tuning in large language models: a survey of methodologies",
+    "year": 2025,
+    "publication_date": "2025-05-02",
+    "cited_by_count": 84,
+    "arxiv_id": null,
+    "doi": "10.1007/s10462-025-11236-4",
+    "authors": [
+      "Luping Wang",
+      "Sheng Chen",
+      "Linnan Jiang",
+      "Shu Pan",
+      "Runze Cai"
+    ],
+    "abstract": "The large language models, as predicted by scaling law forecasts, have made groundbreaking progress in many fields, particularly in natural language generation tasks, where they have approached or even surpassed human levels. However, the unprecedented scale of their parameters brings significant computational and storage costs. These large language models require substantial computational resources and GPU memory to operate. When adapting large language models to specific downstream tasks, their massive parameter scale poses a significant challenge in fine-tuning on hardware platforms with li",
+    "queries": [
+      "parameter efficient fine tuning survey"
+    ]
+  },
+  {
+    "openalex_id": "W4385988359",
+    "title": "Summary of ChatGPT-Related research and perspective towards the future of large language models",
+    "year": 2023,
+    "publication_date": "2023-08-18",
+    "cited_by_count": 717,
+    "arxiv_id": null,
+    "doi": "10.1016/j.metrad.2023.100017",
+    "authors": [
+      "Yiheng Liu",
+      "Tianle Han",
+      "Siyuan Ma",
+      "Jiayue Zhang",
+      "Yuanyuan Yang"
+    ],
+    "abstract": "This paper presents a comprehensive survey of ChatGPT-related (GPT-3.5 and GPT-4) research, state-of-the-art large language models (LLM) from the GPT series, and their prospective applications across diverse domains. Indeed, key innovations such as large-scale pre-training that captures knowledge across the entire world wide web, instruction fine-tuning and Reinforcement Learning from Human Feedback (RLHF) have played significant roles in enhancing LLMs’ adaptability and performance. We performed an in-depth analysis of 194 relevant papers on arXiv, encompassing trend analysis, word cloud repr",
+    "queries": [
+      "RLHF fine tuning human feedback"
+    ]
+  },
+  {
+    "openalex_id": "W4404782689",
+    "title": "ORPO: Monolithic Preference Optimization without Reference Model",
+    "year": 2024,
+    "publication_date": "2024-01-01",
+    "cited_by_count": 71,
+    "arxiv_id": null,
+    "doi": "10.18653/v1/2024.emnlp-main.626",
+    "authors": [
+      "Jiwoo Hong",
+      "Noah Lee",
+      "James H. Thorne"
+    ],
+    "abstract": "While recent preference alignment algorithms for language models have demonstrated promising results, supervised fine-tuning (SFT) remains imperative for achieving successful convergence.In this paper, we revisit SFT in the context of preference alignment, emphasizing that a minor penalty for the disfavored style is sufficient for preference alignment.Building on this foundation, we introduce a straightforward reference model-free monolithic odds ratio preference optimization algorithm, ORPO, eliminating the need for an additional preference alignment phase.We demonstrate, both empirically and",
+    "queries": [
+      "KTO ORPO IPO preference alignment"
+    ]
+  },
+  {
+    "openalex_id": "W4300071243",
+    "title": "Slave to the Algorithm? Why a 'right to an explanation' is probably not the remedy you are looking for",
+    "year": 2017,
+    "publication_date": "2017-11-18",
+    "cited_by_count": 509,
+    "arxiv_id": null,
+    "doi": "10.31228/osf.io/97upg",
+    "authors": [
+      "Lilian Edwards",
+      "Michael Veale"
+    ],
+    "abstract": "Cite as Lilian Edwards and Michael Veale, 'Slave to the Algorithm? Why a 'right to an explanation' is probably not the remedy you are looking for' (2017) 16 Duke Law and Technology Review 18–84. (First posted on SSRN 24 May 2017)Algorithms, particularly machine learning (ML) algorithms, are increasingly important to individuals’ lives, but have caused a range of concerns revolving mainly around unfairness, discrimination and opacity. Transparency in the form of a “right to an explanation” has emerged as a compellingly attractive remedy since it intuitively promises to “open the black box” to p",
+    "queries": [
+      "DPO robot manipulation policy preference"
+    ]
+  },
+  {
+    "openalex_id": "W4312563428",
+    "title": "RegionCLIP: Region-based Language-Image Pretraining",
+    "year": 2022,
+    "publication_date": "2022-06-01",
+    "cited_by_count": 489,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr52688.2022.01629",
+    "authors": [
+      "Yiwu Zhong",
+      "Jianwei Yang",
+      "Pengchuan Zhang",
+      "Chunyuan Li",
+      "Noel Codella"
+    ],
+    "abstract": "Contrastive language-image pretraining (CLIP) using image-text pairs has achieved impressive results on image classification in both zero-shot and transfer learning set-tings. However, we show that directly applying such mod-els to recognize image regions for object detection leads to unsatisfactory performance due to a major domain shift: CLIP was trained to match an image as a whole to a text de-scription, without capturing the fine-grained alignment be-tween image regions and text spans. To mitigate this issue, we propose a new method called RegionCLIP that signifi-cantly extends CLIP to le",
+    "queries": [
+      "contrastive language image pretraining CLIP"
+    ]
+  },
+  {
+    "openalex_id": "W4385403811",
+    "title": "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion",
+    "year": 2023,
+    "publication_date": "2023-07-10",
+    "cited_by_count": 399,
+    "arxiv_id": null,
+    "doi": "10.15607/rss.2023.xix.026",
+    "authors": [
+      "Cheng Chi",
+      "Siyuan Feng",
+      "Yilun Du",
+      "Zhenjia Xu",
+      "Eric Cousineau"
+    ],
+    "abstract": "",
+    "queries": [
+      "R3M universal visual representation manipulation"
+    ]
+  },
+  {
+    "openalex_id": "W4384389802",
+    "title": "A Comprehensive Overview of Large Language Models",
+    "year": 2023,
+    "publication_date": "2023-07-12",
+    "cited_by_count": 357,
+    "arxiv_id": "2307.06435",
+    "doi": "10.48550/arxiv.2307.06435",
+    "authors": [
+      "Humza Naveed",
+      "Asad Ullah Khan",
+      "Shi Qiu",
+      "Muhammad Saqib",
+      "Saeed Anwar"
+    ],
+    "abstract": "Large Language Models (LLMs) have recently demonstrated remarkable capabilities in natural language processing tasks and beyond. This success of LLMs has led to a large influx of research contributions in this direction. These works encompass diverse topics such as architectural innovations, better training strategies, context length improvements, fine-tuning, multi-modal LLMs, robotics, datasets, benchmarking, efficiency, and more. With the rapid development of techniques and regular breakthroughs in LLM research, it has become considerably challenging to perceive the bigger picture of the ad",
+    "queries": [
+      "DPO robot manipulation policy preference"
+    ]
+  },
+  {
+    "openalex_id": "W4406936679",
+    "title": "Comparative Evaluation of Advanced AI Reasoning Models in Pediatric Clinical Decision Support: ChatGPT O1 vs. DeepSeek-R1",
+    "year": 2025,
+    "publication_date": "2025-01-28",
+    "cited_by_count": 48,
+    "arxiv_id": null,
+    "doi": "10.1101/2025.01.27.25321169",
+    "authors": [
+      "Gianluca Mondillo",
+      "Simone Colosimo",
+      "Alessandra Perrotta",
+      "Vittoria Frattolillo",
+      "Mariapia Masino"
+    ],
+    "abstract": "Abstract Introduction The adoption of advanced reasoning models, such as ChatGPT O1 and DeepSeek-R1, represents a pivotal step forward in clinical decision support, particularly in pediatrics. ChatGPT O1 employs “chain-of-thought reasoning” (CoT) to enhance structured problem-solving, while DeepSeek-R1 introduces self-reflection capabilities through reinforcement learning. This study aimed to evaluate the diagnostic accuracy and clinical utility of these models in pediatric scenarios using the MedQA dataset. Materials and Methods A total of 500 multiple-choice pediatric questions from the MedQ",
+    "queries": [
+      "DeepSeek-R1 reasoning reinforcement learning"
+    ]
+  },
+  {
+    "openalex_id": "W4403074774",
+    "title": "A Survey of Robot Intelligence with Large Language Models",
+    "year": 2024,
+    "publication_date": "2024-10-02",
+    "cited_by_count": 46,
+    "arxiv_id": null,
+    "doi": "10.3390/app14198868",
+    "authors": [
+      "Hyeongyo Jeong",
+      "Haechan Lee",
+      "Changwon Kim",
+      "Sungtae Shin"
+    ],
+    "abstract": "Since the emergence of ChatGPT, research on large language models (LLMs) has actively progressed across various fields. LLMs, pre-trained on vast text datasets, have exhibited exceptional abilities in understanding natural language and planning tasks. These abilities of LLMs are promising in robotics. In general, traditional supervised learning-based robot intelligence systems have a significant lack of adaptability to dynamically changing environments. However, LLMs help a robot intelligence system to improve its generalization ability in dynamic and complex real-world environments. Indeed, f",
+    "queries": [
+      "CoT-VLA visual chain of thought reasoning"
+    ]
+  },
+  {
+    "openalex_id": "W4407874080",
+    "title": "TinyVLA: Toward Fast, Data-Efficient Vision-Language-Action Models for Robotic Manipulation",
+    "year": 2025,
+    "publication_date": "2025-02-24",
+    "cited_by_count": 46,
+    "arxiv_id": null,
+    "doi": "10.1109/lra.2025.3544909",
+    "authors": [
+      "Junjie Wen",
+      "Yichen Zhu",
+      "Jinming Li",
+      "Minjie Zhu",
+      "Zhibin Tang"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models have shown remarkable potential in visuomotor control and instruction comprehension through end-to-end learning processes. However, current VLA models face significant challenges: they are slow during inference and require extensive pre-training on large amounts of robotic data, making real-world deployment difficult. In this letter, we introduce a new family of compact vision-language-action models, called TinyVLA, which offers two key advantages over existing VLA models: (1) faster inference speeds, and (2) improved data efficiency, eliminating the need fo",
+    "queries": [
+      "TinyVLA fast data efficient"
+    ]
+  },
+  {
+    "openalex_id": "W4407108350",
+    "title": "Current and future state of evaluation of large language models for medical summarization tasks",
+    "year": 2025,
+    "publication_date": "2025-02-03",
+    "cited_by_count": 45,
+    "arxiv_id": null,
+    "doi": "10.1038/s44401-024-00011-2",
+    "authors": [
+      "Emma Croxford",
+      "Yanjun Gao",
+      "Nicholas Pellegrino",
+      "Karen Wong",
+      "Graham Wills"
+    ],
+    "abstract": "Large Language Models have expanded the potential for clinical Natural Language Generation (NLG), presenting new opportunities to manage the vast amounts of medical text. However, their use in such high-stakes environments necessitate robust evaluation workflows. In this review, we investigated the current landscape of evaluation metrics for NLG in healthcare and proposed a future direction to address the resource constraints of expert human evaluation while balancing alignment with human judgments.",
+    "queries": [
+      "KTO ORPO IPO preference alignment"
+    ]
+  },
+  {
+    "openalex_id": "W4378771755",
+    "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+    "year": 2023,
+    "publication_date": "2023-05-29",
+    "cited_by_count": 274,
+    "arxiv_id": "2305.18290",
+    "doi": "10.48550/arxiv.2305.18290",
+    "authors": [
+      "Rafael Rafailov",
+      "Archit Sharma",
+      "Eric Mitchell",
+      "Stefano Ermon",
+      "Christopher D. Manning"
+    ],
+    "abstract": "While large-scale unsupervised language models (LMs) learn broad world knowledge and some reasoning skills, achieving precise control of their behavior is difficult due to the completely unsupervised nature of their training. Existing methods for gaining such steerability collect human labels of the relative quality of model generations and fine-tune the unsupervised LM to align with these preferences, often with reinforcement learning from human feedback (RLHF). However, RLHF is a complex and often unstable procedure, first fitting a reward model that reflects the human preferences, and then ",
+    "queries": [
+      "RLHF fine tuning human feedback"
+    ]
+  },
+  {
+    "openalex_id": "W4385473486",
+    "title": "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control",
+    "year": 2023,
+    "publication_date": "2023-07-28",
+    "cited_by_count": 266,
+    "arxiv_id": "2307.15818",
+    "doi": "10.48550/arxiv.2307.15818",
+    "authors": [
+      "Anthony Brohan",
+      "Noah Brown",
+      "Justice Carbajal",
+      "Yevgen Chebotar",
+      "Xi Chen"
+    ],
+    "abstract": "We study how vision-language models trained on Internet-scale data can be incorporated directly into end-to-end robotic control to boost generalization and enable emergent semantic reasoning. Our goal is to enable a single end-to-end trained model to both learn to map robot observations to actions and enjoy the benefits of large-scale pretraining on language and vision-language data from the web. To this end, we propose to co-fine-tune state-of-the-art vision-language models on both robotic trajectory data and Internet-scale vision-language tasks, such as visual question answering. In contrast",
+    "queries": [
+      "RT-2 vision language action transfer web knowledge"
+    ]
+  },
+  {
+    "openalex_id": "W4399695759",
+    "title": "OpenVLA: An Open-Source Vision-Language-Action Model",
+    "year": 2024,
+    "publication_date": "2024-06-13",
+    "cited_by_count": 38,
+    "arxiv_id": "2406.09246",
+    "doi": "10.48550/arxiv.2406.09246",
+    "authors": [
+      "Moo Jin Kim",
+      "Karl Pertsch",
+      "Siddharth Karamcheti",
+      "Ted Xiao",
+      "Ashwin Balakrishna"
+    ],
+    "abstract": "Large policies pretrained on a combination of Internet-scale vision-language data and diverse robot demonstrations have the potential to change how we teach robots new skills: rather than training new behaviors from scratch, we can fine-tune such vision-language-action (VLA) models to obtain robust, generalizable policies for visuomotor control. Yet, widespread adoption of VLAs for robotics has been challenging as 1) existing VLAs are largely closed and inaccessible to the public, and 2) prior work fails to explore methods for efficiently fine-tuning VLAs for new tasks, a key component for ado",
+    "queries": [
+      "OpenVLA vision language action open source"
+    ]
+  },
+  {
+    "openalex_id": "W4391871574",
+    "title": "DoRA: Weight-Decomposed Low-Rank Adaptation",
+    "year": 2024,
+    "publication_date": "2024-02-14",
+    "cited_by_count": 37,
+    "arxiv_id": "2402.09353",
+    "doi": "10.48550/arxiv.2402.09353",
+    "authors": [
+      "Shih-Yang Liu",
+      "Chien-Yi Wang",
+      "Hongxu Yin",
+      "Pavlo Molchanov",
+      "Yu-Chiang Frank Wang"
+    ],
+    "abstract": "Among the widely used parameter-efficient fine-tuning (PEFT) methods, LoRA and its variants have gained considerable popularity because of avoiding additional inference costs. However, there still often exists an accuracy gap between these methods and full fine-tuning (FT). In this work, we first introduce a novel weight decomposition analysis to investigate the inherent differences between FT and LoRA. Aiming to resemble the learning capacity of FT from the findings, we propose Weight-Decomposed Low-Rank Adaptation (DoRA). DoRA decomposes the pre-trained weight into two components, magnitude ",
+    "queries": [
+      "DoRA weight decomposition adaptation"
+    ]
+  },
+  {
+    "openalex_id": "W4409365576",
+    "title": "Cobra: Extending Mamba to Multi-Modal Large Language Model for Efficient Inference",
+    "year": 2025,
+    "publication_date": "2025-04-11",
+    "cited_by_count": 36,
+    "arxiv_id": null,
+    "doi": "10.1609/aaai.v39i10.33131",
+    "authors": [
+      "Han Zhao",
+      "M. Zhang",
+      "Wei Zhao",
+      "Pengxiang Ding",
+      "Siteng Huang"
+    ],
+    "abstract": "In recent years, applying multi-modal large language models (MLLMs) in various fields has achieved remarkable success. However, as the foundation model for many downstream tasks, MLLMs comprise the well-known Transformer network, which has a less efficient quadratic computation complexity. In this study, we introduce Cobra, a multi-modal large-scale language model built upon a state-space model, which has demonstrated significant potential in efficiently handling long sequences with fast inference and linear scalability concerning sequence length. Specifically, Cobra involves replacing Transfo",
+    "queries": [
+      "OpenVLA vision language action open source"
+    ]
+  },
+  {
+    "openalex_id": "W4410188253",
+    "title": "Large Language Models in Medicine: Clinical Applications, Technical Challenges, and Ethical Considerations",
+    "year": 2025,
+    "publication_date": "2025-04-30",
+    "cited_by_count": 33,
+    "arxiv_id": null,
+    "doi": "10.4258/hir.2025.31.2.114",
+    "authors": [
+      "Kyu-Hwan Jung"
+    ],
+    "abstract": "OBJECTIVES: This study presents a comprehensive review of the clinical applications, technical challenges, and ethical considerations associated with using large language models (LLMs) in medicine. METHODS: A literature survey of peer-reviewed articles, technical reports, and expert commentary from relevant medical and artificial intelligence journals was conducted. Key clinical application areas, technical limitations (e.g., accuracy, validation, transparency), and ethical issues (e.g., bias, safety, accountability, privacy) were identified and analyzed. RESULTS: LLMs have potential in clinic",
+    "queries": [
+      "OpenVLA vision language action open source"
+    ]
+  },
+  {
+    "openalex_id": "W4411463172",
+    "title": "DeepSeek vs. ChatGPT: prospects and challenges",
+    "year": 2025,
+    "publication_date": "2025-06-19",
+    "cited_by_count": 31,
+    "arxiv_id": null,
+    "doi": "10.3389/frai.2025.1576992",
+    "authors": [
+      "Inhye Jin",
+      "Jonathan A. Tangsrivimol",
+      "Erfan Darzi",
+      "Hafeez Ul Hassan Virk",
+      "Zhen Wang"
+    ],
+    "abstract": "DeepSeek has introduced its recent model DeepSeek-R1, showing divergence from OpenAI's ChatGPT, suggesting an open-source alternative to users. This paper analyzes the architecture of DeepSeek-R1, mainly adopting rule-based reinforcement learning (RL) without preliminary supervised fine-tuning (SFT), which has shown better efficiency. By integrating multi-stage training along with cold-start data usage before RL, the model can achieve meaningful performance in reasoning tasks along with reward modeling optimizing training process. DeepSeek shows its strength in technical, reasoning tasks, able",
+    "queries": [
+      "DeepSeek-R1 reasoning reinforcement learning"
+    ]
+  },
+  {
+    "openalex_id": "W4384920109",
+    "title": "Challenges and Applications of Large Language Models",
+    "year": 2023,
+    "publication_date": "2023-07-19",
+    "cited_by_count": 175,
+    "arxiv_id": "2307.10169",
+    "doi": "10.48550/arxiv.2307.10169",
+    "authors": [
+      "Jean Kaddour",
+      "Joshua Harris",
+      "Maximilian Mozes",
+      "Herbie Bradley",
+      "Roberta Răileanu"
+    ],
+    "abstract": "Large Language Models (LLMs) went from non-existent to ubiquitous in the machine learning discourse within a few years. Due to the fast pace of the field, it is difficult to identify the remaining challenges and already fruitful application areas. In this paper, we aim to establish a systematic set of open problems and application successes so that ML researchers can comprehend the field's current state more quickly and become productive.",
+    "queries": [
+      "DPO robot manipulation policy preference"
+    ]
+  },
+  {
+    "openalex_id": "W4394935437",
+    "title": "CaloClouds II: ultra-fast geometry-independent highly-granular calorimeter simulation",
+    "year": 2024,
+    "publication_date": "2024-04-01",
+    "cited_by_count": 26,
+    "arxiv_id": null,
+    "doi": "10.1088/1748-0221/19/04/p04020",
+    "authors": [
+      "Erik Buhmann",
+      "Frank Gaede",
+      "Gregor Kasieczka",
+      "Anatolii Korol",
+      "W. Korcari"
+    ],
+    "abstract": "Abstract Fast simulation of the energy depositions in high-granular detectors is needed for future collider experiments at ever-increasing luminosities. Generative machine learning (ML) models have been shown to speed up and augment the traditional simulation chain in physics analysis. However, the majority of previous efforts were limited to models relying on fixed, regular detector readout geometries. A major advancement is the recently introduced CaloClouds model, a geometry-independent diffusion model, which generates calorimeter showers as point clouds for the electromagnetic calorimeter ",
+    "queries": [
+      "consistency model distillation diffusion fast sampling"
+    ]
+  },
+  {
+    "openalex_id": "W4366341216",
+    "title": "OpenAssistant Conversations -- Democratizing Large Language Model Alignment",
+    "year": 2023,
+    "publication_date": "2023-04-14",
+    "cited_by_count": 134,
+    "arxiv_id": "2304.07327",
+    "doi": "10.48550/arxiv.2304.07327",
+    "authors": [
+      "Andreas Köpf",
+      "Yannic Kilcher",
+      "Dimitri von Rütte",
+      "Sotiris Anagnostidis",
+      "Zhi-Rui Tam"
+    ],
+    "abstract": "Aligning large language models (LLMs) with human preferences has proven to drastically improve usability and has driven rapid adoption as demonstrated by ChatGPT. Alignment techniques such as supervised fine-tuning (SFT) and reinforcement learning from human feedback (RLHF) greatly reduce the required skill and domain knowledge to effectively harness the capabilities of LLMs, increasing their accessibility and utility across various domains. However, state-of-the-art alignment techniques like RLHF rely on high-quality human feedback data, which is expensive to create and often remains propriet",
+    "queries": [
+      "RLHF fine tuning human feedback"
+    ]
+  },
+  {
+    "openalex_id": "W4206542133",
+    "title": "Blockchain-Based Electronic Health Records Management: A Comprehensive Review and Future Research Direction",
+    "year": 2022,
+    "publication_date": "2022-01-01",
+    "cited_by_count": 122,
+    "arxiv_id": null,
+    "doi": "10.1109/access.2022.3141079",
+    "authors": [
+      "Abdullah Al Mamun",
+      "Sami Azam",
+      "Clémentine Gritti"
+    ],
+    "abstract": "Electronic Health Records (EHRs) are electronically-stored health information in a digital format. EHRs are typically shared among healthcare stakeholders and face power failure, data misuse, lack of privacy, security, and audit trail. On the other hand, blockchain is the revolutionary invention of the twentieth century that offers a distributed and decentralized setting to communicate among nodes in a list of networks without a central authority. It can address the limitations of EHRs management and provide a safer, secured, and decentralized environment for exchanging EHRs data. Three catego",
+    "queries": [
+      "DPO robot manipulation policy preference"
+    ]
+  },
+  {
+    "openalex_id": "W4405717632",
+    "title": "EdgeLLM: Fast On-Device LLM Inference With Speculative Decoding",
+    "year": 2024,
+    "publication_date": "2024-12-23",
+    "cited_by_count": 22,
+    "arxiv_id": null,
+    "doi": "10.1109/tmc.2024.3513457",
+    "authors": [
+      "Daliang Xu",
+      "Wangsong Yin",
+      "Hao Zhang",
+      "Xin Jin",
+      "Ying Zhang"
+    ],
+    "abstract": "Generative tasks, such as text generation and question answering, are essential for mobile applications. Given their inherent privacy sensitivity, executing them on devices is demanded. Nowadays, the execution of these generative tasks heavily relies on the Large Language Models (LLMs). However, the scarce device memory severely hinders the scalability of these models. We present <monospace xmlns:mml=\"http://www.w3.org/1998/Math/MathML\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">EdgeLLM</monospace>, an efficient on-device LLM inference system for models whose sizes exceed the device's memory c",
+    "queries": [
+      "speculative decoding fast LLM inference"
+    ]
+  },
+  {
+    "openalex_id": "W4413156213",
+    "title": "CoT-VLA: Visual Chain-of-Thought Reasoning for Vision-Language-Action Models",
+    "year": 2025,
+    "publication_date": "2025-06-10",
+    "cited_by_count": 21,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr52734.2025.00166",
+    "authors": [
+      "Qingqing Zhao",
+      "Yao Lu",
+      "Moo Jin Kim",
+      "Zipeng Fu",
+      "Zhuoyang Zhang"
+    ],
+    "abstract": "Vision-language-action models (VLAs) have shown potential in leveraging pretrained vision-language models and diverse robot demonstrations for learning generalizable sensorimotor control. While this paradigm effectively utilizes large-scale data from both robotic and non-robotic sources, current VLAs primarily focus on direct input–output mappings, lacking the intermediate reasoning steps crucial for complex manipulation tasks. As a result, existing VLAs lack temporal planning or reasoning capabilities. In this paper, we introduce a method that incorporates explicit visual chain-of-thought (Co",
+    "queries": [
+      "CoT-VLA visual chain of thought reasoning"
+    ]
+  },
+  {
+    "openalex_id": "W4410427444",
+    "title": "DeepSeek: Paradigm Shifts and Technical Evolution in Large AI Models",
+    "year": 2025,
+    "publication_date": "2025-05-01",
+    "cited_by_count": 20,
+    "arxiv_id": null,
+    "doi": "10.1109/jas.2025.125495",
+    "authors": [
+      "Luolin Xiong",
+      "Haofen Wang",
+      "Xi Chen",
+      "Lu Sheng",
+      "Yun Xiong"
+    ],
+    "abstract": "DeepSeek, a Chinese artificial intelligence (AI) startup, has released their V3 and R1 series models, which attracted global attention due to their low cost, high performance, and open-source advantages. This paper begins by reviewing the evolution of large AI models focusing on paradigm shifts, the mainstream large language model (LLM) paradigm, and the DeepSeek paradigm. Subsequently, the paper highlights novel algorithms introduced by DeepSeek, including multi-head latent attention (MLA), mixture-of-experts (MoE), multi-token prediction (MTP), and group relative policy optimization (GRPO). ",
+    "queries": [
+      "GRPO group relative policy optimization DeepSeek"
+    ]
+  },
+  {
+    "openalex_id": "W4221159977",
+    "title": "R3M: A Universal Visual Representation for Robot Manipulation",
+    "year": 2022,
+    "publication_date": "2022-03-23",
+    "cited_by_count": 82,
+    "arxiv_id": "2203.12601",
+    "doi": "10.48550/arxiv.2203.12601",
+    "authors": [
+      "Suraj Nair",
+      "Aravind Rajeswaran",
+      "Vikash Kumar",
+      "Chelsea Finn",
+      "Abhinav Gupta"
+    ],
+    "abstract": "We study how visual representations pre-trained on diverse human video data can enable data-efficient learning of downstream robotic manipulation tasks. Concretely, we pre-train a visual representation using the Ego4D human video dataset using a combination of time-contrastive learning, video-language alignment, and an L1 penalty to encourage sparse and compact representations. The resulting representation, R3M, can be used as a frozen perception module for downstream policy learning. Across a suite of 12 simulated robot manipulation tasks, we find that R3M improves task success by over 20% co",
+    "queries": [
+      "R3M universal visual representation manipulation"
+    ]
+  },
+  {
+    "openalex_id": "W4386076668",
+    "title": "CLIP<sup>2</sup>: Contrastive Language-Image-Point Pretraining from Real-World Point Cloud Data",
+    "year": 2023,
+    "publication_date": "2023-06-01",
+    "cited_by_count": 71,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr52729.2023.01463",
+    "authors": [
+      "Yihan Zeng",
+      "Chenhan Jiang",
+      "Jiageng Mao",
+      "Jianhua Han",
+      "Chaoqiang Ye"
+    ],
+    "abstract": "Contrastive Language-Image Pre-training, benefiting from large-scale unlabeled text-image pairs, has demonstrated great performance in open-world vision understanding tasks. However, due to the limited Text-3D data pairs, adapting the success of 2D Vision-Language Models (VLM) to the 3D space remains an open problem. Existing works that leverage VLM for 3D understanding generally resort to constructing intermediate 2D representations for the 3D data, but at the cost of losing 3D geometry information. To take a step toward open-world 3D vision understanding, we propose Contrastive Language-Imag",
+    "queries": [
+      "contrastive language image pretraining CLIP"
+    ]
+  },
+  {
+    "openalex_id": "W4414198610",
+    "title": "Vision-Language-Action Models for Robotics: A Review Towards Real-World Applications",
+    "year": 2025,
+    "publication_date": "2025-01-01",
+    "cited_by_count": 16,
+    "arxiv_id": "2510.07077",
+    "doi": "10.1109/access.2025.3609980",
+    "authors": [
+      "Kento Kawaharazuka",
+      "Jihoon Oh",
+      "Jun Yamada",
+      "Ingmar Posner",
+      "Yuke Zhu"
+    ],
+    "abstract": "Amid growing efforts to leverage advances in large language models (LLMs) and visionlanguage models (VLMs) for robotics, Vision-Language-Action (VLA) models have recently gained significant attention. By unifying vision, language, and action data at scale, which have traditionally been studied separately, VLA models aim to learn policies that generalise across diverse tasks, objects, embodiments, and environments. This generalisation capability is expected to enable robots to solve novel downstream tasks with minimal or no additional task-specific data, facilitating more flexible and scalable ",
+    "queries": [
+      "RDT-1B diffusion bimanual robot manipulation",
+      "OpenVLA-OFT fine tuning speed success"
+    ]
+  },
+  {
+    "openalex_id": "W4391590853",
+    "title": "Parameter-Efficient Fine-Tuning for Pre-Trained Vision Models: A Survey and Benchmark",
+    "year": 2024,
+    "publication_date": "2024-02-03",
+    "cited_by_count": 16,
+    "arxiv_id": "2402.02242",
+    "doi": "10.48550/arxiv.2402.02242",
+    "authors": [
+      "Yi Xin",
+      "Yang, Jianjiang",
+      "Siqi Luo",
+      "Yuntao Du",
+      "Qin, Qi"
+    ],
+    "abstract": "Pre-trained vision models (PVMs) have demonstrated remarkable adaptability across a wide range of downstream vision tasks, showcasing exceptional performance. However, as these models scale to billions or even trillions of parameters, conventional full fine-tuning has become increasingly impractical due to its high computational and storage demands. To address these challenges, parameter-efficient fine-tuning (PEFT) has emerged as a promising alternative, aiming to achieve performance comparable to full fine-tuning while making minimal adjustments to the model parameters. This paper presents a",
+    "queries": [
+      "parameter efficient fine tuning survey"
+    ]
+  },
+  {
+    "openalex_id": "W4293498911",
+    "title": "What Matters in Language Conditioned Robotic Imitation Learning Over Unstructured Data",
+    "year": 2022,
+    "publication_date": "2022-08-29",
+    "cited_by_count": 68,
+    "arxiv_id": null,
+    "doi": "10.1109/lra.2022.3196123",
+    "authors": [
+      "Oier Mees",
+      "Lukás Hermann",
+      "Wolfram Burgard"
+    ],
+    "abstract": "A long-standing goal in robotics is to build robots that can perform a wide range of daily tasks from perceptions obtained with their onboard sensors and specified only via natural language. While recently substantial advances have been achieved in language-driven robotics by leveraging end-to-end learning from pixels, there is no clear and well-understood process for making various design choices due to the underlying variation in setups. In this letter, we conduct an extensive study of the most critical challenges in learning language conditioned policies from offline free-form imitation dat",
+    "queries": [
+      "CALVIN long horizon robot benchmark"
+    ]
+  },
+  {
+    "openalex_id": "W4402671706",
+    "title": "DoRA: Enhancing Parameter-Efficient Fine-Tuning with Dynamic Rank Distribution",
+    "year": 2024,
+    "publication_date": "2024-01-01",
+    "cited_by_count": 15,
+    "arxiv_id": null,
+    "doi": "10.18653/v1/2024.acl-long.626",
+    "authors": [
+      "Yulong Mao",
+      "Kaiyu Huang",
+      "Changhao Guan",
+      "Ganglin Bao",
+      "Fengran Mo"
+    ],
+    "abstract": "Fine-tuning large-scale pre-trained models is inherently a resource-intensive task.While it can enhance the capabilities of the model, it also incurs substantial computational costs, posing challenges to the practical application of downstream tasks.Existing parameter-efficient fine-tuning (PEFT) methods such as Low-Rank Adaptation (LoRA) rely on a bypass framework that ignores the differential parameter budget requirements across weight matrices, which may lead to suboptimal fine-tuning outcomes.To address this issue, we introduce the Dynamic Low-Rank Adaptation (DoRA) method.DoRA decomposes ",
+    "queries": [
+      "DoRA weight decomposition adaptation"
+    ]
+  },
+  {
+    "openalex_id": "W4414051092",
+    "title": "SpatialVLA: Exploring Spatial Representations for Visual-Language-Action Models",
+    "year": 2025,
+    "publication_date": "2025-06-21",
+    "cited_by_count": 14,
+    "arxiv_id": null,
+    "doi": "10.15607/rss.2025.xxi.011",
+    "authors": [
+      "Delin Qu",
+      "Haoming Song",
+      "Qizhi Chen",
+      "Yuanqi Yao",
+      "Xinyi Ye"
+    ],
+    "abstract": "and real-world setups, where the pre-learned action grids are re-discretized to capture robot-specific spatial action movements of new setups.The superior results from extensive evaluations demonstrate the exceptional in-distribution generalization and out-of-distribution adaptation capability, highlighting the crucial benefit of the proposed spatial-aware representations for generalist robot policy learning.All the details and codes are opensourced.",
+    "queries": [
+      "RDT-1B diffusion bimanual robot manipulation",
+      "SimplerEnv sim real robot"
+    ]
+  },
+  {
+    "openalex_id": "W4402780389",
+    "title": "VideoMAC: Video Masked Autoencoders Meet ConvNets",
+    "year": 2024,
+    "publication_date": "2024-06-16",
+    "cited_by_count": 14,
+    "arxiv_id": "2402.19082",
+    "doi": "10.1109/cvpr52733.2024.02145",
+    "authors": [
+      "Gensheng Pei",
+      "Tao Chen",
+      "Xiruo Jiang",
+      "Huafeng Liu",
+      "Zeren Sun"
+    ],
+    "abstract": "Recently, the advancement of self-supervised learning techniques, like masked autoencoders (MAE), has greatly influenced visual representation learning for images and videos. Nevertheless, it is worth noting that the predomi-nant approaches in existing masked image / video modeling rely excessively on resource-intensive vision transformers (ViTs) as the feature encoder. In this paper, we propose a new approach termed as VideoMAC, which combines video masked autoencoders with resource-friendly Con-vNets. Specifically, VideoMAC employs symmetric masking on randomly sampled pairs of video frames.",
+    "queries": [
+      "SiamMAE siamese masked autoencoder video correspondence"
+    ]
+  },
+  {
+    "openalex_id": "W4414050921",
+    "title": "Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success",
+    "year": 2025,
+    "publication_date": "2025-06-21",
+    "cited_by_count": 13,
+    "arxiv_id": null,
+    "doi": "10.15607/rss.2025.xxi.017",
+    "authors": [
+      "Moo Hyun Kim",
+      "Chelsea Finn",
+      "Percy Liang"
+    ],
+    "abstract": "Recent vision-language-action models (VLAs) build upon pretrained vision-language models and leverage diverse robot datasets to demonstrate strong task execution, language following ability, and semantic generalization.Despite these successes, VLAs struggle with novel robot setups and require finetuning to achieve good performance, yet how to most effectively fine-tune them is unclear given many possible strategies.In this work, we study key VLA adaptation design choices such as different action decoding schemes, action representations, and learning objectives for fine-tuning, using OpenVLA as",
+    "queries": [
+      "RDT-1B diffusion bimanual robot manipulation",
+      "OpenVLA-OFT fine tuning speed success"
+    ]
+  },
+  {
+    "openalex_id": "W3190007957",
+    "title": "2018 12th International Conference on Research Challenges in Information Science (RCIS)",
+    "year": 2018,
+    "publication_date": "2018-05-01",
+    "cited_by_count": 46,
+    "arxiv_id": null,
+    "doi": "10.1109/rcis43556.2018",
+    "authors": [],
+    "abstract": "The proceedings contain 52 papers. The special focus in this conference is on Research Challenges in Information Science. The topics include: Robotic Process Automation in the Automotive Industry - Lessons Learned from an Exploratory Case Study;CompLicy: Evaluating the GDPR Alignment of Privacy Policies - A Study on Web Platforms;WEIR-P: An Information Extraction Pipeline for the Wastewater Domain;recommendations for Data-Driven Degradation Estimation with Case Studies from Manufacturing and Dry-Bulk Shipping;detection of Event Precursors in Social Networks: A Graphlet-Based Method;developing ",
+    "queries": [
+      "preference alignment robotic policy"
+    ]
+  },
+  {
+    "openalex_id": "W4405785673",
+    "title": "Ag2Manip: Learning Novel Manipulation Skills with Agent-Agnostic Visual and Action Representations",
+    "year": 2024,
+    "publication_date": "2024-10-14",
+    "cited_by_count": 12,
+    "arxiv_id": null,
+    "doi": "10.1109/iros58592.2024.10801835",
+    "authors": [
+      "Puhao Li",
+      "Tengyu Liu",
+      "Yuyang Li",
+      "Muzhi Han",
+      "Haoran Geng"
+    ],
+    "abstract": "Autonomous robotic systems capable of learning novel manipulation tasks are poised to transform industries from manufacturing to service automation. However, current methods (e.g., VIP and R3M) still face significant hurdles, notably the domain gap among robotic embodiments and the sparsity of successful task executions within specific action spaces, resulting in misaligned and ambiguous task representations. We introduce Ag2Manip (Agent-Agnostic representations for Manipulation), a framework aimed at addressing these challenges through two key innovations: (1) an agent-agnostic visual represe",
+    "queries": [
+      "R3M universal visual representation manipulation"
+    ]
+  },
+  {
+    "openalex_id": "W4402670165",
+    "title": "Beyond One-Preference-Fits-All Alignment: Multi-Objective Direct Preference Optimization",
+    "year": 2024,
+    "publication_date": "2024-01-01",
+    "cited_by_count": 11,
+    "arxiv_id": null,
+    "doi": "10.18653/v1/2024.findings-acl.630",
+    "authors": [
+      "Zhanhui Zhou",
+      "Jie Liu",
+      "Jing Shao",
+      "Xiangyu Yue",
+      "Chao Yang"
+    ],
+    "abstract": "A single language model, even when aligned with labelers through reinforcement learning from human feedback (RLHF), may not suit all human preferences.Recent approaches therefore prefer customization, gathering multidimensional feedback, and creating distinct reward models for each dimension.Different language models are then optimized for various preferences using multi-objective RLHF (MORLHF) with varying reward weights.However, RL fine-tuning is unstable and resourceheavy, especially with diverse and usually conflicting objectives.In this paper, we present Multi-Objective Direct Preference ",
+    "queries": [
+      "Direct Preference Optimization implicit reward language"
+    ]
+  },
+  {
+    "openalex_id": "W4388685466",
+    "title": "Large Language Models for Robotics: A Survey",
+    "year": 2023,
+    "publication_date": "2023-11-13",
+    "cited_by_count": 36,
+    "arxiv_id": "2311.07226",
+    "doi": "10.48550/arxiv.2311.07226",
+    "authors": [
+      "Fanlong Zeng",
+      "Wensheng Gan",
+      "Huai, Zezheng",
+      "Sun, Lichao",
+      "Philip S. Yu"
+    ],
+    "abstract": "The human ability to learn, generalize, and control complex manipulation tasks through multi-modality feedback suggests a unique capability, which we refer to as dexterity intelligence. Understanding and assessing this intelligence is a complex task. Amidst the swift progress and extensive proliferation of large language models (LLMs), their applications in the field of robotics have garnered increasing attention. LLMs possess the ability to process and generate natural language, facilitating efficient interaction and collaboration with robots. Researchers and engineers in the field of robotic",
+    "queries": [
+      "OpenVLA vision language action open source",
+      "FAST efficient action tokenization VLA"
+    ]
+  },
+  {
+    "openalex_id": "W4413765256",
+    "title": "Exploring Challenges and Opportunities in Manufacturing and Intelligence for Future Robotics",
+    "year": 2025,
+    "publication_date": "2025-08-27",
+    "cited_by_count": 10,
+    "arxiv_id": null,
+    "doi": "10.1007/s12541-025-01318-2",
+    "authors": [
+      "Jun Young Choi",
+      "Semin Ahn",
+      "Do–Hyeon Kim",
+      "Jun Heo",
+      "Won-Jae Yun"
+    ],
+    "abstract": "Abstract This paper offers a forward-looking perspective on the challenges and opportunities shaping the future of robotics, drawing insights from both established and emerging research. It addresses two pivotal dimensions: the complexities of manufacturing and the integration of intelligence within robotic systems. On the manufacturing front, key elements such as structural materials, manufacturing processes, assembly methodologies, sensors, actuators, and power systems are explored. Simultaneously, the paper evaluates the evolution of robotic intelligence, focusing on frameworks for autonomo",
+    "queries": [
+      "CoT-VLA visual chain of thought reasoning"
+    ]
+  },
+  {
+    "openalex_id": "W4398796510",
+    "title": "A Survey on Vision–Language–Action Models for Embodied AI",
+    "year": 2026,
+    "publication_date": "2026-01-01",
+    "cited_by_count": 10,
+    "arxiv_id": "2405.14093",
+    "doi": "10.1109/tnnls.2025.3650584",
+    "authors": [
+      "Yueen Ma",
+      "Zixing Song",
+      "Yuzheng Zhuang",
+      "Jianye Hao",
+      "Irwin King"
+    ],
+    "abstract": "Embodied AI is widely recognized as a cornerstone of artificial general intelligence (AGI) because it involves controlling embodied agents to perform tasks in the physical world. Building on the success of large language models (LLMs) and vision-language models (VLMs), a new category of multimodal models-referred to as vision-language-action (VLA) models-has emerged to address language-conditioned robotic tasks in embodied AI by leveraging their distinct ability to generate actions. The recent proliferation of VLAs necessitates a comprehensive survey to capture the rapidly evolving landscape. ",
+    "queries": [
+      "OpenVLA-OFT fine tuning speed success"
+    ]
+  },
+  {
+    "openalex_id": "W4362655601",
+    "title": "The Vector Grounding Problem",
+    "year": 2023,
+    "publication_date": "2023-04-04",
+    "cited_by_count": 35,
+    "arxiv_id": "2304.01481",
+    "doi": "10.48550/arxiv.2304.01481",
+    "authors": [
+      "Dimitri Coelho Mollo",
+      "Raphaël Millière"
+    ],
+    "abstract": "Large language models (LLMs) produce seemingly meaningful outputs, yet they are trained on text alone without direct interaction with the world. This leads to a modern variant of the classical symbol grounding problem in AI: can LLMs' internal states and outputs be about extra-linguistic reality, independently of the meaning human interpreters project onto them? We argue that they can. We first distinguish referential grounding -- the connection between a representation and its worldly referent -- from other forms of grounding and argue it is the only kind essential to solving the problem. We ",
+    "queries": [
+      "OpenVLA vision language action open source"
+    ]
+  },
+  {
+    "openalex_id": "W4381249600",
+    "title": "Scaling Open-Vocabulary Object Detection",
+    "year": 2023,
+    "publication_date": "2023-06-16",
+    "cited_by_count": 28,
+    "arxiv_id": "2306.09683",
+    "doi": "10.48550/arxiv.2306.09683",
+    "authors": [
+      "Matthias Minderer",
+      "Alexey A. Gritsenko",
+      "Neil Houlsby"
+    ],
+    "abstract": "Open-vocabulary object detection has benefited greatly from pretrained vision-language models, but is still limited by the amount of available detection training data. While detection training data can be expanded by using Web image-text pairs as weak supervision, this has not been done at scales comparable to image-level pretraining. Here, we scale up detection data with self-training, which uses an existing detector to generate pseudo-box annotations on image-text pairs. Major challenges in scaling self-training are the choice of label space, pseudo-annotation filtering, and training efficie",
+    "queries": [
+      "SigLIP sigmoid loss image-text pretraining"
+    ]
+  },
+  {
+    "openalex_id": "W4398859186",
+    "title": "SimPO: Simple Preference Optimization with a Reference-Free Reward",
+    "year": 2024,
+    "publication_date": "2024-05-23",
+    "cited_by_count": 8,
+    "arxiv_id": "2405.14734",
+    "doi": "10.48550/arxiv.2405.14734",
+    "authors": [
+      "Yu Meng",
+      "Mengzhou Xia",
+      "Danqi Chen"
+    ],
+    "abstract": "Direct Preference Optimization (DPO) is a widely used offline preference optimization algorithm that reparameterizes reward functions in reinforcement learning from human feedback (RLHF) to enhance simplicity and training stability. In this work, we propose SimPO, a simpler yet more effective approach. The effectiveness of SimPO is attributed to a key design: using the average log probability of a sequence as the implicit reward. This reward formulation better aligns with model generation and eliminates the need for a reference model, making it more compute and memory efficient. Additionally, ",
+    "queries": [
+      "KTO ORPO IPO preference alignment"
+    ]
+  },
+  {
+    "openalex_id": "W4413145750",
+    "title": "MoFlow: One-Step Flow Matching for Human Trajectory Forecasting via Implicit Maximum Likelihood Estimation based Distillation",
+    "year": 2025,
+    "publication_date": "2025-06-10",
+    "cited_by_count": 8,
+    "arxiv_id": null,
+    "doi": "10.1109/cvpr52734.2025.01611",
+    "authors": [
+      "Yuxiang Fu",
+      "Qi Yan",
+      "Lele Wang",
+      "Ke Li",
+      "Renjie Liao"
+    ],
+    "abstract": "In this paper, we address the problem of human trajectory forecasting, which aims to predict the inherently multi-modal future movements of humans based on their past trajectories and other contextual cues. We propose a novel motion prediction conditional flow matching model, termed MoFlow, to predict K-shot future trajectories for all agents in a given scene. We design a novel flow matching loss function that not only ensures at least one of the K sets of future trajectories is accurate but also encourages all K sets of future trajectories to be diverse and plausible. Furthermore, by leveragi",
+    "queries": [
+      "flow matching one-step distillation"
+    ]
+  },
+  {
+    "openalex_id": "W4387688013",
+    "title": "PaLI-3 Vision Language Models: Smaller, Faster, Stronger",
+    "year": 2023,
+    "publication_date": "2023-10-13",
+    "cited_by_count": 26,
+    "arxiv_id": "2310.09199",
+    "doi": "10.48550/arxiv.2310.09199",
+    "authors": [
+      "Xi Chen",
+      "Xiao Wang",
+      "Lucas Beyer",
+      "А. И. Колесников",
+      "Jialin Wu"
+    ],
+    "abstract": "This paper presents PaLI-3, a smaller, faster, and stronger vision language model (VLM) that compares favorably to similar models that are 10x larger. As part of arriving at this strong performance, we compare Vision Transformer (ViT) models pretrained using classification objectives to contrastively (SigLIP) pretrained ones. We find that, while slightly underperforming on standard image classification benchmarks, SigLIP-based PaLI shows superior performance across various multimodal benchmarks, especially on localization and visually-situated text understanding. We scale the SigLIP image enco",
+    "queries": [
+      "SigLIP sigmoid loss image-text pretraining"
+    ]
+  },
+  {
+    "openalex_id": "W4323076585",
+    "title": "Consistency Models",
+    "year": 2023,
+    "publication_date": "2023-03-02",
+    "cited_by_count": 25,
+    "arxiv_id": "2303.01469",
+    "doi": "10.48550/arxiv.2303.01469",
+    "authors": [
+      "Yang Song",
+      "Prafulla Dhariwal",
+      "Mark Chen",
+      "Ilya Sutskever"
+    ],
+    "abstract": "Diffusion models have significantly advanced the fields of image, audio, and video generation, but they depend on an iterative sampling process that causes slow generation. To overcome this limitation, we propose consistency models, a new family of models that generate high quality samples by directly mapping noise to data. They support fast one-step generation by design, while still allowing multistep sampling to trade compute for sample quality. They also support zero-shot data editing, such as image inpainting, colorization, and super-resolution, without requiring explicit training on these",
+    "queries": [
+      "consistency model distillation diffusion fast sampling"
+    ]
+  },
+  {
+    "openalex_id": "W4387946888",
+    "title": "Wonder3D: Single Image to 3D using Cross-Domain Diffusion",
+    "year": 2023,
+    "publication_date": "2023-10-23",
+    "cited_by_count": 25,
+    "arxiv_id": "2310.15008",
+    "doi": "10.48550/arxiv.2310.15008",
+    "authors": [
+      "Xiaoxiao Long",
+      "Yuan-Chen Guo",
+      "Cheng Lin",
+      "Yuan Liu",
+      "Zhiyang Dou"
+    ],
+    "abstract": "In this work, we introduce Wonder3D, a novel method for efficiently generating high-fidelity textured meshes from single-view images.Recent methods based on Score Distillation Sampling (SDS) have shown the potential to recover 3D geometry from 2D diffusion priors, but they typically suffer from time-consuming per-shape optimization and inconsistent geometry. In contrast, certain works directly produce 3D information via fast network inferences, but their results are often of low quality and lack geometric details. To holistically improve the quality, consistency, and efficiency of image-to-3D ",
+    "queries": [
+      "consistency model distillation diffusion fast sampling"
+    ]
+  },
+  {
+    "openalex_id": "W4399455360",
+    "title": "RoboMamba: Efficient Vision-Language-Action Model for Robotic Reasoning and Manipulation",
+    "year": 2024,
+    "publication_date": "2024-06-06",
+    "cited_by_count": 7,
+    "arxiv_id": "2406.04339",
+    "doi": "10.48550/arxiv.2406.04339",
+    "authors": [
+      "Jiaming Liu",
+      "Mengzhen Liu",
+      "Zhenyu Wang",
+      "Pengju An",
+      "Li, Xiaoqi"
+    ],
+    "abstract": "A fundamental objective in robot manipulation is to enable models to comprehend visual scenes and execute actions. Although existing Vision-Language-Action (VLA) models for robots can handle a range of basic tasks, they still face challenges in two areas: (1) insufficient reasoning ability to tackle complex tasks, and (2) high computational costs for VLA model fine-tuning and inference. The recently proposed state space model (SSM) known as Mamba demonstrates promising capabilities in non-trivial sequence modeling with linear inference complexity. Inspired by this, we introduce RoboMamba, an e",
+    "queries": [
+      "FAST efficient action tokenization VLA"
+    ]
+  },
+  {
+    "openalex_id": "W4391970846",
+    "title": "Perceptual Image Quality Prediction: Are Contrastive Language–Image Pretraining (CLIP) Visual Features Effective?",
+    "year": 2024,
+    "publication_date": "2024-02-19",
+    "cited_by_count": 7,
+    "arxiv_id": null,
+    "doi": "10.3390/electronics13040803",
+    "authors": [
+      "Chibuike Onuoha",
+      "Jean Flaherty",
+      "Truong Cong Thang"
+    ],
+    "abstract": "In recent studies, the Contrastive Language–Image Pretraining (CLIP) model has showcased remarkable versatility in downstream tasks, ranging from image captioning and question-answering reasoning to image–text similarity rating, etc. In this paper, we investigate the effectiveness of CLIP visual features in predicting perceptual image quality. CLIP is also compared with competitive large multimodal models (LMMs) for this task. In contrast to previous studies, the results show that CLIP and other LMMs do not always provide the best performance. Interestingly, our evaluation experiment reveals t",
+    "queries": [
+      "contrastive language image pretraining CLIP"
+    ]
+  },
+  {
+    "openalex_id": "W4387156572",
+    "title": "QA-LoRA: Quantization-Aware Low-Rank Adaptation of Large Language Models",
+    "year": 2023,
+    "publication_date": "2023-09-26",
+    "cited_by_count": 21,
+    "arxiv_id": "2309.14717",
+    "doi": "10.48550/arxiv.2309.14717",
+    "authors": [
+      "Yuhui Xu",
+      "Lingxi Xie",
+      "Xiaotao Gu",
+      "Xin Chen",
+      "Heng Chang"
+    ],
+    "abstract": "Recently years have witnessed a rapid development of large language models (LLMs). Despite the strong ability in many language-understanding tasks, the heavy computational burden largely restricts the application of LLMs especially when one needs to deploy them onto edge devices. In this paper, we propose a quantization-aware low-rank adaptation (QA-LoRA) algorithm. The motivation lies in the imbalanced degrees of freedom of quantization and adaptation, and the solution is to use group-wise operators which increase the degree of freedom of quantization meanwhile decreasing that of adaptation. ",
+    "queries": [
+      "LoRA low rank adaptation language model"
+    ]
+  },
+  {
+    "openalex_id": "W4416037023",
+    "title": "ChatVLA: Unified Multimodal Understanding and Robot Control with Vision-Language-Action Model",
+    "year": 2025,
+    "publication_date": "2025-01-01",
+    "cited_by_count": 6,
+    "arxiv_id": null,
+    "doi": "10.18653/v1/2025.emnlp-main.273",
+    "authors": [
+      "Zhongyi Zhou",
+      "Yichen Zhu",
+      "Minjie Zhu",
+      "Junjie Wen",
+      "Ning Liu"
+    ],
+    "abstract": "Zhongyi Zhou, Yichen Zhu, Minjie Zhu, Junjie Wen, Ning Liu, Zhiyuan Xu, Weibin Meng, Yaxin Peng, Chaomin Shen, Feifei Feng, Yi Xu. Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing. 2025.",
+    "queries": [
+      "TinyVLA fast data efficient"
+    ]
+  },
+  {
+    "openalex_id": "W4378509424",
+    "title": "Siamese Masked Autoencoders",
+    "year": 2023,
+    "publication_date": "2023-05-23",
+    "cited_by_count": 17,
+    "arxiv_id": "2305.14344",
+    "doi": "10.48550/arxiv.2305.14344",
+    "authors": [
+      "Agrim Gupta",
+      "Jiajun Wu",
+      "Jia Deng",
+      "Li Fei-Fei"
+    ],
+    "abstract": "Establishing correspondence between images or scenes is a significant challenge in computer vision, especially given occlusions, viewpoint changes, and varying object appearances. In this paper, we present Siamese Masked Autoencoders (SiamMAE), a simple extension of Masked Autoencoders (MAE) for learning visual correspondence from videos. SiamMAE operates on pairs of randomly sampled video frames and asymmetrically masks them. These frames are processed independently by an encoder network, and a decoder composed of a sequence of cross-attention layers is tasked with predicting the missing patc",
+    "queries": [
+      "SiamMAE siamese masked autoencoder video correspondence"
+    ]
+  },
+  {
+    "openalex_id": "W7133220882",
+    "title": "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning",
+    "year": 2023,
+    "publication_date": "2023-01-01",
+    "cited_by_count": 14,
+    "arxiv_id": null,
+    "doi": "10.52202/075280-1939",
+    "authors": [
+      "Yihao Feng",
+      "Chongkai Gao",
+      "Bo Liu",
+      "Qiang Liu",
+      "Peter Stone"
+    ],
+    "abstract": "",
+    "queries": [
+      "LIBERO benchmark lifelong robot learning"
+    ]
+  },
+  {
+    "openalex_id": "W4402684039",
+    "title": "Speculative Decoding via Early-exiting for Faster LLM Inference with Thompson Sampling Control Mechanism",
+    "year": 2024,
+    "publication_date": "2024-01-01",
+    "cited_by_count": 5,
+    "arxiv_id": null,
+    "doi": "10.18653/v1/2024.findings-acl.179",
+    "authors": [
+      "Jiahao Liu",
+      "Qifan Wang",
+      "Jingang Wang",
+      "Xunliang Cai"
+    ],
+    "abstract": "The recent advancements in large language models (LLMs) have been extraordinary, yet the escalating inference costs associated with them present challenges in real-world applications.To address these challenges, we propose a novel approach called Early-exiting Speculative Decoding (EESD) with lossless acceleration.Specifically, EESD utilizes a segment of the LLM to generate draft tokens, incorporating Early-exiting structures after the first N layers.To enhance the quality of draft tokens, a self-distillation method is integrated.This early-exiting design not only reduces deployment and traini",
+    "queries": [
+      "speculative decoding fast LLM inference"
+    ]
+  },
+  {
+    "openalex_id": "W4361194459",
+    "title": "Sigmoid Loss for Language Image Pre-Training",
+    "year": 2023,
+    "publication_date": "2023-03-27",
+    "cited_by_count": 12,
+    "arxiv_id": "2303.15343",
+    "doi": "10.48550/arxiv.2303.15343",
+    "authors": [
+      "Xiaohua Zhai",
+      "Basil Mustafa",
+      "А. И. Колесников",
+      "Lucas Beyer"
+    ],
+    "abstract": "We propose a simple pairwise Sigmoid loss for Language-Image Pre-training (SigLIP). Unlike standard contrastive learning with softmax normalization, the sigmoid loss operates solely on image-text pairs and does not require a global view of the pairwise similarities for normalization. The sigmoid loss simultaneously allows further scaling up the batch size, while also performing better at smaller batch sizes. Combined with Locked-image Tuning, with only four TPUv4 chips, we train a SigLiT model that achieves 84.5% ImageNet zero-shot accuracy in two days. The disentanglement of the batch size fr",
+    "queries": [
+      "SigLIP sigmoid loss image-text pretraining"
+    ]
+  },
+  {
+    "openalex_id": "W4409049124",
+    "title": "Understanding R1-Zero-Like Training: A Critical Perspective",
+    "year": 2025,
+    "publication_date": "2025-03-26",
+    "cited_by_count": 4,
+    "arxiv_id": "2503.20783",
+    "doi": "10.48550/arxiv.2503.20783",
+    "authors": [
+      "Zichen Liu",
+      "Changyu Chen",
+      "Wenjun Li",
+      "Penghui Qi",
+      "Tianyu Pang"
+    ],
+    "abstract": "DeepSeek-R1-Zero has shown that reinforcement learning (RL) at scale can directly enhance the reasoning capabilities of LLMs without supervised fine-tuning. In this work, we critically examine R1-Zero-like training by analyzing its two core components: base models and RL. We investigate a wide range of base models, including DeepSeek-V3-Base, to understand how pretraining characteristics influence RL performance. Our analysis reveals that DeepSeek-V3-Base already exhibit ''Aha moment'', while Qwen2.5 base models demonstrate strong reasoning capabilities even without prompt templates, suggestin",
+    "queries": [
+      "GRPO group relative policy optimization DeepSeek"
+    ]
+  },
+  {
+    "openalex_id": "W4403919989",
+    "title": "EnQuery: Ensemble Policies for Diverse Query-Generation in Preference Alignment of Robot Navigation",
+    "year": 2024,
+    "publication_date": "2024-08-26",
+    "cited_by_count": 4,
+    "arxiv_id": null,
+    "doi": "10.1109/ro-man60168.2024.10731470",
+    "authors": [
+      "Jorge de Heuvel",
+      "Florian Seiler",
+      "Maren Bennewitz"
+    ],
+    "abstract": "To align mobile robot navigation policies with user preferences through reinforcement learning from human feedback (RLHF), reliable and behavior-diverse user queries are required. However, deterministic policies fail to generate a variety of navigation trajectory suggestions for a given navigation task. In this paper, we introduce EnQuery, a query generation approach using an ensemble of policies that achieve behavioral diversity through a regularization term. For a given navigation task, EnQuery produces multiple navigation trajectory suggestions, thereby optimizing the efficiency of preferen",
+    "queries": [
+      "preference alignment robotic policy"
+    ]
+  },
+  {
+    "openalex_id": "W4411270486",
+    "title": "LoRA-Adv: Boosting Text Classification in Large Language Models Through Adversarial Low-Rank Adaptations",
+    "year": 2025,
+    "publication_date": "2025-01-01",
+    "cited_by_count": 4,
+    "arxiv_id": null,
+    "doi": "10.1109/access.2025.3579539",
+    "authors": [
+      "Hong Ye",
+      "Xialin Xie",
+      "Fenlong Xie",
+      "Jun Zuo",
+      "Chunyan Bu"
+    ],
+    "abstract": "Low-rank adaptation (LoRA), a paradigm bridging the gap between large language models and fine-tuning, has demonstrated effectiveness across various natural language processing tasks. The LoRA algorithm updates only a small number of model parameters, significantly reducing the consumption of computational resources. Although the LoRA algorithm achieves feasible performance, it is susceptible to the influence of training samples. To enhance the stability of the LoRA algorithm and improve the performance of classification models, this paper introduces a novel adversarially enhanced LoRA algorit",
+    "queries": [
+      "LoRA low rank adaptation language model"
+    ]
+  },
+  {
+    "openalex_id": "W4411374015",
+    "title": "Neuro-Symbolic Robotics",
+    "year": 2025,
+    "publication_date": "2025-06-15",
+    "cited_by_count": 3,
+    "arxiv_id": null,
+    "doi": "10.36227/techrxiv.175000864.40759665/v1",
+    "authors": [
+      "Emre Uğur",
+      "Alper Ahmetoğlu",
+      "Yukie Nagai",
+      "Tadahiro Taniguchi",
+      "Matteo Saveriano"
+    ],
+    "abstract": "This article introduces and summarizes the emerging field of Neuro-Symbolic Robotics. The advancements in computational power, robust neural structures, and extensive data have positioned Neural Networks as the preferred solution for robotic challenges involving emergent behavior, learning, adaptation, and, more recently, reasoning and communication. Despite these strengths, the deployment of robots in real-world settings demands properties like verifiability, explainability, and interpretability, which Neural Networks lack. Furthermore, neural network-based models experience difficulties with",
+    "queries": [
+      "ReVLA reverting visual domain limitation"
+    ]
+  },
+  {
+    "openalex_id": "W4403794704",
+    "title": "TinyVLA: Towards Fast, Data-Efficient Vision-Language-Action Models for Robotic Manipulation",
+    "year": 2024,
+    "publication_date": "2024-09-19",
+    "cited_by_count": 3,
+    "arxiv_id": "2409.12514",
+    "doi": "10.48550/arxiv.2409.12514",
+    "authors": [
+      "Junjie Wen",
+      "Yichen Zhu",
+      "Jinming Li",
+      "Minjie Zhu",
+      "Kun Wu"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models have shown remarkable potential in visuomotor control and instruction comprehension through end-to-end learning processes. However, current VLA models face significant challenges: they are slow during inference and require extensive pre-training on large amounts of robotic data, making real-world deployment difficult. In this paper, we introduce a new family of compact vision-language-action models, called TinyVLA, which offers two key advantages over existing VLA models: (1) faster inference speeds, and (2) improved data efficiency, eliminating the need for",
+    "queries": [
+      "TinyVLA fast data efficient"
+    ]
+  },
+  {
+    "openalex_id": "W4393248221",
+    "title": "Efficient Image Pre-Training with Siamese Cropped Masked Autoencoders",
+    "year": 2024,
+    "publication_date": "2024-03-26",
+    "cited_by_count": 3,
+    "arxiv_id": "2403.17823",
+    "doi": "10.48550/arxiv.2403.17823",
+    "authors": [
+      "Alexandre Eymaël",
+      "Renaud Vandeghen",
+      "Anthony Cioppa",
+      "Silvio Giancola",
+      "Bernard Ghanem"
+    ],
+    "abstract": "Self-supervised pre-training of image encoders is omnipresent in the literature, particularly following the introduction of Masked autoencoders (MAE). Current efforts attempt to learn object-centric representations from motion in videos. In particular, SiamMAE recently introduced a Siamese network, training a shared-weight encoder from two frames of a video with a high asymmetric masking ratio (95%). In this work, we propose CropMAE, an alternative approach to the Siamese pre-training introduced by SiamMAE. Our method specifically differs by exclusively considering pairs of cropped images sour",
+    "queries": [
+      "SiamMAE siamese masked autoencoder video correspondence"
+    ]
+  },
+  {
+    "openalex_id": "W4379919389",
+    "title": "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning",
+    "year": 2023,
+    "publication_date": "2023-06-05",
+    "cited_by_count": 7,
+    "arxiv_id": "2306.03310",
+    "doi": "10.48550/arxiv.2306.03310",
+    "authors": [
+      "Bo Liu",
+      "Yifeng Zhu",
+      "Chongkai Gao",
+      "Yihao Feng",
+      "Qiang Liu"
+    ],
+    "abstract": "Lifelong learning offers a promising paradigm of building a generalist agent that learns and adapts over its lifespan. Unlike traditional lifelong learning problems in image and text domains, which primarily involve the transfer of declarative knowledge of entities and concepts, lifelong learning in decision-making (LLDM) also necessitates the transfer of procedural knowledge, such as actions and behaviors. To advance research in LLDM, we introduce LIBERO, a novel benchmark of lifelong learning for robot manipulation. Specifically, LIBERO highlights five key research topics in LLDM: 1) how to ",
+    "queries": [
+      "LIBERO benchmark lifelong robot learning"
+    ]
+  },
+  {
+    "openalex_id": "W4319452940",
+    "title": "Multi-View Masked World Models for Visual Robotic Manipulation",
+    "year": 2023,
+    "publication_date": "2023-02-05",
+    "cited_by_count": 6,
+    "arxiv_id": "2302.02408",
+    "doi": "10.48550/arxiv.2302.02408",
+    "authors": [
+      "Younggyo Seo",
+      "Junsu Kim",
+      "Stephen James",
+      "Kimin Lee",
+      "Jinwoo Shin"
+    ],
+    "abstract": "Visual robotic manipulation research and applications often use multiple cameras, or views, to better perceive the world. How else can we utilize the richness of multi-view data? In this paper, we investigate how to learn good representations with multi-view data and utilize them for visual robotic manipulation. Specifically, we train a multi-view masked autoencoder which reconstructs pixels of randomly masked viewpoints and then learn a world model operating on the representations from the autoencoder. We demonstrate the effectiveness of our method in a range of scenarios, including multi-vie",
+    "queries": [
+      "multi-view masked world model robot"
+    ]
+  },
+  {
+    "openalex_id": "W4200635284",
+    "title": "CALVIN: A Benchmark for Language-Conditioned Policy Learning for Long-Horizon Robot Manipulation Tasks",
+    "year": 2021,
+    "publication_date": "2021-12-06",
+    "cited_by_count": 6,
+    "arxiv_id": "2112.03227",
+    "doi": "10.48550/arxiv.2112.03227",
+    "authors": [
+      "Oier Mees",
+      "Lukás Hermann",
+      "Erick Rosete-Beas",
+      "Wolfram Burgard"
+    ],
+    "abstract": "General-purpose robots coexisting with humans in their environment must learn to relate human language to their perceptions and actions to be useful in a range of daily tasks. Moreover, they need to acquire a diverse repertoire of general-purpose skills that allow composing long-horizon tasks by following unconstrained language instructions. In this paper, we present CALVIN (Composing Actions from Language and Vision), an open-source simulated benchmark to learn long-horizon language-conditioned tasks. Our aim is to make it possible to develop agents that can solve many robotic manipulation ta",
+    "queries": [
+      "CALVIN long horizon robot benchmark"
+    ]
+  },
+  {
+    "openalex_id": "W4403781119",
+    "title": "ReVLA: Reverting Visual Domain Limitation of Robotic Foundation Models",
+    "year": 2024,
+    "publication_date": "2024-09-23",
+    "cited_by_count": 2,
+    "arxiv_id": "2409.15250",
+    "doi": "10.48550/arxiv.2409.15250",
+    "authors": [
+      "Sombit Dey",
+      "Jan-Nico Zaech",
+      "Nikolay Nikolov",
+      "Luc Van Gool",
+      "Danda Pani Paudel"
+    ],
+    "abstract": "Recent progress in large language models and access to large-scale robotic datasets has sparked a paradigm shift in robotics models transforming them into generalists able to adapt to various tasks, scenes, and robot modalities. A large step for the community are open Vision Language Action models which showcase strong performance in a wide variety of tasks. In this work, we study the visual generalization capabilities of three existing robotic foundation models, and propose a corresponding evaluation framework. Our study shows that the existing models do not exhibit robustness to visual out-o",
+    "queries": [
+      "ReVLA reverting visual domain limitation"
+    ]
+  },
+  {
+    "openalex_id": "W4413917209",
+    "title": "ReVLA: Reverting Visual Domain Limitation of Robotic Foundation Models",
+    "year": 2025,
+    "publication_date": "2025-05-19",
+    "cited_by_count": 2,
+    "arxiv_id": null,
+    "doi": "10.1109/icra55743.2025.11128823",
+    "authors": [
+      "Sombit Dey",
+      "Jan-Nico Zaech",
+      "Nikolay Nikolov",
+      "Luc Van Gool",
+      "Danda Pani Paudel"
+    ],
+    "abstract": "Recent progress in large language models and access to large-scale robotic datasets has sparked a paradigm shift in robotics models transforming them into generalists able to adapt to various tasks, scenes, and robot modalities. A large step for the community are open Vision Language Action models which showcase strong performance in a wide variety of tasks. In this work, we study the visual generalization capabilities of three existing robotic foundation models, and propose a corresponding evaluation framework. Our study shows that the existing models do not exhibit robustness to visual out-o",
+    "queries": [
+      "ReVLA reverting visual domain limitation"
+    ]
+  },
+  {
+    "openalex_id": "W4404306896",
+    "title": "KVSharer: Efficient Inference via Layer-Wise Dissimilar KV Cache Sharing",
+    "year": 2024,
+    "publication_date": "2024-10-24",
+    "cited_by_count": 2,
+    "arxiv_id": "2410.18517",
+    "doi": "10.48550/arxiv.2410.18517",
+    "authors": [
+      "Yifei Yang",
+      "Zouying Cao",
+      "Qiguang Chen",
+      "Libo Qin",
+      "Dongjie Yang"
+    ],
+    "abstract": "The development of large language models (LLMs) has significantly expanded model sizes, resulting in substantial GPU memory requirements during inference. The key and value storage of the attention map in the KV (key-value) cache accounts for more than 80\\% of this memory consumption. Nowadays, most existing KV cache compression methods focus on intra-layer compression within a single Transformer layer but few works consider layer-wise compression. In this paper, we propose a plug-and-play method called \\textit{KVSharer}, which shares the KV cache between layers to achieve layer-wise compressi",
+    "queries": [
+      "KV cache transformer inference acceleration"
+    ]
+  },
+  {
+    "openalex_id": "W4390722419",
+    "title": "Long Context Compression with Activation Beacon",
+    "year": 2024,
+    "publication_date": "2024-01-07",
+    "cited_by_count": 2,
+    "arxiv_id": "2401.03462",
+    "doi": "10.48550/arxiv.2401.03462",
+    "authors": [
+      "Peitian Zhang",
+      "Zheng Liu",
+      "Shitao Xiao",
+      "Ninglu Shao",
+      "Qiwei Ye"
+    ],
+    "abstract": "Long context compression is a critical research problem due to its significance in reducing the high computational and memory costs associated with LLMs. In this paper, we propose Activation Beacon, a plug-in module for transformer-based LLMs that targets effective, efficient, and flexible compression of long contexts. To achieve this, our method introduces the following technical designs. 1) We directly compress the activations (i.e. keys and values at every layer), rather than leveraging soft prompts to relay information (which constitute a major bottleneck to encapsulate the complex informa",
+    "queries": [
+      "KV cache transformer inference acceleration"
+    ]
+  },
+  {
+    "openalex_id": "W4400612090",
+    "title": "Robotic Control via Embodied Chain-of-Thought Reasoning",
+    "year": 2024,
+    "publication_date": "2024-07-11",
+    "cited_by_count": 1,
+    "arxiv_id": "2407.08693",
+    "doi": "10.48550/arxiv.2407.08693",
+    "authors": [
+      "Zawalski Michał",
+      "Chen William",
+      "Pertsch Karl",
+      "Oier Mees",
+      "Finn Chelsea"
+    ],
+    "abstract": "A key limitation of learned robot control policies is their inability to generalize outside their training data. Recent works on vision-language-action models (VLAs) have shown that the use of large, internet pre-trained vision-language models as the backbone of learned robot policies can substantially improve their robustness and generalization ability. Yet, one of the most exciting capabilities of large vision-language models in other domains is their ability to reason iteratively through complex problems. Can that same capability be brought into robotics to allow policies to improve perform",
+    "queries": [
+      "OpenVLA vision language action open source"
+    ]
+  },
+  {
+    "openalex_id": "W4405030195",
+    "title": "GRAPE: Generalizing Robot Policy via Preference Alignment",
+    "year": 2024,
+    "publication_date": "2024-11-28",
+    "cited_by_count": 1,
+    "arxiv_id": "2411.19309",
+    "doi": "10.48550/arxiv.2411.19309",
+    "authors": [
+      "Zijian Zhang",
+      "Kaiyuan Zheng",
+      "Zhaorun Chen",
+      "Joel Jang",
+      "Yi Li"
+    ],
+    "abstract": "Despite the recent advancements of vision-language-action (VLA) models on a variety of robotics tasks, they suffer from critical issues such as poor generalizability to unseen tasks, due to their reliance on behavior cloning exclusively from successful rollouts. Furthermore, they are typically fine-tuned to replicate demonstrations collected by experts under different settings, thus introducing distribution bias and limiting their adaptability to diverse manipulation objectives, such as efficiency, safety, and task completion. To bridge this gap, we introduce GRAPE: Generalizing Robot Policy v",
+    "queries": [
+      "preference alignment robotic policy"
+    ]
+  },
+  {
+    "openalex_id": "W7131317196",
+    "title": "FPC-VLA: A vision-language-action framework with a supervisor for failure prediction and correction",
+    "year": 2026,
+    "publication_date": "2026-02-24",
+    "cited_by_count": 1,
+    "arxiv_id": null,
+    "doi": "10.1016/j.eswa.2026.131742",
+    "authors": [
+      "Yifan Yang",
+      "Zhixiang Duan",
+      "Tianshi Xie",
+      "Fuyu Cao",
+      "Pinxi Shen"
+    ],
+    "abstract": "",
+    "queries": [
+      "LIBERO benchmark lifelong robot learning"
+    ]
+  },
+  {
+    "openalex_id": "W4416748412",
+    "title": "ReBot: Scaling Robot Learning with Real-to-Sim-to-Real Robotic Video Synthesis",
+    "year": 2025,
+    "publication_date": "2025-10-19",
+    "cited_by_count": 1,
+    "arxiv_id": null,
+    "doi": "10.1109/iros60139.2025.11246305",
+    "authors": [
+      "Fang Yu",
+      "Yue Yang",
+      "Xinghao Zhu",
+      "Kaiyuan Zheng",
+      "Gedas Bertasius"
+    ],
+    "abstract": "Vision-language-action (VLA) models present a promising paradigm by training policies directly on real robot datasets like Open X-Embodiment. However, the high cost of real-world data collection hinders further data scaling, thereby restricting the generalizability of VLAs. In this paper, we introduce ReBot, a novel real-to-sim-to-real approach for scaling real robot datasets and adapting VLA models to target domains, which is the last-mile deployment challenge in robot manipulation. Specifically, ReBot replays real-world robot trajectories in simulation to diversify manipulated objects (real-",
+    "queries": [
+      "SimplerEnv sim real robot"
+    ]
+  },
+  {
+    "openalex_id": "W7151742465",
+    "title": "SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation",
+    "year": 2026,
+    "publication_date": "2026-04-07",
+    "cited_by_count": 0,
+    "arxiv_id": null,
+    "doi": "10.48550/arxiv.2604.05656",
+    "authors": [
+      "Wuyang Luan",
+      "Junhui Li",
+      "Weiguang Zhao",
+      "Wenjian Zhang",
+      "Tao Wu"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models based on flow matching -- such as pi0, pi0.5, and SmolVLA -- achieve state-of-the-art generalist robotic manipulation, yet their iterative denoising, typically 10 ODE steps, introduces substantial latency: on a modern GPU, denoising alone accounts for 80% of end-to-end inference time. Naively reducing the step count is unreliable, degrading success on most tasks due to the velocity field being uncalibrated for single-step jumps. We present SnapFlow, a plug-and-play self-distillation method that compresses multi-step denoising into a single forward pass (1-NF",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W7152933535",
+    "title": "SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation",
+    "year": 2026,
+    "publication_date": "2026-04-07",
+    "cited_by_count": 0,
+    "arxiv_id": "2604.05656",
+    "doi": null,
+    "authors": [
+      "Wuyang Luan",
+      "Junhui Li",
+      "Weiguang Zhao",
+      "Wenjian Zhang",
+      "Tao Wu"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models based on flow matching -- such as pi0, pi0.5, and SmolVLA -- achieve state-of-the-art generalist robotic manipulation, yet their iterative denoising, typically 10 ODE steps, introduces substantial latency: on a modern GPU, denoising alone accounts for 80% of end-to-end inference time. Naively reducing the step count is unreliable, degrading success on most tasks due to the velocity field being uncalibrated for single-step jumps. We present SnapFlow, a plug-and-play self-distillation method that compresses multi-step denoising into a single forward pass (1-NF",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W7160457775",
+    "title": "VLA-ATTC: Adaptive Test-Time Compute for VLA Models with Relative Action Critic Model",
+    "year": 2026,
+    "publication_date": "2026-05-02",
+    "cited_by_count": 0,
+    "arxiv_id": "2605.01194",
+    "doi": null,
+    "authors": [
+      "Wenhao Li",
+      "Xiu Su",
+      "Dan Niu",
+      "Yichao Cao",
+      "Hongyan Xu"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models have demonstrated remarkable capabilities and generalization in embodied manipulation. However, their decision-making relies on a fast, instinctive process that lacks deliberation. This strategy often leads to suboptimal or catastrophic actions when facing complex or ambiguous scenarios that require greater consideration. In this paper, we introduce \\textbf{VLA-ATTC}, a framework that endows VLA models with adaptive test-time compute (TTC). VLA-ATTC employs an uncertainty-based ``cognitive clutch'' to dynamically transition from reflexive execution to a TTC ",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W7160457055",
+    "title": "Sentinel-VLA: A Metacognitive VLA Model with Active Status Monitoring for Dynamic Reasoning and Error Recovery",
+    "year": 2026,
+    "publication_date": "2026-05-02",
+    "cited_by_count": 0,
+    "arxiv_id": "2605.01191",
+    "doi": null,
+    "authors": [
+      "Wenhao Li",
+      "Xiu Su",
+      "Yichao Cao",
+      "Hongyan Xu",
+      "Xiaobo Xia"
+    ],
+    "abstract": "Vision-language-action (VLA) models have advanced the field of embodied manipulation by harnessing broad world knowledge and strong generalization. However, current VLA models still face several key challenges, including limited reasoning capability, lack of status monitoring, and difficulty in self-correction. In this paper, we introduce \\textbf{Sentinel-VLA}, a metacognitive VLA model equipped with an active ``sentinel'' module to monitor real-time execution status. Only when necessary, such as during initial planning or upon detecting an error, the model triggers a dynamic reasoning or form",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W7125566501",
+    "title": "CompliantVLA-adaptor: VLM-Guided Variable Impedance Action for Safe Contact-Rich Manipulation",
+    "year": 2026,
+    "publication_date": "2026-01-21",
+    "cited_by_count": 0,
+    "arxiv_id": "2601.15541",
+    "doi": null,
+    "authors": [
+      "Heng Zhang",
+      "Wei-Hsing Huang",
+      "Qiyi Tong",
+      "Gökhan Solak",
+      "Puze Liu"
+    ],
+    "abstract": "We propose a CompliantVLA-adaptor that augments the state-of-the-art Vision-Language-Action (VLA) models with vision-language model (VLM)-informed context-aware variable impedance control (VIC) to improve the safety and effectiveness of contact-rich robotic manipulation tasks. Existing VLA systems (e.g., RDT, Pi0.5, OpenVLA-oft) typically output position, but lack force-aware adaptation, leading to unsafe or failed interactions in physical tasks involving contact, compliance, or uncertainty. In the proposed CompliantVLA-adaptor, a VLM interprets task context from images and natural language to",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W7126123467",
+    "title": "Shallow-π: Knowledge Distillation for Flow-based VLAs",
+    "year": 2026,
+    "publication_date": "2026-01-28",
+    "cited_by_count": 0,
+    "arxiv_id": "2601.20262",
+    "doi": null,
+    "authors": [
+      "Boseong Felipe Jeon",
+      "Yunho Choi",
+      "Taehan Kim"
+    ],
+    "abstract": "The growing demand for real-time robotic deployment necessitates fast and on-device inference for vision-language-action (VLA) models. Within the VLA literature, efficiency has been extensively studied at the token level, such as visual token pruning. In contrast, systematic transformer layer reduction has received limited attention and, to the best of our knowledge, has not been explored for flow-based VLA models under knowledge distillation. In this work, we propose Shallow-pi, a principled knowledge distillation framework that aggressively reduces the transformer depth of both the VLM backb",
+    "queries": [
+      "pi0 pi0.5 vision language action flow matching robot"
+    ]
+  },
+  {
+    "openalex_id": "W4416421036",
+    "title": "CoT-VLA: Visual Chain-of-Thought Reasoning for Vision-Language-Action Models",
+    "year": 2025,
+    "publication_date": "2025-03-27",
+    "cited_by_count": 0,
+    "arxiv_id": "2503.22020",
+    "doi": "10.48550/arxiv.2503.22020",
+    "authors": [
+      "Qingqing Zhao",
+      "Yao Lu",
+      "Moo Jin Kim",
+      "Zipeng Fu",
+      "Zhang, Zhuoyang"
+    ],
+    "abstract": "Vision-language-action models (VLAs) have shown potential in leveraging pretrained vision-language models and diverse robot demonstrations for learning generalizable sensorimotor control. While this paradigm effectively utilizes large-scale data from both robotic and non-robotic sources, current VLAs primarily focus on direct input--output mappings, lacking the intermediate reasoning steps crucial for complex manipulation tasks. As a result, existing VLAs lack temporal planning or reasoning capabilities. In this paper, we introduce a method that incorporates explicit visual chain-of-thought (C",
+    "queries": [
+      "CoT-VLA visual chain of thought reasoning"
+    ]
+  },
+  {
+    "openalex_id": "W4413167926",
+    "title": "CLIP-DoRA: Weight-decomposed Low-rank Adaptation for Efficient Vision-Language Models",
+    "year": 2025,
+    "publication_date": "2025-01-01",
+    "cited_by_count": 0,
+    "arxiv_id": null,
+    "doi": "10.1016/j.procs.2025.07.128",
+    "authors": [
+      "Jesús M. Rodríguez-de-Vera",
+      "Imanol G. Estepa",
+      "Bhalaji Nagarajan",
+      "Petia Radeva"
+    ],
+    "abstract": "Foundational Vision-Language (V-L) models, such as CLIP, have progressed computer vision research by providing general “shared” latent spaces for image and text modalities. However, training these models, or even fine-tuning them, demands substantial computational resources and has a high environmental cost. In this work, we propose CLIP-DoRA, a method leveraging weight-decomposed low-rank adaptation for parameter-efficient V-L fine-tuning. We explore the potential of less explored low-rank-based methods for V-L fine-tuning, and provide empirical proof of the benefits of weight-decomposed fine",
+    "queries": [
+      "DoRA weight decomposition adaptation"
+    ]
+  },
+  {
+    "openalex_id": "W4407185791",
+    "title": "VLA-Cache: Efficient Vision-Language-Action Manipulation via Adaptive Token Caching",
+    "year": 2025,
+    "publication_date": "2025-02-04",
+    "cited_by_count": 0,
+    "arxiv_id": "2502.02175",
+    "doi": "10.48550/arxiv.2502.02175",
+    "authors": [
+      "Siyu Xu",
+      "Yunke Wang",
+      "Xia, Chenghao",
+      "Dihao Zhu",
+      "Tao Huang"
+    ],
+    "abstract": "Vision-Language-Action (VLA) models have demonstrated strong multi-modal reasoning capabilities, enabling direct action generation from visual perception and language instructions in an end-to-end manner. However, their substantial computational cost poses a challenge for real-time robotic control, where rapid decision-making is essential. This paper introduces VLA-Cache, a training-free inference acceleration method that reduces computational overhead by adaptively caching and reusing static visual tokens across frames. Exploiting the temporal continuity in robotic manipulation, VLA-Cache ide",
+    "queries": [
+      "VLA-Cache vision language action inference cache"
+    ]
+  },
+  {
+    "openalex_id": "W7139147858",
+    "title": "OxyGen: Unified KV Cache Management for Vision-Language-Action Models under Multi-Task Parallelism",
+    "year": 2026,
+    "publication_date": "2026-03-15",
+    "cited_by_count": 0,
+    "arxiv_id": "2603.14371",
+    "doi": null,
+    "authors": [
+      "Xiangyu Li",
+      "Huaizhi Tang",
+      "Xin Ding",
+      "Weijun Wang",
+      "Ting Cao"
+    ],
+    "abstract": "Embodied AI agents increasingly require parallel execution of multiple tasks, such as manipulation, conversation, and memory construction, from shared observations under distinct time constraints. Recent Mixture-of-Transformers (MoT) Vision-Language-Action Models (VLAs) architecturally support such heterogeneous outputs, yet existing inference systems fail to achieve efficient multi-task parallelism for on-device deployment due to redundant computation and resource contention. We identify isolated KV cache management as the root cause. To address this, we propose unified KV cache management, a",
+    "queries": [
+      "VLA-Cache vision language action inference cache"
+    ]
+  }
+]

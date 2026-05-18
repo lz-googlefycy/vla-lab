@@ -7,7 +7,7 @@ GPU pod (cloudml) and a 96 GB H20 on a dev pod. Each main-table cell
 trains and evaluates on a single GPU; no multi-GPU parallelism is used.
 
 **Backbones.**
-- **OpenVLA-7B** (Kim et al. 2024): autoregressive, Llama-2 7B + DINO-SigLIP
+- **OpenVLA-7B** (\cite{kim2024openvla}): autoregressive, Llama-2 7B + DINO-SigLIP
   fused vision tower, 256-bin discretised action tokens. We use the
   per-suite LIBERO-finetuned checkpoints released by the OpenVLA team
   (one ckpt per LIBERO suite, ~15 GB in 4-shard safetensors).
@@ -38,7 +38,7 @@ column lists each backbone's published number.
 | Goal | 70% | 79.2%¹ | **100.0%** | 98.0% |
 | Long10 | 53% | 53.7%¹ | **94.0%** | 92.4% |
 
-¹ Kim et al. 2024 Table 5. Differences on Spatial/Object/Goal are
+¹ \cite{kim2024openvla} Table 5. Differences on Spatial/Object/Goal are
 attributable to default decoding settings (temperature 1.0) vs.
 calibrated decoding used by the paper authors. Long10 matches.
 
@@ -120,7 +120,7 @@ disconnects mid-sprint (§6).
 ## 4.5 Inference Anatomy: KV-Cache Fails on Flow-Matching
 
 We test whether KV-cache strategies that work for autoregressive VLAs
-(e.g. VLA-Cache, Wang et al. 2025) transfer to flow-matching VLAs.
+(e.g. VLA-Cache, \cite{wang2025vlacache}) transfer to flow-matching VLAs.
 
 ### 4.5.1 Latency anatomy
 
@@ -186,8 +186,8 @@ The results are negative for both off-the-shelf KV-cache strategies on
 dominant cost, not addressable by prefix caching — also bounds the
 upside of any future caching work in this paradigm. We conjecture that
 **denoise-loop-targeting** acceleration (e.g. consistency model
-distillation reducing 10 → 1–4 denoise steps, Salimans & Ho 2022;
-Lu et al. 2024) is the more productive direction for flow-matching VLA
+distillation reducing 10 → 1–4 denoise steps, \cite{salimans2022progressive};
+\cite{lu2024simpleconsistency}) is the more productive direction for flow-matching VLA
 inference.
 
 ## 4.6 Multi-View Pretraining: Convergence and Retrieval

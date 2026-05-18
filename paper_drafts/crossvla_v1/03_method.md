@@ -55,7 +55,7 @@ $$
 Two design choices:
 
 1. **Negative MSE as logp-surrogate**: the variational lower bound for
-   diffusion models (Kingma et al. 2021) connects MSE to log-likelihood
+   diffusion models (\cite{kingma2021variational}) connects MSE to log-likelihood
    up to a known factor; in flow-matching the analogous bound exists
    with prefactor `||x_1 - x_0||^2 σ²(t)`. We absorb the prefactor into
    the DPO temperature β (Eq. 2 below) and use raw MSE.
@@ -69,9 +69,9 @@ the DPO objective requires for the reference forward to be reproducible.
 
 ## 3.3 PEFT Layer: DoRA
 
-Low-Rank Adaptation (LoRA, Hu et al. 2021) decomposes the weight update
+Low-Rank Adaptation (LoRA, \cite{hu2021lora}) decomposes the weight update
 as `ΔW = α/r · B A` with `B ∈ R^{out × r}, A ∈ R^{r × in}`. DoRA
-(Liu et al. 2024) further decomposes the adapted weight into
+(\cite{liu2024dora}) further decomposes the adapted weight into
 **magnitude** and **direction** components:
 
 $$
@@ -111,7 +111,7 @@ LoRA path only.
 
 ## 3.4 DPO Loss
 
-We use the standard DPO objective (Rafailov et al. 2023) with the
+We use the standard DPO objective (\cite{rafailov2023direct}) with the
 surrogate logp:
 
 $$

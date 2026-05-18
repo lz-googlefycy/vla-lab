@@ -1,12 +1,14 @@
 ---
-title: "VLA-PostTrain: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models"
+title: "CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models"
 authors: Liu Zhi (Independent)
-status: workshop draft v1.0
-date: 2026-05-17
+status: workshop draft v1.1
+date: 2026-05-18
 target: NeurIPS 2026 Robot Learning Workshop / arxiv preprint
-working_name_history:
-  - "CrossVLA" (rejected: conflict with Bai et al. Dec 2025 'CrossVLA-Attack')
-  - "VLA-PostTrain" (current; subject to user final approval)
+notes: |
+  Working name 'CrossVLA' restored after verifying 'CrossVLA-Attack'
+  (Bai et al. Dec 2025, ResearchGate only) is in adversarial security
+  domain (orthogonal to ours), zero-cite, not on arxiv/Semantic Scholar.
+  Topic disambiguation is unambiguous.
 ---
 
 # Abstract (~180 words)
@@ -18,7 +20,7 @@ preference alignment via Direct Preference Optimisation (DPO) — the
 de-facto post-training step in language models — has been studied
 almost exclusively on autoregressive VLAs.
 
-We present **VLA-PostTrain**, an empirical study of cross-paradigm VLA
+We present **CrossVLA**, an empirical study of cross-paradigm VLA
 post-training. Three contributions: (i) a **surrogate flow-matching
 log-probability** estimator that lets DPO operate on continuous-action
 backbones without probability-flow ODE integration; (ii) a head-to-head
@@ -42,23 +44,26 @@ reproduction scripts are open at https://github.com/lz-googlefycy/vla-lab.
 Vision-Language-Action (VLA) models — large multimodal policies that
 map (image, language instruction, proprioceptive state) → robot action
 — have established a small set of architectural lineages. **OpenVLA**
-(Kim et al. 2024) treats actions as 7 × 256-bin discretised tokens and
-predicts them autoregressively atop a Llama-2 7B language model with a
-fused DINO-SigLIP vision tower. **π0** and **π0.5** (Black et al.
-2024; openpi 2025) instead emit *continuous* 7-DoF action chunks via
-flow-matching, with a PaliGemma vision-language encoder and a
-10-step ordinary differential equation (ODE) action expert. RT-2,
-Spirit, RDT, and OpenVLA-OFT span the design space between these poles.
+\cite{kim2024openvla} treats actions as 7 × 256-bin discretised tokens
+and predicts them autoregressively atop a Llama-2 7B language model
+with a fused DINO-SigLIP vision tower. **π0** \cite{black2024pi0} and
+**π0.5** \cite{openpi2025pi05} instead emit *continuous* 7-DoF action
+chunks via flow-matching, with a PaliGemma vision-language encoder and
+a 10-step ordinary differential equation (ODE) action expert. RT-2
+\cite{brohan2023rt2}, RDT \cite{liu2024rdt}, OpenVLA-OFT
+\cite{kim2025openvlaoft}, TinyVLA \cite{wen2024tinyvla}, SpatialVLA
+\cite{spatialvla2025}, RoboMamba \cite{robomamba2024}, and CoT-VLA
+\cite{cotvla2025} span the design space between these poles.
 
 While supervised fine-tuning (SFT) on demonstrations yields VLA
-policies that solve held-out manipulation tasks at the 80–98% range
-on LIBERO (Liu et al. 2023), **post-training** — the analogue of
-RLHF/DPO/GRPO in language models — remains nascent in VLAs. Existing
-preference-alignment literature has largely focused on autoregressive
-VLAs where the per-token log-probability is closed-form (Wang et al.
-2024; Park et al. 2025); flow-matching VLAs lack a clean DPO formulation
-because their chunk-level log-probability requires probability-flow ODE
-integration with prohibitive Jacobian costs.
+policies that solve held-out manipulation tasks at the 80–98% range on
+LIBERO \cite{liu2023libero}, **post-training** — the analogue of
+RLHF/DPO/GRPO in language models — remains nascent for VLAs. The
+concurrent work GRAPE \cite{grape2024} addresses preference alignment
+on autoregressive VLAs but does not consider flow-matching backbones,
+which lack a clean DPO formulation because their chunk-level
+log-probability requires probability-flow ODE integration with
+prohibitive Jacobian costs.
 
 This work asks: **does post-training generalise across architectural
 paradigms in VLA?** Specifically:
@@ -69,147 +74,191 @@ paradigms in VLA?** Specifically:
    interact with the backbone architecture or the task family?
 3. Do **inference-time acceleration** techniques developed for
    autoregressive VLAs (specifically VLA-Cache style prefix-K/V
-   reuse) transfer to flow-matching VLAs?
+   reuse \cite{wang2025vlacache}) transfer to flow-matching VLAs?
 
 We answer all three empirically on LIBERO 4-suite, with public OpenVLA
 and π0.5 checkpoints. Headline findings:
 
 - DPO with our **negative-MSE flow-matching surrogate** (§3.2) trains
   stably on π0.5 with the same protocol as on OpenVLA.
-- **DoRA** (Liu et al. 2024), originally proposed for LLM
+- **DoRA** \cite{liu2024dora}, originally proposed for LLM
   instruction-tuning, generalises to VLA DPO and **outperforms LoRA**
   on the harder LIBERO suites: +14 pp on Object, +10 pp on Long10
   (single-seed; LoRA multi-seed mean = DoRA single-seed on Long10).
+  This is substantially larger than the +1–3 pp gains DoRA reports in
+  the LLM domain.
 - **VLA-Cache style prefix caching does not transfer to π0.5.** A
   latency anatomy reveals that 78.6% of per-call cost is the
   flow-matching denoise loop — *not* the prefix forward that
   VLA-Cache targets — leaving a hard 21% acceleration ceiling. Both
   chunk-level (§4.5.2) and token-level (§4.5.3) cache strategies
   degrade success rate while producing little or no speedup.
+  **Concurrent work** SnapFlow \cite{snapflow2026} arrives at the same
+  prescription via progressive self-distillation of the denoise loop.
 
 **Contributions.**
 1. **Surrogate flow-matching log-probability** for DPO on continuous-
    action VLAs (§3.2), validated to be drop-in compatible with the
    standard DPO objective.
-2. **First reported result** of DoRA on VLA fine-tuning, with a
-   per-suite breakdown identifying when magnitude/direction
-   decoupling helps (narrow-distribution adaptation: Object, Long10)
-   and when it doesn't (large direction shifts: Spatial).
+2. **First reported DoRA-on-VLA empirical study**, with a per-suite
+   breakdown identifying when magnitude/direction decoupling helps
+   (narrow-distribution adaptation: Object, Long10) and when it
+   doesn't (large direction shifts: Spatial).
 3. **Negative result on prefix-K/V caching for flow-matching VLAs**,
    accompanied by a structural latency anatomy and a positive
    prescription (denoise-loop-targeting acceleration is the
-   productive direction).
+   productive direction; concurrently validated by \cite{snapflow2026}).
 4. **Multi-view + temporal contrastive pretraining framework**
-   (§3.5) with a publicly released `proj_head.pt` checkpoint
+   (§3.5) with a publicly released projection-head checkpoint
    achieving 99.5% k-NN recall@1 for same-task retrieval on 6000
    LIBERO frames.
 5. **Open implementation**: all four contributions are reproducible
    from a single repository (https://github.com/lz-googlefycy/vla-lab),
    including ckpts, training logs, and end-to-end runnable scripts.
 
-The remainder of the paper is organised as follows. §2 reviews the
+The remainder of the paper is organised as follows. §2 reviews
 relevant VLA backbones, RLHF methods, and PEFT techniques. §3 details
 our cross-paradigm interface, the surrogate logp, our DoRA + DPO
 pipeline, and the multi-view pretraining framework. §4 reports
-LIBERO 4-suite results. §5 discusses what these results imply for the
-near-term VLA post-training research agenda. §6 acknowledges
-limitations including the cloudml infrastructure issues that
-prevented full multi-seed coverage.
+LIBERO 4-suite results. §5 discusses implications for near-term VLA
+post-training research. §6 acknowledges limitations.
 
 ---
 
 # 2. Background and Related Work
 
-## 2.1 VLA Architectural Paradigms
+## 2.1 Vision-Language-Action Models
 
-We focus on two open VLA paradigms with publicly released LIBERO
-checkpoints.
+The VLA paradigm has rapidly diversified since RT-2 \cite{brohan2023rt2}.
+Two open-source families with public LIBERO-finetuned checkpoints are
+the focus of this paper.
 
-**Autoregressive (token-AR) VLAs**. Discretise each action dimension
-into a vocabulary (typically 256 bins per dimension) and predict the
-joint action vector autoregressively under a language model head.
-RT-2 (Brohan et al. 2023) introduced this template; OpenVLA
-(Kim et al. 2024) built a 7B-parameter open variant on Llama-2 with a
-fused DINO-SigLIP vision encoder, releasing per-suite LIBERO-finetuned
-checkpoints which we use directly. OpenVLA-OFT (Kim et al. 2024b)
-investigates SFT data mixtures but does not study post-training.
+**Autoregressive (token-AR) VLAs.** Discretise each action dimension
+into a vocabulary (typically 256 bins per DoF) and predict the joint
+action vector autoregressively under a language model head. **OpenVLA**
+\cite{kim2024openvla} is the canonical 7B-parameter open variant on
+Llama-2 with a fused DINO-SigLIP vision encoder, releasing per-suite
+LIBERO-finetuned checkpoints. OpenVLA-OFT \cite{kim2025openvlaoft}
+investigates SFT data mixtures and decoding for speed and success rate.
+Smaller variants such as TinyVLA \cite{wen2024tinyvla} and lightweight
+extensions such as RoboMamba \cite{robomamba2024} and ReVLA
+\cite{revla2024} target deployment efficiency. Spatial reasoning
+extensions include SpatialVLA \cite{spatialvla2025} and CoT-VLA
+\cite{cotvla2025}; the latter is closely related to embodied
+chain-of-thought \cite{ecot2024}. ChatVLA \cite{chatvla2025} unifies
+multimodal understanding with robot control. Surveys
+\cite{vla2025survey, vla2026embodied} provide broader context.
 
-**Flow-matching VLAs**. Emit continuous-action chunks via probability-
-flow ODEs (Lipman et al. 2023). π0 (Black et al. 2024) introduced this
-direction, π0.5 (openpi 2025) refined it with knowledge insulation
-between the vision-language and action expert sub-networks. Spirit v1.5
-(2026, RoboChallenge winner) uses a similar flow-matching architecture
-on Qwen3-VL-4B. Both lack a closed-form per-chunk log-probability,
-which has so far precluded DPO-style preference alignment.
+**Flow-matching VLAs.** Emit *continuous* action chunks via probability-
+flow ODE integration. **π0** \cite{black2024pi0} introduced this
+direction with a 10-step ODE action expert; **π0.5** \cite{openpi2025pi05}
+refined it with knowledge insulation. Diffusion Policy
+\cite{chi2023diffusion} is a precursor in non-VLA visuomotor settings;
+RDT-1B \cite{liu2024rdt} extends diffusion to bimanual manipulation.
+Both flow-matching and diffusion models lack a closed-form per-chunk
+log-probability, which has so far precluded standard DPO-style
+preference alignment.
 
-**Mixed paradigms.** RDT (Liu et al. 2024) employs flow matching atop
-a discrete-token diffusion. We exclude it from this study because
-its public LIBERO checkpoints had not been released at the sprint
-deadline.
+**Concurrent work on VLA preference alignment.** GRAPE
+\cite{grape2024} concurrently develops preference alignment for robot
+policies, focusing on autoregressive VLAs and online preference
+collection. We differ in (i) cross-paradigm scope (we cover both
+autoregressive and flow-matching), (ii) offline pair-based DPO with a
+flow-matching surrogate logp (§3.2), and (iii) PEFT-layer ablation
+(LoRA vs DoRA, §4.3). Failure-prediction extensions such as FPC-VLA
+\cite{fpcvla2026} take an orthogonal direction.
 
 ## 2.2 Preference Alignment
 
-**DPO** (Rafailov et al. 2023) replaces the explicit reward model of
-RLHF with an implicit one defined by the policy ratio against a
-reference. Its closed-form objective requires evaluating
-`log p_θ(chunk | obs)` and `log p_ref(chunk | obs)`. For
-autoregressive policies this is straightforward; for continuous-
-action flow-matching policies it is an open problem.
+**DPO** \cite{rafailov2023direct} replaces the explicit reward model of
+RLHF with an implicit reward defined by the policy ratio against a
+reference. Its closed-form loss requires evaluating
+`log p_θ(chunk | obs)` and `log p_ref(chunk | obs)`. For autoregressive
+policies this is straightforward; for continuous-action flow-matching
+policies it is an open problem that we address in §3.2.
 
-**GRPO** (Shao et al. 2024) and its DeepSeek-R1 variant (DeepSeek
-2024) sidestep the reference model by estimating advantage from a
-*group* of K rollouts and using group-relative normalisation. GRPO
-is appealing for VLAs (no reference model storage cost) but requires
-online rollouts, which is expensive in robotics simulation
-(~30 s/trial × K samples × 200 steps). We include a single-suite
-GRPO ablation in App C and find it under-performs DPO at our compute
-budget; we focus the main study on DPO.
+**Variants.** IPO \cite{azar2023ipo}, KTO \cite{ethayarajh2024kto},
+ORPO \cite{hong2024orpo}, and SimPO \cite{meng2024simpo} explore
+different reward parameterisations (no reference model, prospect-
+theoretic loss, single-stage objectives, length-normalised rewards).
+We use vanilla DPO for clarity; extending to these variants is
+straightforward in our pipeline.
 
-**Other preference variants** — IPO (Azar et al. 2023), KTO
-(Ethayarajh et al. 2024), ORPO (Hong et al. 2024) — are not
-investigated here.
+**GRPO** \cite{shao2024deepseekmath, deepseek2025r1} sidesteps the
+reference model via group-relative advantage. We include a single-suite
+GRPO ablation (App C) but find it under-performs DPO at our compute
+budget; cross-paradigm GRPO is left to future work.
+
+**Multi-objective preference** \cite{multidpo2024} is orthogonal to
+this work; we use a single scalar reward (LIBERO success rate).
 
 ## 2.3 Parameter-Efficient Fine-Tuning
 
-**LoRA** (Hu et al. 2021) injects a rank-r residual `α/r · BA` into
-each Linear layer. **DoRA** (Liu et al. 2024) decomposes the LoRA-
-adapted weight into magnitude × direction, training the magnitude as a
-free per-output-channel scalar. DoRA was originally evaluated on LLM
-instruction-following (GLUE, MT-Bench) where it gives modest
-+1–3 point gains. To our knowledge **no prior work has evaluated DoRA
-on VLA fine-tuning**; we report the first such study in §4.3.
+**LoRA** \cite{hu2021lora} injects a rank-r residual `α/r · BA` into
+each Linear layer. **DoRA** \cite{liu2024dora} additionally decomposes
+the LoRA-adapted weight into magnitude × direction, training the
+magnitude as a free per-output-channel scalar. DoRA was originally
+evaluated on LLM instruction-following (GLUE, MT-Bench) where it gives
+modest +1–3 point gains. To our knowledge **no prior work has
+evaluated DoRA on VLA fine-tuning**; we report the first such study in
+§4.3, with substantially larger per-suite gains than the LLM-domain
+literature reports. Variants such as QA-LoRA \cite{xu2024qalora} and
+CLIP-DoRA \cite{clipdora2025} address quantisation and vision-language
+adaptation respectively, but not VLA action prediction.
 
 ## 2.4 VLA Inference Acceleration
 
-**VLA-Cache** (Wang et al. 2025, NeurIPS workshop) caches static
-visual tokens' KV across env timesteps, achieving ~1.7× speedup on
+**VLA-Cache** \cite{wang2025vlacache} caches static visual tokens'
+KV across env timesteps, achieving a reported ~1.7× speedup on
 OpenVLA. Their target architecture is autoregressive, where the
 vision tokens dominate per-call compute. We test (§4.5) whether the
 strategy transfers to π0.5; our latency anatomy shows the prefix
 forward is only 21% of per-call cost on flow-matching VLAs, capping
-the strategy's potential.
+the strategy's potential. KVSharer \cite{kvsharer2024} is a
+complementary approach for general LLM inference but does not target
+the action-expert denoise loop.
 
-**Speculative decoding** (Leviathan et al. 2023) and **Medusa**
-(Cai et al. 2024) target autoregressive token generation; not
-applicable to flow-matching action chunks.
+**Speculative decoding** \cite{leviathan2023speculative} targets
+autoregressive token generation; not directly applicable to flow-
+matching action chunks. Adaptive test-time compute approaches such as
+VLA-ATTC \cite{vlaattc2026} and Sentinel-VLA \cite{sentinelvla2026}
+trade compute against task progress signals; these are orthogonal to
+our static-cache study.
 
-**Consistency model distillation** (Salimans & Ho 2022; Lu et al.
-2024) reduces N-step ODE integration to 1–4 steps, directly attacking
-the dominant cost in flow-matching VLAs. We do not implement it in
-this work but identify it as the productive direction (§5.4).
+**Consistency model distillation** \cite{salimans2022progressive,
+song2023consistency, lu2024simpleconsistency} reduces N-step ODE
+integration to 1–4 steps, directly attacking the dominant cost in
+flow-matching VLAs. Concurrent to our work, **SnapFlow**
+\cite{snapflow2026} applies progressive self-distillation to obtain
+**one-step action generation for flow-matching VLAs** — empirically
+validating the prescription we identify in §5.4. MoFlow
+\cite{moflow2025} explores a similar one-step direction in trajectory
+forecasting.
 
-## 2.5 Self-Supervised Pretraining for Robotics
+## 2.5 Self-Supervised Pretraining for Robot Representations
 
-**R3M** (Nair et al. 2022) pretrains a visual encoder on ego-centric
+**R3M** \cite{nair2022r3m} pretrains a visual encoder on ego-centric
 human video with time-contrastive and language-alignment losses.
-**SiamMAE** (Gupta et al. 2023) uses siamese masked autoencoding for
-time-correspondence in video. **DeCUR** (Mokady et al. 2023) decouples
-contrastive learning across modalities for vision-language models.
-**MV-MWM** (Seo et al. 2023) does multi-view world-modelling for
-robot manipulation. Our multi-view + temporal pretraining (§3.5)
-combines these threads, instantiated specifically as a small
-projection head on top of a frozen SigLIP-so400m so the resulting
+**SiamMAE** \cite{gupta2023siammae} uses siamese masked autoencoding
+for time-correspondence in video. **MV-MWM** \cite{seo2023multiview}
+multi-view world-models for robot manipulation. Ag2Manip
+\cite{ag2manip2024} learns agent-agnostic visual + action
+representations. ReBot \cite{rebot2025} synthesises real-to-sim-to-real
+video for scaling robot learning. Our multi-view + temporal pretraining
+(§3.5) draws on these, instantiated as a small projection head on top
+of a frozen SigLIP-so400m \cite{zhai2023siglip} so the resulting
 features stack cleanly atop OpenVLA's existing vision encoder.
+PaLI-3 \cite{chen2023pali3} explores smaller VLMs that share the
+SigLIP encoder family.
+
+## 2.6 Benchmarks
+
+We evaluate on **LIBERO** \cite{liu2023libero}, the de-facto VLA
+manipulation benchmark with four suites (Spatial, Object, Goal,
+Long10) covering 130 unique tasks with paired demonstrations. CALVIN
+\cite{mees2022calvin} is a complementary long-horizon benchmark we
+do not use here; cross-benchmark generalisation is future work
+(§5.4).
 
 ---
 
@@ -270,7 +319,7 @@ $$
 Two design choices:
 
 1. **Negative MSE as logp-surrogate**: the variational lower bound for
-   diffusion models (Kingma et al. 2021) connects MSE to log-likelihood
+   diffusion models (\cite{kingma2021variational}) connects MSE to log-likelihood
    up to a known factor; in flow-matching the analogous bound exists
    with prefactor `||x_1 - x_0||^2 σ²(t)`. We absorb the prefactor into
    the DPO temperature β (Eq. 2 below) and use raw MSE.
@@ -284,9 +333,9 @@ the DPO objective requires for the reference forward to be reproducible.
 
 ## 3.3 PEFT Layer: DoRA
 
-Low-Rank Adaptation (LoRA, Hu et al. 2021) decomposes the weight update
+Low-Rank Adaptation (LoRA, \cite{hu2021lora}) decomposes the weight update
 as `ΔW = α/r · B A` with `B ∈ R^{out × r}, A ∈ R^{r × in}`. DoRA
-(Liu et al. 2024) further decomposes the adapted weight into
+(\cite{liu2024dora}) further decomposes the adapted weight into
 **magnitude** and **direction** components:
 
 $$
@@ -326,7 +375,7 @@ LoRA path only.
 
 ## 3.4 DPO Loss
 
-We use the standard DPO objective (Rafailov et al. 2023) with the
+We use the standard DPO objective (\cite{rafailov2023direct}) with the
 surrogate logp:
 
 $$
@@ -405,7 +454,7 @@ GPU pod (cloudml) and a 96 GB H20 on a dev pod. Each main-table cell
 trains and evaluates on a single GPU; no multi-GPU parallelism is used.
 
 **Backbones.**
-- **OpenVLA-7B** (Kim et al. 2024): autoregressive, Llama-2 7B + DINO-SigLIP
+- **OpenVLA-7B** (\cite{kim2024openvla}): autoregressive, Llama-2 7B + DINO-SigLIP
   fused vision tower, 256-bin discretised action tokens. We use the
   per-suite LIBERO-finetuned checkpoints released by the OpenVLA team
   (one ckpt per LIBERO suite, ~15 GB in 4-shard safetensors).
@@ -436,7 +485,7 @@ column lists each backbone's published number.
 | Goal | 70% | 79.2%¹ | **100.0%** | 98.0% |
 | Long10 | 53% | 53.7%¹ | **94.0%** | 92.4% |
 
-¹ Kim et al. 2024 Table 5. Differences on Spatial/Object/Goal are
+¹ \cite{kim2024openvla} Table 5. Differences on Spatial/Object/Goal are
 attributable to default decoding settings (temperature 1.0) vs.
 calibrated decoding used by the paper authors. Long10 matches.
 
@@ -518,7 +567,7 @@ disconnects mid-sprint (§6).
 ## 4.5 Inference Anatomy: KV-Cache Fails on Flow-Matching
 
 We test whether KV-cache strategies that work for autoregressive VLAs
-(e.g. VLA-Cache, Wang et al. 2025) transfer to flow-matching VLAs.
+(e.g. VLA-Cache, \cite{wang2025vlacache}) transfer to flow-matching VLAs.
 
 ### 4.5.1 Latency anatomy
 
@@ -584,8 +633,8 @@ The results are negative for both off-the-shelf KV-cache strategies on
 dominant cost, not addressable by prefix caching — also bounds the
 upside of any future caching work in this paradigm. We conjecture that
 **denoise-loop-targeting** acceleration (e.g. consistency model
-distillation reducing 10 → 1–4 denoise steps, Salimans & Ho 2022;
-Lu et al. 2024) is the more productive direction for flow-matching VLA
+distillation reducing 10 → 1–4 denoise steps, \cite{salimans2022progressive};
+\cite{lu2024simpleconsistency}) is the more productive direction for flow-matching VLA
 inference.
 
 ## 4.6 Multi-View Pretraining: Convergence and Retrieval
@@ -687,7 +736,7 @@ seed; we discuss this in §6.
 
 1. **Denoise-loop-targeting acceleration** is the productive direction
    for flow-matching VLA inference. Consistency model distillation
-   (Salimans & Ho 2022) is a natural fit but has not, to our
+   (\cite{salimans2022progressive}) is a natural fit but has not, to our
    knowledge, been applied to VLAs.
 2. **DoRA on Spirit v1.5 / π0.5** is unstudied. Our work covers OpenVLA
    only; extending the DoRA+DPO combination to flow-matching backbones
@@ -751,7 +800,7 @@ strength of our claims.
 
 # 7. Conclusion
 
-We present **VLA-PostTrain**, an empirical study of cross-paradigm
+We present **CrossVLA**, an empirical study of cross-paradigm
 post-training for Vision-Language-Action models. Our work makes four
 contributions:
 

@@ -7,7 +7,7 @@ preference alignment via Direct Preference Optimisation (DPO) — the
 de-facto post-training step in language models — has been studied
 almost exclusively on autoregressive VLAs.
 
-We present **VLA-PostTrain**, an empirical study of cross-paradigm VLA
+We present **CrossVLA**, an empirical study of cross-paradigm VLA
 post-training. Three contributions: (i) a **surrogate flow-matching
 log-probability** estimator that lets DPO operate on continuous-action
 backbones without probability-flow ODE integration; (ii) a head-to-head
