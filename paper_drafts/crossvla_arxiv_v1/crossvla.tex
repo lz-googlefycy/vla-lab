@@ -110,14 +110,16 @@ We evaluate on \textbf{LIBERO}~\cite{liu2023libero}, the de-facto VLA manipulati
 
 We define a minimal protocol that exposes the necessary primitives for preference alignment across architecturally heterogeneous VLA backbones. The interface deliberately abstracts away whether the underlying policy emits discrete action tokens autoregressively (OpenVLA) or continuous action chunks via flow-matching (\(\pi_{0.5}\)).
 
+{\small
 \begin{verbatim}
 class VLABase(Protocol):
-    def policy_logp(self, batch, chunk) -> Tensor:           # (B,)
-    def policy_logp_with_ref(self, batch, chunk) -> tuple    # (cur, ref)
-    def policy_sample(self, batch, K) -> Tensor              # (B, K, T, A)
-    def encode_obs(self, obs) -> dict                        # processed inputs
-    def sample_actions(self, obs, num_steps) -> Tensor       # (T, A) for env
+    def policy_logp(self, batch, chunk) -> Tensor                # (B,)
+    def policy_logp_with_ref(self, batch, chunk) -> tuple        # (cur, ref)
+    def policy_sample(self, batch, K) -> Tensor                  # (B, K, T, A)
+    def encode_obs(self, obs) -> dict                            # processed inputs
+    def sample_actions(self, obs, num_steps) -> Tensor           # (T, A) for env
 \end{verbatim}
+}
 
 The five-method contract is implemented per backbone. For OpenVLA, \texttt{policy\_logp} is the closed-form sum of token log-probabilities under teacher forcing. For \(\pi_{0.5}\), \texttt{policy\_logp} does not have a closed form and we define a surrogate log-probability (\S\ref{sec:surrogate}).
 
@@ -147,7 +149,7 @@ where \(m \in \mathbb{R}^{\text{out}}\) is a learnable per-output-channel magnit
 
 \textbf{Implementation.} Our \texttt{\_DoRALinear} materialises \(W_\text{eff}\) once per forward, then applies the standard linear op. Memory cost: an additional \(\text{out}\times\text{in}\) materialised tensor per layer. For OpenVLA's 128 LoRA-target Linears at hidden 4096:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{DoRA vs LoRA at \(r{=}32\) on OpenVLA-7B (DPO eval setup).}
 \begin{tabular}{lrr}
@@ -164,24 +166,27 @@ Initial cur\(\equiv\)ref diff & 0.0 & 0.0 \\
 \subsection{DPO Loss}
 
 We use the standard DPO objective~\cite{rafailov2023direct} with the surrogate logp:
-\begin{equation}
-\mathcal{L}_\text{DPO}(\theta) = -\mathbb{E}_{(\text{obs}, c^+, c^-)} \log\sigma\!\left(\beta \cdot \big[(\log\tilde{p}_\theta(c^+) - \log\tilde{p}_\text{ref}(c^+)) - (\log\tilde{p}_\theta(c^-) - \log\tilde{p}_\text{ref}(c^-))\big]\right)
-\end{equation}
-where \(c^+\) is the chosen chunk and \(c^-\) is the rejected chunk. Reference is the frozen SFT base. We set \(\beta = 0.1\), learning rate \(5\mathrm{e}{-5}\), batch size 1, max steps 500, warmup 100.
+\begin{align}
+\mathcal{L}_\text{DPO}(\theta) &= -\mathbb{E}_{(\text{obs}, c^+, c^-)} \log\sigma\!\left(\beta \cdot \Delta_\theta(c^+, c^-) \right), \\
+\Delta_\theta(c^+, c^-) &= \big(\log\tilde{p}_\theta(c^+) - \log\tilde{p}_\text{ref}(c^+)\big) - \big(\log\tilde{p}_\theta(c^-) - \log\tilde{p}_\text{ref}(c^-)\big). \nonumber
+\end{align}
+Here \(c^+\) is the chosen chunk and \(c^-\) is the rejected chunk. Reference is the frozen SFT base. We set \(\beta = 0.1\), learning rate \(5\mathrm{e}{-5}\), batch size 1, max steps 500, warmup 100.
 
 \subsection{Multi-View + Temporal Contrastive Pretraining}\label{sec:pretrain}
 
 We additionally explore representation-level pretraining as an orthogonal axis. The architecture:
 
+{\small
 \begin{verbatim}
 image (224x224x3, [-1,1])
-  -> SigLIP-so400m (timm vit_so400m_patch14_siglip_224, FROZEN)
+  -> SigLIP-so400m (frozen, timm vit_so400m_patch14_siglip_224)
 1152-d feature (CLS pooled)
-  -> MultiViewProjectionHead: Linear(1152,512) -> GELU -> Linear(512,128)
+  -> MultiViewProjHead: Linear(1152,512) -> GELU -> Linear(512,128)
 128-d embedding -> L2 normalize
 \end{verbatim}
+}
 
-The SigLIP encoder weights are extracted bit-identically from OpenVLA-7B's \texttt{vision\_backbone.fused\_featurizer.*} (342 keys, 0 missing, 0 unexpected), so any feature this projection learns is directly re-usable as input to OpenVLA's downstream LLM head.
+The SigLIP encoder weights are extracted bit-identically from OpenVLA-7B's \texttt{vision\_backbone.fused\_\allowbreak featurizer.*} (342 keys, 0 missing, 0 unexpected), so any feature this projection learns is directly re-usable as input to OpenVLA's downstream LLM head.
 
 \textbf{Dual-stream InfoNCE objective:}
 \begin{equation}
@@ -205,12 +210,13 @@ where \(\mathcal{L}_\text{mva}\) is the symmetric InfoNCE between agent-view and
 
 \subsection{SFT Baseline Reproduction}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
-\caption{SFT baseline reproduction (50 trials, seed 42). Our re-eval matches \(\pi_{0.5}\) paper within \(\pm 2\)\,pp on all four suites; OpenVLA delta attributable to default decoding settings. Long-horizon matches OpenVLA paper.}
+\caption{SFT baseline reproduction (50 trials, seed 42). Our \(\pi_{0.5}\) re-eval matches the openpi paper within \(\pm 2\)\,pp on all four suites; OpenVLA delta attributable to default decoding settings. Long-horizon matches OpenVLA paper.}
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lrrrr}
 \toprule
-Suite & OpenVLA SFT (us) & OpenVLA paper~\cite{kim2024openvla} & \(\pi_{0.5}\) SFT (us) & \(\pi_{0.5}\) paper~\cite{openpi2025pi05} \\
+Suite & \makecell[r]{OpenVLA\\SFT (ours)} & \makecell[r]{OpenVLA\\paper~\cite{kim2024openvla}} & \makecell[r]{\(\pi_{0.5}\)\\SFT (ours)} & \makecell[r]{\(\pi_{0.5}\)\\paper~\cite{openpi2025pi05}} \\
 \midrule
 Spatial & 72\% & 84.7\% & \textbf{100.0\%} & 98.8\% \\
 Object & 56\% & 88.4\% & \textbf{98.0\%} & 98.2\% \\
@@ -226,25 +232,26 @@ Long-horizon & 53\% & 53.7\% & \textbf{94.0\%} & 92.4\% \\
 
 We hold the DPO algorithm and pair-generation procedure fixed, and ablate the PEFT layer choice. We report DoRA cells over \textbf{3 seeds \(\times\) 50 trials = 150 trials per suite} (600 trials total). LoRA multiseed available for Object/Goal/Long10 only.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{Main result: DoRA + DPO 3-seed pool vs OpenVLA SFT on LIBERO 4-suite (600 trials total).}
+\label{tab:main}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrr}
 \toprule
-Suite & SFT (ours) & + LoRA s\(=42\) & + LoRA multiseed\(^1\) & \textbf{+ DoRA pool}\(^2\) & \textbf{\(\Delta\) vs SFT} \\
+Suite & \makecell[r]{SFT\\(ours)} & \makecell[r]{+LoRA\\s=42} & \makecell[r]{+LoRA\\multiseed\(^1\)} & \makecell[r]{\textbf{+DoRA pool}\(^2\)\\\textbf{(succ/trials)}} & \makecell[r]{\textbf{\(\Delta\) vs}\\\textbf{SFT}} \\
 \midrule
 Spatial & 72\% & 78\% & --- & \textbf{74.7\%} (112/150) & \textbf{+2.7} \\
-Object & 56\% & 62\% & 75\% & \textbf{76.0\%}\(^3\) (114/150)\(\star\) & \textbf{+20.0} \\
+Object & 56\% & 62\% & 75\% & \textbf{76.0\%}\(^{3\star}\) (114/150) & \textbf{+20.0} \\
 Goal & 70\% & 76\% & 77\% & \textbf{78.0\%} (117/150) & \textbf{+8.0} \\
 Long-horizon & 53\% & 54\% & 64\% & \textbf{64.0\%} (96/150) & \textbf{+11.0} \\
 \midrule
-\textbf{Mean} & \textbf{62.75} & \textbf{67.50} & --- & \textbf{73.2} & \textbf{+10.4} \\
+\textbf{Mean} & \textbf{62.75} & \textbf{67.50} & --- & \textbf{73.2\%} & \textbf{+10.4} \\
 \bottomrule
 \end{tabular}
-\label{tab:main}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig_dora_vs_lora_4suite}
 \caption{LIBERO 4-suite: SFT, LoRA single-seed, LoRA multiseed pool (where available), DoRA 3-seed pool. DoRA improves over SFT on all four suites with a mean +10.4\,pp gain across 600 trials.}
@@ -279,7 +286,7 @@ We hypothesise DoRA's advantage stems from \textbf{magnitude/direction decouplin
 
 We validate the surrogate flow-matching logp (\S\ref{sec:surrogate}) by training LoRA-r32 DPO on \(\pi_{0.5}\) with the same protocol. Due to dev pod tunnel instability during the sprint, we report the two suites that completed cleanly:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{lrr}
 \toprule
@@ -297,7 +304,7 @@ The surrogate logp produces stable, non-degenerate DPO training on \(\pi_{0.5}\)
 
 \subsubsection*{Latency Anatomy}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{\(\pi_{0.5}\) \texttt{sample\_actions} latency breakdown (LIBERO Spatial, single-image obs, dev pod H20 96\,GB).}
 \begin{tabular}{lrr}
@@ -315,7 +322,7 @@ Denoise loop \(\times 10\) (action expert each step) & \(\sim 220\)\,ms & \textb
 
 \textbf{The denoise loop dominates per-call latency.} Any caching strategy targeting only the prefix forward---including VLA-Cache's prefix-K/V re-use across timesteps---has a hard ceiling of \(\approx 21\%\) acceleration on \(\pi_{0.5}\).
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig_kvcache_anatomy_bench}
 \caption{Left: \(\pi_{0.5}\) \texttt{sample\_actions} latency breakdown. Right: cache strategy benchmark on LIBERO Spatial \(\times\) 50 trials.}
@@ -325,7 +332,7 @@ Denoise loop \(\times 10\) (action expert each step) & \(\sim 220\)\,ms & \textb
 
 Naive: cache the whole 10-step action chunk; on the next env step, if visual signature is similar (cosine \(\geq 0.95\)) to the cached observation, reuse cached chunk's \(i\)-th action.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{lrr}
 \toprule
@@ -345,7 +352,7 @@ The cache mechanism worked (82\% reuse), yet the run was both \emph{+30\% slower
 
 We monkey-patch \texttt{sample\_actions} to reuse prefix \texttt{past\_key\_values} across env timesteps when visual signature is similar, while letting the action expert (suffix) re-run every step.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{lrrrr}
 \toprule
@@ -368,7 +375,7 @@ The results are negative for both off-the-shelf KV-cache strategies on \(\pi_{0.
 
 \subsubsection*{Convergence}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{Convergence on 6000 LIBERO frames \(\times\) 10 epochs (\(\approx 470\) steps), 1\,\(\times\) H20-3e, 30\,min.}
 \begin{tabular}{lrr}
@@ -385,7 +392,7 @@ Random baseline \(\log(B{=}128)\) & 4.852 & --- \\
 
 The total loss recovers \textbf{92.5\% of the (random \(\rightarrow\) 0) range}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig_pretrain_loss_curve}
 \caption{Multi-view + temporal contrastive training on real LIBERO RLDS with frozen SigLIP-so400m. Total InfoNCE loss \(2.42 \rightarrow 0.37\) (\(92.5\%\) recovery from \(\log B = 4.85\) random baseline) in 470 steps; \(L_\text{mva} > L_\text{tc}\) throughout (cross-view harder than nearby-temporal).}
@@ -393,7 +400,7 @@ The total loss recovers \textbf{92.5\% of the (random \(\rightarrow\) 0) range}.
 
 \subsubsection*{k-NN Retrieval Eval}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{k-NN retrieval over all 6000 LIBERO frames using the trained projection head.}
 \begin{tabular}{lrrrr}
@@ -409,7 +416,7 @@ same-task \& \(|\Delta t| \leq 10\) & 92.4\% & 98.2\% & 99.0\% & \(\sim 0.3\%\) 
 
 Per-suite recall@1 same-task: spatial 99.3\%, \textbf{object 100.0\%}, goal 99.3\%, long-horizon 99.5\%. The 99.5\% recall@1 is \textbf{36\(\times\) over random}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig_retrieval_examples}
 \caption{Qualitative k-NN retrieval examples: 6 query frames \(\times\) top-3 retrieved neighbours. Ticks indicate same-task hits.}
