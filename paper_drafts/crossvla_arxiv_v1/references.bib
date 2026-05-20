@@ -1,0 +1,403 @@
+% CrossVLA workshop draft references
+% Curated from OpenAlex (101 results → 66 VLA-relevant → 45 cited keepers)
+% Tool: paper_drafts/crossvla_v1/oa_literature*.json
+
+% ============================================================
+% VLA backbones (autoregressive)
+% ============================================================
+@inproceedings{kim2024openvla,
+  title={OpenVLA: An Open-Source Vision-Language-Action Model},
+  author={Kim, Moo Jin and Pertsch, Karl and Karamcheti, Siddharth and Xiao, Ted and Balakrishna, Ashwin and Nair, Suraj and Rafailov, Rafael and Foster, Ethan and Lam, Grace and Sanketi, Pannag and Vuong, Quan and Kollar, Thomas and Burchfiel, Benjamin and Tedrake, Russ and Sadigh, Dorsa and Levine, Sergey and Liang, Percy and Finn, Chelsea},
+  booktitle={CoRL},
+  year={2024},
+  eprint={arXiv:2406.09246}
+}
+
+@article{brohan2023rt2,
+  title={RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control},
+  author={Brohan, Anthony and Brown, Noah and Carbajal, Justice and Chebotar, Yevgen and Chen, Xi and Choromanski, Krzysztof and Ding, Tianli and Driess, Danny and Dubey, Avinava and Finn, Chelsea and others},
+  journal={arXiv preprint arXiv:2307.15818},
+  year={2023}
+}
+
+@article{kim2025openvlaoft,
+  title={Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success},
+  author={Kim, Moo Jin and others},
+  journal={arXiv preprint},
+  year={2025},
+  note={OpenVLA-OFT extension}
+}
+
+@article{wen2024tinyvla,
+  title={TinyVLA: Toward Fast, Data-Efficient Vision-Language-Action Models for Robotic Manipulation},
+  author={Wen, Jian and Zhang, Jian and others},
+  journal={arXiv preprint arXiv:2409.12514},
+  year={2024}
+}
+
+@article{spatialvla2025,
+  title={SpatialVLA: Exploring Spatial Representations for Visual-Language-Action Models},
+  author={SpatialVLA team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+@article{chatvla2025,
+  title={ChatVLA: Unified Multimodal Understanding and Robot Control with Vision-Language-Action Model},
+  author={ChatVLA team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+@article{robomamba2024,
+  title={RoboMamba: Efficient Vision-Language-Action Model for Robotic Reasoning and Manipulation},
+  author={Liu, Jiaming and others},
+  journal={arXiv preprint arXiv:2406.04339},
+  year={2024}
+}
+
+@article{revla2024,
+  title={ReVLA: Reverting Visual Domain Limitation of Robotic Foundation Models},
+  author={ReVLA team},
+  journal={arXiv preprint arXiv:2409.15250},
+  year={2024}
+}
+
+@article{cotvla2025,
+  title={CoT-VLA: Visual Chain-of-Thought Reasoning for Vision-Language-Action Models},
+  author={CoT-VLA team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+@article{ecot2024,
+  title={Robotic Control via Embodied Chain-of-Thought Reasoning},
+  author={Embodied CoT team},
+  journal={arXiv preprint arXiv:2407.08693},
+  year={2024}
+}
+
+@article{fpcvla2026,
+  title={FPC-VLA: A vision-language-action framework with a supervisor for failure prediction and correction},
+  author={FPC-VLA team},
+  journal={arXiv preprint},
+  year={2026}
+}
+
+@article{vla2025survey,
+  title={Vision-Language-Action Models for Robotics: A Review Towards Real-World Applications},
+  author={VLA Survey team},
+  journal={arXiv preprint arXiv:2510.07077},
+  year={2025}
+}
+
+@article{vla2026embodied,
+  title={A Survey on Vision-Language-Action Models for Embodied AI},
+  author={Survey team},
+  journal={arXiv preprint arXiv:2405.14093},
+  year={2026}
+}
+
+% ============================================================
+% VLA backbones (flow-matching / diffusion)
+% ============================================================
+@article{black2024pi0,
+  title={π0: A Vision-Language-Action Flow Model for General Robot Control},
+  author={Black, Kevin and Brown, Noah and Driess, Danny and Esmail, Adnan and Equi, Michael and Finn, Chelsea and Fusai, Niccolo and Groom, Lachy and Hausman, Karol and Ichter, Brian and others},
+  journal={arXiv preprint arXiv:2410.24164},
+  year={2024}
+}
+
+@misc{openpi2025pi05,
+  title={π0.5: A Vision-Language-Action Model with Open-World Generalization},
+  author={Pertsch, Karl and Black, Kevin and others},
+  year={2025},
+  note={Physical Intelligence and openpi 2025.09 release}
+}
+
+@inproceedings{chi2023diffusion,
+  title={Diffusion Policy: Visuomotor Policy Learning via Action Diffusion},
+  author={Chi, Cheng and Feng, Siyuan and Du, Yilun and Xu, Zhenjia and Cousineau, Eric and Burchfiel, Benjamin and Song, Shuran},
+  booktitle={RSS},
+  year={2023}
+}
+
+@article{liu2024rdt,
+  title={RDT-1B: A Diffusion Foundation Model for Bimanual Manipulation},
+  author={Liu, Songming and Wu, Lingxuan and Li, Bangguo and Tan, Hengkai and Chen, Huayu and Wang, Zhengyi and Xu, Ke and Su, Hang and Zhu, Jun},
+  journal={arXiv preprint arXiv:2410.07864},
+  year={2024}
+}
+
+@article{snapflow2026,
+  title={SnapFlow: One-Step Action Generation for Flow-Matching VLAs via Progressive Self-Distillation},
+  author={SnapFlow team},
+  journal={arXiv preprint arXiv:2604.05656},
+  year={2026},
+  note={Validates our denoise-loop-targeting prescription (§5.4)}
+}
+
+@article{moflow2025,
+  title={MoFlow: One-Step Flow Matching for Human Trajectory Forecasting via Implicit Maximum Likelihood Estimation},
+  author={MoFlow team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+% ============================================================
+% Preference alignment / RLHF
+% ============================================================
+@inproceedings{rafailov2023direct,
+  title={Direct Preference Optimization: Your Language Model is Secretly a Reward Model},
+  author={Rafailov, Rafael and Sharma, Archit and Mitchell, Eric and Ermon, Stefano and Manning, Christopher D and Finn, Chelsea},
+  booktitle={NeurIPS},
+  year={2023},
+  eprint={arXiv:2305.18290}
+}
+
+@article{shao2024deepseekmath,
+  title={DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models},
+  author={Shao, Zhihong and Wang, Peiyi and Zhu, Qihao and Xu, Runxin and Song, Junxiao and Zhang, Mingchuan and Li, YK and Wu, Y and Guo, Daya},
+  journal={arXiv preprint arXiv:2402.03300},
+  year={2024},
+  note={Introduces GRPO}
+}
+
+@article{deepseek2025r1,
+  title={DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning},
+  author={DeepSeek-AI},
+  journal={arXiv preprint arXiv:2501.12948},
+  year={2025}
+}
+
+@article{azar2023ipo,
+  title={A General Theoretical Paradigm to Understand Learning from Human Preferences},
+  author={Azar, Mohammad Gheshlaghi and Rowland, Mark and Piot, Bilal and Guo, Daniel and Calandriello, Daniele and Valko, Michal and Munos, Rémi},
+  journal={arXiv preprint arXiv:2310.12036},
+  year={2023}
+}
+
+@article{ethayarajh2024kto,
+  title={KTO: Model Alignment as Prospect Theoretic Optimization},
+  author={Ethayarajh, Kawin and Xu, Winnie and Muennighoff, Niklas and Jurafsky, Dan and Kiela, Douwe},
+  journal={arXiv preprint arXiv:2402.01306},
+  year={2024}
+}
+
+@article{hong2024orpo,
+  title={ORPO: Monolithic Preference Optimization without Reference Model},
+  author={Hong, Jiwoo and Lee, Noah and Thorne, James},
+  journal={arXiv preprint arXiv:2403.07691},
+  year={2024}
+}
+
+@article{meng2024simpo,
+  title={SimPO: Simple Preference Optimization with a Reference-Free Reward},
+  author={Meng, Yu and Xia, Mengzhou and Chen, Danqi},
+  journal={arXiv preprint arXiv:2405.14734},
+  year={2024}
+}
+
+@article{grape2024,
+  title={GRAPE: Generalizing Robot Policy via Preference Alignment},
+  author={GRAPE team},
+  journal={arXiv preprint arXiv:2411.19309},
+  year={2024},
+  note={Concurrent work on VLA preference alignment}
+}
+
+@article{multidpo2024,
+  title={Beyond One-Preference-Fits-All Alignment: Multi-Objective Direct Preference Optimization},
+  author={Multi-DPO team},
+  journal={arXiv preprint},
+  year={2024}
+}
+
+% ============================================================
+% PEFT
+% ============================================================
+@inproceedings{hu2021lora,
+  title={LoRA: Low-Rank Adaptation of Large Language Models},
+  author={Hu, Edward J and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+  booktitle={ICLR},
+  year={2022},
+  eprint={arXiv:2106.09685}
+}
+
+@inproceedings{liu2024dora,
+  title={DoRA: Weight-Decomposed Low-Rank Adaptation},
+  author={Liu, Shih-Yang and Wang, Chien-Yi and Yin, Hongxu and Molchanov, Pavlo and Wang, Yu-Chiang Frank and Cheng, Kwang-Ting and Chen, Min-Hung},
+  booktitle={ICML},
+  year={2024},
+  eprint={arXiv:2402.09353}
+}
+
+@article{xu2024qalora,
+  title={QA-LoRA: Quantization-Aware Low-Rank Adaptation of Large Language Models},
+  author={Xu, Yuhui and Xie, Lingxi and Gu, Xiaotao and Chen, Xin and Chang, Heng and Zhang, Hengheng and Chen, Zhengsu and Zhang, Xiaopeng and Tian, Qi},
+  journal={arXiv preprint arXiv:2309.14717},
+  year={2023}
+}
+
+@article{clipdora2025,
+  title={CLIP-DoRA: Weight-decomposed Low-rank Adaptation for Efficient Vision-Language Models},
+  author={CLIP-DoRA team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+% ============================================================
+% Inference acceleration
+% ============================================================
+@inproceedings{wang2025vlacache,
+  title={VLA-Cache: Towards Efficient Vision-Language-Action Model Inference via Adaptive Token Caching},
+  author={Wang, Siyu and others},
+  booktitle={NeurIPS Workshop},
+  year={2025},
+  note={Targets autoregressive VLAs; we test transfer to flow-matching π0.5 (§4.5)}
+}
+
+@inproceedings{leviathan2023speculative,
+  title={Fast Inference from Transformers via Speculative Decoding},
+  author={Leviathan, Yaniv and Kalman, Matan and Matias, Yossi},
+  booktitle={ICML},
+  year={2023}
+}
+
+@article{kvsharer2024,
+  title={KVSharer: Efficient Inference via Layer-Wise Dissimilar KV Cache Sharing},
+  author={KVSharer team},
+  journal={arXiv preprint arXiv:2410.18517},
+  year={2024}
+}
+
+@article{vlaattc2026,
+  title={VLA-ATTC: Adaptive Test-Time Compute for VLA Models with Relative Action Critic Model},
+  author={VLA-ATTC team},
+  journal={arXiv preprint arXiv:2605.01194},
+  year={2026}
+}
+
+@article{sentinelvla2026,
+  title={Sentinel-VLA: A Metacognitive VLA Model with Active Status Monitoring for Dynamic Reasoning and Error Recovery},
+  author={Sentinel-VLA team},
+  journal={arXiv preprint arXiv:2605.01191},
+  year={2026}
+}
+
+% ============================================================
+% Flow-matching / diffusion / consistency
+% ============================================================
+@inproceedings{lipman2023flowmatching,
+  title={Flow Matching for Generative Modeling},
+  author={Lipman, Yaron and Chen, Ricky T. Q. and Ben-Hamu, Heli and Nickel, Maximilian and Le, Matt},
+  booktitle={ICLR},
+  year={2023}
+}
+
+@inproceedings{kingma2021variational,
+  title={Variational Diffusion Models},
+  author={Kingma, Diederik P and Salimans, Tim and Poole, Ben and Ho, Jonathan},
+  booktitle={NeurIPS},
+  year={2021}
+}
+
+@inproceedings{salimans2022progressive,
+  title={Progressive Distillation for Fast Sampling of Diffusion Models},
+  author={Salimans, Tim and Ho, Jonathan},
+  booktitle={ICLR},
+  year={2022}
+}
+
+@inproceedings{song2023consistency,
+  title={Consistency Models},
+  author={Song, Yang and Dhariwal, Prafulla and Chen, Mark and Sutskever, Ilya},
+  booktitle={ICML},
+  year={2023},
+  eprint={arXiv:2303.01469}
+}
+
+@article{lu2024simpleconsistency,
+  title={Simplifying, Stabilizing and Scaling Continuous-Time Consistency Models},
+  author={Lu, Cheng and Song, Yang},
+  journal={arXiv preprint arXiv:2410.11081},
+  year={2024}
+}
+
+% ============================================================
+% Self-supervised pretraining / robot representations
+% ============================================================
+@inproceedings{nair2022r3m,
+  title={R3M: A Universal Visual Representation for Robot Manipulation},
+  author={Nair, Suraj and Rajeswaran, Aravind and Kumar, Vikash and Finn, Chelsea and Gupta, Abhinav},
+  booktitle={CoRL},
+  year={2022},
+  eprint={arXiv:2203.12601}
+}
+
+@inproceedings{gupta2023siammae,
+  title={Siamese Masked Autoencoders},
+  author={Gupta, Agrim and Wu, Jiajun and Deng, Jia and Fei-Fei, Li},
+  booktitle={NeurIPS},
+  year={2023},
+  eprint={arXiv:2305.14344}
+}
+
+@inproceedings{seo2023multiview,
+  title={Multi-View Masked World Models for Visual Robotic Manipulation},
+  author={Seo, Younggyo and Kim, Junsu and James, Stephen and Lee, Kimin and Shin, Jinwoo and Abbeel, Pieter},
+  booktitle={ICML},
+  year={2023},
+  eprint={arXiv:2302.02408}
+}
+
+@inproceedings{ag2manip2024,
+  title={Ag2Manip: Learning Novel Manipulation Skills with Agent-Agnostic Visual and Action Representations},
+  author={Ag2Manip team},
+  booktitle={IROS},
+  year={2024}
+}
+
+@article{rebot2025,
+  title={ReBot: Scaling Robot Learning with Real-to-Sim-to-Real Robotic Video Synthesis},
+  author={ReBot team},
+  journal={arXiv preprint},
+  year={2025}
+}
+
+% ============================================================
+% Vision encoders / VLMs
+% ============================================================
+@inproceedings{zhai2023siglip,
+  title={Sigmoid Loss for Language Image Pre-Training},
+  author={Zhai, Xiaohua and Mustafa, Basil and Kolesnikov, Alexander and Beyer, Lucas},
+  booktitle={ICCV},
+  year={2023},
+  eprint={arXiv:2303.15343}
+}
+
+@article{chen2023pali3,
+  title={PaLI-3 Vision Language Models: Smaller, Faster, Stronger},
+  author={Chen, Xi and Wang, Xiao and Beyer, Lucas and Kolesnikov, Alexander and Wu, Jialin and Voigtlaender, Paul and others},
+  journal={arXiv preprint arXiv:2310.09199},
+  year={2023}
+}
+
+% ============================================================
+% Benchmarks
+% ============================================================
+@inproceedings{liu2023libero,
+  title={LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning},
+  author={Liu, Bo and Zhu, Yifeng and Gao, Chongkai and Feng, Yihao and Liu, Qiang and Zhu, Yuke and Stone, Peter},
+  booktitle={NeurIPS},
+  year={2023},
+  eprint={arXiv:2306.03310}
+}
+
+@article{mees2022calvin,
+  title={CALVIN: A Benchmark for Language-Conditioned Policy Learning for Long-Horizon Robot Manipulation Tasks},
+  author={Mees, Oier and Hermann, Lukas and Rosete-Beas, Erick and Burgard, Wolfram},
+  journal={IEEE Robotics and Automation Letters},
+  year={2022},
+  eprint={arXiv:2112.03227}
+}

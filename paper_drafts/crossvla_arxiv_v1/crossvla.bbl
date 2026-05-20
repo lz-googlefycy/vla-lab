@@ -1,0 +1,258 @@
+\begin{thebibliography}{49}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Azar et~al.(2023)Azar, Rowland, Piot, Guo, Calandriello, Valko, and Munos]{azar2023ipo}
+Mohammad~Gheshlaghi Azar, Mark Rowland, Bilal Piot, Daniel Guo, Daniele Calandriello, Michal Valko, and Rémi Munos.
+\newblock A general theoretical paradigm to understand learning from human preferences.
+\newblock \emph{arXiv preprint arXiv:2310.12036}, 2023.
+
+\bibitem[Black et~al.(2024)Black, Brown, Driess, Esmail, Equi, Finn, Fusai, Groom, Hausman, Ichter, et~al.]{black2024pi0}
+Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, et~al.
+\newblock π0: A vision-language-action flow model for general robot control.
+\newblock \emph{arXiv preprint arXiv:2410.24164}, 2024.
+
+\bibitem[Brohan et~al.(2023)Brohan, Brown, Carbajal, Chebotar, Chen, Choromanski, Ding, Driess, Dubey, Finn, et~al.]{brohan2023rt2}
+Anthony Brohan, Noah Brown, Justice Carbajal, Yevgen Chebotar, Xi~Chen, Krzysztof Choromanski, Tianli Ding, Danny Driess, Avinava Dubey, Chelsea Finn, et~al.
+\newblock Rt-2: Vision-language-action models transfer web knowledge to robotic control.
+\newblock \emph{arXiv preprint arXiv:2307.15818}, 2023.
+
+\bibitem[Chen et~al.(2023)Chen, Wang, Beyer, Kolesnikov, Wu, Voigtlaender, et~al.]{chen2023pali3}
+Xi~Chen, Xiao Wang, Lucas Beyer, Alexander Kolesnikov, Jialin Wu, Paul Voigtlaender, et~al.
+\newblock Pali-3 vision language models: Smaller, faster, stronger.
+\newblock \emph{arXiv preprint arXiv:2310.09199}, 2023.
+
+\bibitem[Chi et~al.(2023)Chi, Feng, Du, Xu, Cousineau, Burchfiel, and Song]{chi2023diffusion}
+Cheng Chi, Siyuan Feng, Yilun Du, Zhenjia Xu, Eric Cousineau, Benjamin Burchfiel, and Shuran Song.
+\newblock Diffusion policy: Visuomotor policy learning via action diffusion.
+\newblock In \emph{RSS}, 2023.
+
+\bibitem[DeepSeek-AI(2025)]{deepseek2025r1}
+DeepSeek-AI.
+\newblock Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning.
+\newblock \emph{arXiv preprint arXiv:2501.12948}, 2025.
+
+\bibitem[Ethayarajh et~al.(2024)Ethayarajh, Xu, Muennighoff, Jurafsky, and Kiela]{ethayarajh2024kto}
+Kawin Ethayarajh, Winnie Xu, Niklas Muennighoff, Dan Jurafsky, and Douwe Kiela.
+\newblock Kto: Model alignment as prospect theoretic optimization.
+\newblock \emph{arXiv preprint arXiv:2402.01306}, 2024.
+
+\bibitem[Gupta et~al.(2023)Gupta, Wu, Deng, and Fei-Fei]{gupta2023siammae}
+Agrim Gupta, Jiajun Wu, Jia Deng, and Li~Fei-Fei.
+\newblock Siamese masked autoencoders.
+\newblock In \emph{NeurIPS}, 2023.
+
+\bibitem[Hong et~al.(2024)Hong, Lee, and Thorne]{hong2024orpo}
+Jiwoo Hong, Noah Lee, and James Thorne.
+\newblock Orpo: Monolithic preference optimization without reference model.
+\newblock \emph{arXiv preprint arXiv:2403.07691}, 2024.
+
+\bibitem[Hu et~al.(2022)Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, and Chen]{hu2021lora}
+Edward~J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu~Wang, and Weizhu Chen.
+\newblock Lora: Low-rank adaptation of large language models.
+\newblock In \emph{ICLR}, 2022.
+
+\bibitem[Kim et~al.(2024)Kim, Pertsch, Karamcheti, Xiao, Balakrishna, Nair, Rafailov, Foster, Lam, Sanketi, Vuong, Kollar, Burchfiel, Tedrake, Sadigh, Levine, Liang, and Finn]{kim2024openvla}
+Moo~Jin Kim, Karl Pertsch, Siddharth Karamcheti, Ted Xiao, Ashwin Balakrishna, Suraj Nair, Rafael Rafailov, Ethan Foster, Grace Lam, Pannag Sanketi, Quan Vuong, Thomas Kollar, Benjamin Burchfiel, Russ Tedrake, Dorsa Sadigh, Sergey Levine, Percy Liang, and Chelsea Finn.
+\newblock Openvla: An open-source vision-language-action model.
+\newblock In \emph{CoRL}, 2024.
+
+\bibitem[Kim et~al.(2025)]{kim2025openvlaoft}
+Moo~Jin Kim et~al.
+\newblock Fine-tuning vision-language-action models: Optimizing speed and success.
+\newblock \emph{arXiv preprint}, 2025.
+\newblock OpenVLA-OFT extension.
+
+\bibitem[Kingma et~al.(2021)Kingma, Salimans, Poole, and Ho]{kingma2021variational}
+Diederik~P Kingma, Tim Salimans, Ben Poole, and Jonathan Ho.
+\newblock Variational diffusion models.
+\newblock In \emph{NeurIPS}, 2021.
+
+\bibitem[Leviathan et~al.(2023)Leviathan, Kalman, and Matias]{leviathan2023speculative}
+Yaniv Leviathan, Matan Kalman, and Yossi Matias.
+\newblock Fast inference from transformers via speculative decoding.
+\newblock In \emph{ICML}, 2023.
+
+\bibitem[Liu et~al.(2023)Liu, Zhu, Gao, Feng, Liu, Zhu, and Stone]{liu2023libero}
+Bo~Liu, Yifeng Zhu, Chongkai Gao, Yihao Feng, Qiang Liu, Yuke Zhu, and Peter Stone.
+\newblock Libero: Benchmarking knowledge transfer for lifelong robot learning.
+\newblock In \emph{NeurIPS}, 2023.
+
+\bibitem[Liu et~al.(2024{\natexlab{a}})]{robomamba2024}
+Jiaming Liu et~al.
+\newblock Robomamba: Efficient vision-language-action model for robotic reasoning and manipulation.
+\newblock \emph{arXiv preprint arXiv:2406.04339}, 2024{\natexlab{a}}.
+
+\bibitem[Liu et~al.(2024{\natexlab{b}})Liu, Wang, Yin, Molchanov, Wang, Cheng, and Chen]{liu2024dora}
+Shih-Yang Liu, Chien-Yi Wang, Hongxu Yin, Pavlo Molchanov, Yu-Chiang~Frank Wang, Kwang-Ting Cheng, and Min-Hung Chen.
+\newblock Dora: Weight-decomposed low-rank adaptation.
+\newblock In \emph{ICML}, 2024{\natexlab{b}}.
+
+\bibitem[Liu et~al.(2024{\natexlab{c}})Liu, Wu, Li, Tan, Chen, Wang, Xu, Su, and Zhu]{liu2024rdt}
+Songming Liu, Lingxuan Wu, Bangguo Li, Hengkai Tan, Huayu Chen, Zhengyi Wang, Ke~Xu, Hang Su, and Jun Zhu.
+\newblock Rdt-1b: A diffusion foundation model for bimanual manipulation.
+\newblock \emph{arXiv preprint arXiv:2410.07864}, 2024{\natexlab{c}}.
+
+\bibitem[Lu and Song(2024)]{lu2024simpleconsistency}
+Cheng Lu and Yang Song.
+\newblock Simplifying, stabilizing and scaling continuous-time consistency models.
+\newblock \emph{arXiv preprint arXiv:2410.11081}, 2024.
+
+\bibitem[Mees et~al.(2022)Mees, Hermann, Rosete-Beas, and Burgard]{mees2022calvin}
+Oier Mees, Lukas Hermann, Erick Rosete-Beas, and Wolfram Burgard.
+\newblock Calvin: A benchmark for language-conditioned policy learning for long-horizon robot manipulation tasks.
+\newblock \emph{IEEE Robotics and Automation Letters}, 2022.
+
+\bibitem[Meng et~al.(2024)Meng, Xia, and Chen]{meng2024simpo}
+Yu~Meng, Mengzhou Xia, and Danqi Chen.
+\newblock Simpo: Simple preference optimization with a reference-free reward.
+\newblock \emph{arXiv preprint arXiv:2405.14734}, 2024.
+
+\bibitem[Nair et~al.(2022)Nair, Rajeswaran, Kumar, Finn, and Gupta]{nair2022r3m}
+Suraj Nair, Aravind Rajeswaran, Vikash Kumar, Chelsea Finn, and Abhinav Gupta.
+\newblock R3m: A universal visual representation for robot manipulation.
+\newblock In \emph{CoRL}, 2022.
+
+\bibitem[Pertsch et~al.(2025)Pertsch, Black, et~al.]{openpi2025pi05}
+Karl Pertsch, Kevin Black, et~al.
+\newblock π0.5: A vision-language-action model with open-world generalization, 2025.
+\newblock Physical Intelligence and openpi 2025.09 release.
+
+\bibitem[Rafailov et~al.(2023)Rafailov, Sharma, Mitchell, Ermon, Manning, and Finn]{rafailov2023direct}
+Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher~D Manning, and Chelsea Finn.
+\newblock Direct preference optimization: Your language model is secretly a reward model.
+\newblock In \emph{NeurIPS}, 2023.
+
+\bibitem[Salimans and Ho(2022)]{salimans2022progressive}
+Tim Salimans and Jonathan Ho.
+\newblock Progressive distillation for fast sampling of diffusion models.
+\newblock In \emph{ICLR}, 2022.
+
+\bibitem[Seo et~al.(2023)Seo, Kim, James, Lee, Shin, and Abbeel]{seo2023multiview}
+Younggyo Seo, Junsu Kim, Stephen James, Kimin Lee, Jinwoo Shin, and Pieter Abbeel.
+\newblock Multi-view masked world models for visual robotic manipulation.
+\newblock In \emph{ICML}, 2023.
+
+\bibitem[Shao et~al.(2024)Shao, Wang, Zhu, Xu, Song, Zhang, Li, Wu, and Guo]{shao2024deepseekmath}
+Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Mingchuan Zhang, YK~Li, Y~Wu, and Daya Guo.
+\newblock Deepseekmath: Pushing the limits of mathematical reasoning in open language models.
+\newblock \emph{arXiv preprint arXiv:2402.03300}, 2024.
+\newblock Introduces GRPO.
+
+\bibitem[Song et~al.(2023)Song, Dhariwal, Chen, and Sutskever]{song2023consistency}
+Yang Song, Prafulla Dhariwal, Mark Chen, and Ilya Sutskever.
+\newblock Consistency models.
+\newblock In \emph{ICML}, 2023.
+
+\bibitem[team(2024{\natexlab{a}})]{ag2manip2024}
+Ag2Manip team.
+\newblock Ag2manip: Learning novel manipulation skills with agent-agnostic visual and action representations.
+\newblock In \emph{IROS}, 2024{\natexlab{a}}.
+
+\bibitem[team(2025{\natexlab{a}})]{chatvla2025}
+ChatVLA team.
+\newblock Chatvla: Unified multimodal understanding and robot control with vision-language-action model.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{a}}.
+
+\bibitem[team(2025{\natexlab{b}})]{clipdora2025}
+CLIP-DoRA team.
+\newblock Clip-dora: Weight-decomposed low-rank adaptation for efficient vision-language models.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{b}}.
+
+\bibitem[team(2025{\natexlab{c}})]{cotvla2025}
+CoT-VLA team.
+\newblock Cot-vla: Visual chain-of-thought reasoning for vision-language-action models.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{c}}.
+
+\bibitem[team(2024{\natexlab{b}})]{ecot2024}
+Embodied~CoT team.
+\newblock Robotic control via embodied chain-of-thought reasoning.
+\newblock \emph{arXiv preprint arXiv:2407.08693}, 2024{\natexlab{b}}.
+
+\bibitem[team(2026{\natexlab{a}})]{fpcvla2026}
+FPC-VLA team.
+\newblock Fpc-vla: A vision-language-action framework with a supervisor for failure prediction and correction.
+\newblock \emph{arXiv preprint}, 2026{\natexlab{a}}.
+
+\bibitem[team(2024{\natexlab{c}})]{grape2024}
+GRAPE team.
+\newblock Grape: Generalizing robot policy via preference alignment.
+\newblock \emph{arXiv preprint arXiv:2411.19309}, 2024{\natexlab{c}}.
+\newblock Concurrent work on VLA preference alignment.
+
+\bibitem[team(2024{\natexlab{d}})]{kvsharer2024}
+KVSharer team.
+\newblock Kvsharer: Efficient inference via layer-wise dissimilar kv cache sharing.
+\newblock \emph{arXiv preprint arXiv:2410.18517}, 2024{\natexlab{d}}.
+
+\bibitem[team(2025{\natexlab{d}})]{moflow2025}
+MoFlow team.
+\newblock Moflow: One-step flow matching for human trajectory forecasting via implicit maximum likelihood estimation.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{d}}.
+
+\bibitem[team(2025{\natexlab{e}})]{rebot2025}
+ReBot team.
+\newblock Rebot: Scaling robot learning with real-to-sim-to-real robotic video synthesis.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{e}}.
+
+\bibitem[team(2024{\natexlab{e}})]{revla2024}
+ReVLA team.
+\newblock Revla: Reverting visual domain limitation of robotic foundation models.
+\newblock \emph{arXiv preprint arXiv:2409.15250}, 2024{\natexlab{e}}.
+
+\bibitem[team(2026{\natexlab{b}})]{sentinelvla2026}
+Sentinel-VLA team.
+\newblock Sentinel-vla: A metacognitive vla model with active status monitoring for dynamic reasoning and error recovery.
+\newblock \emph{arXiv preprint arXiv:2605.01191}, 2026{\natexlab{b}}.
+
+\bibitem[team(2026{\natexlab{c}})]{snapflow2026}
+SnapFlow team.
+\newblock Snapflow: One-step action generation for flow-matching vlas via progressive self-distillation.
+\newblock \emph{arXiv preprint arXiv:2604.05656}, 2026{\natexlab{c}}.
+\newblock Validates our denoise-loop-targeting prescription (§5.4).
+
+\bibitem[team(2025{\natexlab{f}})]{spatialvla2025}
+SpatialVLA team.
+\newblock Spatialvla: Exploring spatial representations for visual-language-action models.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{f}}.
+
+\bibitem[team(2026{\natexlab{d}})]{vla2026embodied}
+Survey team.
+\newblock A survey on vision-language-action models for embodied ai.
+\newblock \emph{arXiv preprint arXiv:2405.14093}, 2026{\natexlab{d}}.
+
+\bibitem[team(2026{\natexlab{e}})]{vlaattc2026}
+VLA-ATTC team.
+\newblock Vla-attc: Adaptive test-time compute for vla models with relative action critic model.
+\newblock \emph{arXiv preprint arXiv:2605.01194}, 2026{\natexlab{e}}.
+
+\bibitem[team(2025{\natexlab{g}})]{vla2025survey}
+VLA~Survey team.
+\newblock Vision-language-action models for robotics: A review towards real-world applications.
+\newblock \emph{arXiv preprint arXiv:2510.07077}, 2025{\natexlab{g}}.
+
+\bibitem[Wang et~al.(2025)]{wang2025vlacache}
+Siyu Wang et~al.
+\newblock Vla-cache: Towards efficient vision-language-action model inference via adaptive token caching.
+\newblock In \emph{NeurIPS Workshop}, 2025.
+\newblock Targets autoregressive VLAs; we test transfer to flow-matching π0.5 (§4.5).
+
+\bibitem[Wen et~al.(2024)Wen, Zhang, et~al.]{wen2024tinyvla}
+Jian Wen, Jian Zhang, et~al.
+\newblock Tinyvla: Toward fast, data-efficient vision-language-action models for robotic manipulation.
+\newblock \emph{arXiv preprint arXiv:2409.12514}, 2024.
+
+\bibitem[Xu et~al.(2023)Xu, Xie, Gu, Chen, Chang, Zhang, Chen, Zhang, and Tian]{xu2024qalora}
+Yuhui Xu, Lingxi Xie, Xiaotao Gu, Xin Chen, Heng Chang, Hengheng Zhang, Zhengsu Chen, Xiaopeng Zhang, and Qi~Tian.
+\newblock Qa-lora: Quantization-aware low-rank adaptation of large language models.
+\newblock \emph{arXiv preprint arXiv:2309.14717}, 2023.
+
+\bibitem[Zhai et~al.(2023)Zhai, Mustafa, Kolesnikov, and Beyer]{zhai2023siglip}
+Xiaohua Zhai, Basil Mustafa, Alexander Kolesnikov, and Lucas Beyer.
+\newblock Sigmoid loss for language image pre-training.
+\newblock In \emph{ICCV}, 2023.
+
+\end{thebibliography}
