@@ -68,13 +68,14 @@ seed; we discuss this in §6.
 We list known limitations honestly so reviewers can calibrate the
 strength of our claims.
 
-1. **Multiseed coverage in flight.** Our DoRA Object cell has been
-   verified on two seeds (42 and 1337, both 76.0%) at camera-ready
-   time. The remaining seven cells (DoRA × {Spatial, Goal, Long10}
-   × {1337, 2026} plus Object × 2026) are running on cloudml under
-   the EGL/USE_TF=0 fix described in §4.3 and App D, scheduled to
-   finish by submission deadline. The single-seed Spatial 0-pp result
-   in particular warrants seed re-confirmation.
+1. **Asymmetric multiseed coverage on the LoRA side.** All four DoRA
+   cells are 3-seed pooled (seeds 42, 1337, 2026; 150 trials per
+   suite). On the LoRA side, multiseed (seeds 1337 + 2026) is
+   available for Object/Goal/Long10 only. **LoRA Spatial single-seed
+   only** (s=42 = 78%), so the DoRA-vs-LoRA Spatial cell in §4.3 is
+   reported with the asymmetry footnoted (direct s=42 tie at 78%; pool
+   comparison shows DoRA 74.7%). This was deferred due to compute
+   budget and is the most defendable cell to expand for camera-ready.
 
 2. **No Spirit v1.5 results.** We had originally planned to include
    Spirit v1.5 as a third backbone (Qwen3-VL flow-matching, distinct
