@@ -6,13 +6,13 @@
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
 \bibitem[Azar et~al.(2023)Azar, Rowland, Piot, Guo, Calandriello, Valko, and Munos]{azar2023ipo}
-Mohammad~Gheshlaghi Azar, Mark Rowland, Bilal Piot, Daniel Guo, Daniele Calandriello, Michal Valko, and Rémi Munos.
+Mohammad~Gheshlaghi Azar, Mark Rowland, Bilal Piot, Daniel Guo, Daniele Calandriello, Michal Valko, and R\'{e}mi Munos.
 \newblock A general theoretical paradigm to understand learning from human preferences.
 \newblock \emph{arXiv preprint arXiv:2310.12036}, 2023.
 
 \bibitem[Black et~al.(2024)Black, Brown, Driess, Esmail, Equi, Finn, Fusai, Groom, Hausman, Ichter, et~al.]{black2024pi0}
 Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, et~al.
-\newblock π0: A vision-language-action flow model for general robot control.
+\newblock $\pi_0$: A vision-language-action flow model for general robot control.
 \newblock \emph{arXiv preprint arXiv:2410.24164}, 2024.
 
 \bibitem[Brohan et~al.(2023)Brohan, Brown, Carbajal, Chebotar, Chen, Choromanski, Ding, Driess, Dubey, Finn, et~al.]{brohan2023rt2}
@@ -118,7 +118,7 @@ Suraj Nair, Aravind Rajeswaran, Vikash Kumar, Chelsea Finn, and Abhinav Gupta.
 
 \bibitem[Pertsch et~al.(2025)Pertsch, Black, et~al.]{openpi2025pi05}
 Karl Pertsch, Kevin Black, et~al.
-\newblock π0.5: A vision-language-action model with open-world generalization, 2025.
+\newblock $\pi_{0.5}$: A vision-language-action model with open-world generalization, 2025.
 \newblock Physical Intelligence and openpi 2025.09 release.
 
 \bibitem[Rafailov et~al.(2023)Rafailov, Sharma, Mitchell, Ermon, Manning, and Finn]{rafailov2023direct}
@@ -212,7 +212,7 @@ Sentinel-VLA team.
 SnapFlow team.
 \newblock Snapflow: One-step action generation for flow-matching vlas via progressive self-distillation.
 \newblock \emph{arXiv preprint arXiv:2604.05656}, 2026{\natexlab{c}}.
-\newblock Validates our denoise-loop-targeting prescription (§5.4).
+\newblock Validates our denoise-loop-targeting prescription (\S5.4).
 
 \bibitem[team(2025{\natexlab{f}})]{spatialvla2025}
 SpatialVLA team.
@@ -238,7 +238,7 @@ VLA~Survey team.
 Siyu Wang et~al.
 \newblock Vla-cache: Towards efficient vision-language-action model inference via adaptive token caching.
 \newblock In \emph{NeurIPS Workshop}, 2025.
-\newblock Targets autoregressive VLAs; we test transfer to flow-matching π0.5 (§4.5).
+\newblock Targets autoregressive VLAs; we test transfer to flow-matching $\pi_{0.5}$ (\S4.5).
 
 \bibitem[Wen et~al.(2024)Wen, Zhang, et~al.]{wen2024tinyvla}
 Jian Wen, Jian Zhang, et~al.
