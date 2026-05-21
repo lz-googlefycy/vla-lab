@@ -4,10 +4,11 @@
 
 **Independent VLA Research — DoRA × DPO × Multi-View Pretraining on OpenVLA / π0.5**
 
-*Personal project by Liu Zhi (刘志) — transitioning from autonomous-driving motion planning into embodied AI / Vision-Language-Action models.*
+*Personal project by Liu Zhi (刘志, [ORCID 0009-0006-4808-9202](https://orcid.org/0009-0006-4808-9202)) — transitioning from autonomous-driving motion planning into embodied AI / Vision-Language-Action models.*
 
 [![Status](https://img.shields.io/badge/status-active-brightgreen)]()
 [![Paper](https://img.shields.io/badge/paper-workshop_v1.4-orange)](paper_drafts/crossvla_v1/00_full_draft.pdf)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0006--4808--9202-A6CE39?logo=orcid)](https://orcid.org/0009-0006-4808-9202)
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 [![Updated](https://img.shields.io/badge/updated-May%202026-informational)]()
 

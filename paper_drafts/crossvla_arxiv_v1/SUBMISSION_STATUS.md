@@ -8,6 +8,7 @@
 | Status | **submitted** (waiting moderator review) |
 | Title | CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for Vision-Language-Action Models |
 | Author | Zhi Liu |
+| ORCID | [0009-0006-4808-9202](https://orcid.org/0009-0006-4808-9202) |
 | Affiliation | Tianjin University |
 | Email | 2022201433@tju.edu.cn |
 | Primary category | cs.AI |
@@ -46,3 +47,20 @@ Updates 4 places + pushes both repos:
 - [ ] PDF visible at `https://arxiv.org/pdf/2606.XXXXX`
 - [ ] HTML visible at `https://arxiv.org/abs/2606.XXXXX`
 - [ ] Author/title rendering correct on abs page
+
+## ORCID linkage
+
+**ORCID iD**: [0009-0006-4808-9202](https://orcid.org/0009-0006-4808-9202)
+
+To enable automatic synchronization between arxiv and ORCID:
+
+1. Go to https://arxiv.org/user (logged in as `Zhi_Liu`)
+2. Find the "Confirm your ORCID iD" link near the bottom
+3. Click → enter ORCID `0009-0006-4808-9202` → confirm via ORCID OAuth
+4. After linkage:
+   - All future arxiv submissions auto-push to ORCID Works
+   - Past papers (including current `submit/7617925`) can be claimed via Works → Add → Search & link → ArXiv
+
+Once arxiv assigns the permanent ID `arXiv:2606.XXXXX`:
+- ORCID Works section will show: "CrossVLA: Cross-Paradigm Post-Training... — arXiv:2606.XXXXX"
+- Identifier link: directly back to https://arxiv.org/abs/2606.XXXXX
