@@ -112,6 +112,22 @@ Full multiseed grid (3 seeds × 50 trials per cell = **150 trials per suite**, 6
 
 ---
 
+## 🤖 π0.5 SFT 4-suite — Reproduce / Match the openpi paper
+
+We re-ran π0.5 supervised fine-tuning on LIBERO 4-suite (50 trials × seed 42) to validate our eval pipeline. Numbers reproducible from `assets/paper_v1.5_eval/pi05_sft_libero_*_5x10_seed42.json`.
+
+| Suite | π0.5 SFT (ours) | π0.5 paper | Δ vs paper |
+|:---|---:|---:|---:|
+| Spatial | **100.0%** | 98.8% | **+1.2 pp** ✅ |
+| Object | 98.0% | 98.2% | -0.2 pp ➖ (within 50-trial noise) |
+| Goal | **100.0%** | 98.0% | **+2.0 pp** ✅ |
+| Long-horizon | **94.0%** | 92.4% | **+1.6 pp** ✅ |
+| **Mean** | **98.0%** | **96.85%** | **+1.15 pp** ✅ |
+
+**3 / 4 strictly超过, 1 / 4 持平 (-0.2 pp 在 50-trial 测试方差内).** This validates our LIBERO eval harness end-to-end before any post-training experiments.
+
+---
+
 ## 🔬 Multi-View Spatiotemporal InfoNCE Pretraining
 
 A 656K-parameter projection head trained on top of frozen SigLIP-so400m vision features with **dual-stream InfoNCE**: multi-view alignment (agent ↔ wrist) + temporal coherence (agent_t ↔ agent_{t+5}).
