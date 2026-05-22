@@ -74,13 +74,15 @@ https://github.com/lz-googlefycy/vla-lab/assets/openvla_libero_4suite_demo.mp4
 
 Full multiseed grid (3 seeds × 50 trials per cell = **150 trials per suite**, 600 trials total for the DoRA cells). All numbers reproducible from raw json files in [`assets/paper_v1.5_eval/`](assets/paper_v1.5_eval/).
 
-| Suite | OpenVLA SFT (ours) | + LoRA + DPO (s=42) | + LoRA + DPO multiseed | **+ DoRA + DPO (3-seed pool)** | Δ vs SFT |
+| Suite | OpenVLA SFT (ours) | + LoRA + DPO (s=42) | + LoRA + DPO multiseed¹ | **+ DoRA + DPO (3-seed pool)** | Δ vs SFT |
 |:---|---:|---:|---:|---:|---:|
-| Spatial | 72% | 78% | — | **74.7%** (112/150) | +2.7pp |
+| Spatial | 72% | 78% | n/a¹ | **74.7%** (112/150) | +2.7pp |
 | **Object** | 56% | 62% | 75% | **76.0%** (114/150) ⭐ | **+20.0pp** |
 | Goal | 70% | 76% | 77% | **78.0%** (117/150) | +8.0pp |
 | Long-horizon | 53% | 54% | 64% | **64.0%** (96/150) | +11.0pp |
 | **Mean** | **62.75** | **67.50** | — | **73.2** | **+10.4pp** |
+
+¹ **LoRA Spatial multiseed not available** — at the time of the LoRA experiment we only ran seed=42 on the Spatial cell (other suites Object/Goal/Long10 had seed 1337+2026 pooled = "multiseed"). Spatial's missing LoRA-multiseed cell is the asymmetry footnoted in [paper §4.3 footnote 4](paper_drafts/crossvla_v1/04_experiments.md): direct seed-42 comparison shows DoRA 78% = LoRA 78% (tie); DoRA 3-seed pool 74.7% therefore averages over its own seed variance against a single LoRA point estimate. Expanding LoRA Spatial to multiseed is left to camera-ready.
 
 **Key findings**:
 - DoRA Object exhibits **zero seed variance**: each of seeds 42, 1337, 2026 yields exactly **38/50 = 76.0%**. This rules out lucky-seed concerns for the headline +20 pp gain over SFT.
