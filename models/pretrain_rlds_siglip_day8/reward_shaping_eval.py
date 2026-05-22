@@ -105,9 +105,12 @@ def main():
             "goal_window_consistency": [], # std of r_T-K..T_T (low = goal stable)
         }
 
-        for ep in tfds.as_numpy(ds):
-            steps = ep["steps"]
-            agent_frames = steps["observation"]["image"]  # (T, 256, 256, 3) uint8
+        for ep in ds:
+            # ep["steps"] is a tf nested Dataset; iterate to materialise frames
+            agent_list = []
+            for st in ep["steps"]:
+                agent_list.append(st["observation"]["image"].numpy())
+            agent_frames = np.stack(agent_list, axis=0)  # (T, 256, 256, 3) uint8
             T = agent_frames.shape[0]
             if T < args.goal_window + 5:
                 continue
