@@ -7,7 +7,8 @@
 *Personal project by Liu Zhi (刘志, [ORCID 0009-0006-4808-9202](https://orcid.org/0009-0006-4808-9202)) — transitioning from autonomous-driving motion planning into embodied AI / Vision-Language-Action models.*
 
 [![Status](https://img.shields.io/badge/status-active-brightgreen)]()
-[![Paper](https://img.shields.io/badge/paper-workshop_v1.4-orange)](paper_drafts/crossvla_v1/00_full_draft.pdf)
+[![arxiv](https://img.shields.io/badge/arXiv-2605.21854-b31b1b.svg)](https://arxiv.org/abs/2605.21854)
+[![Paper](https://img.shields.io/badge/paper-arXiv:2605.21854-orange)](paper_drafts/crossvla_v1/00_full_draft.pdf)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0006--4808--9202-A6CE39?logo=orcid)](https://orcid.org/0009-0006-4808-9202)
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 [![Updated](https://img.shields.io/badge/updated-May%202026-informational)]()
@@ -24,7 +25,7 @@ https://github.com/lz-googlefycy/vla-lab/assets/openvla_libero_4suite_demo.mp4
 
 ## ⭐ TL;DR (May 2026 sprint)
 
-- 📄 **Workshop paper draft** — [CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for VLA](paper_drafts/crossvla_v1/00_full_draft.pdf) (5 pages, 45 OpenAlex-verified citations). arxiv preprint TBD.
+- 📄 **Workshop paper draft** — [CrossVLA: Cross-Paradigm Post-Training and Inference Optimization for VLA](https://arxiv.org/abs/2605.21854) ([PDF](https://arxiv.org/pdf/2605.21854)) (5 pages, 45 OpenAlex-verified citations). arxiv preprint: 2605.21854.
 - 🎯 **DoRA + DPO 4-suite multiseed** (600 trials × 3 seeds): **mean +10.4pp over OpenVLA SFT**. Per-suite: Object **+20pp**, Long10 **+11pp**, Goal **+8pp**, Spatial **+3pp**. See [§4.3](paper_drafts/crossvla_v1/04_experiments.md) and the 12 raw json files in [`assets/paper_v1.5_eval/`](assets/paper_v1.5_eval/).
 - 🔬 **Multi-view InfoNCE pretrain ckpt** (SigLIP-so400m frozen + 656K projection head, trained on 6000 LIBERO frames in 30 min on 1×H20). k-NN retrieval **recall@1 same-task = 99.5%** (36× over random). Live demo: [`models/pretrain_rlds_siglip_day8/`](models/pretrain_rlds_siglip_day8/).
 - ⚡ **KV-Cache inference anatomy** — both chunk-level and token-level prefix caching strategies fail on flow-matching VLAs. Latency anatomy reveals denoise loop dominates **78.6% of per-call cost** vs prefix forward at **21.4%**, capping VLA-Cache style strategies. Concurrent SnapFlow (arXiv:2604.05656) confirms denoise-loop distillation as the productive direction. See [§4.5](paper_drafts/crossvla_v1/04_experiments.md).
