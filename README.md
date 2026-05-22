@@ -173,11 +173,11 @@ We instrumented `model.sample_actions()` on π0.5 (LIBERO Spatial, dev pod H20 9
 
 We tested two cache strategies; **both fail on π0.5** (full data in [§4.5](paper_drafts/crossvla_v1/04_experiments.md)):
 
-| Strategy | Hit rate | Success rate | Speedup |
-|:---|---:|---:|---:|
-| Baseline (no cache) | — | 100% (50/50) | 1.0× |
-| Chunk-level cache (sim ≥ 0.95) | 82.1% | 80% (40/50) | 0.7× (slower) |
-| Token-level prefix cache (sim ≥ 0.92) | 86% | 0% (0/1 task) | 1.4× |
+| Strategy | Hit rate | Success rate | Wall time | vs baseline |
+|:---|---:|---:|---:|---:|
+| Baseline (no cache) | — | 100% (50/50) | 1258 s | 1.00× |
+| Chunk-level cache (sim ≥ 0.95) | 82.1% | 80% (40/50) | 1796 s | **+43% slower** |
+| Token-level prefix cache (sim ≥ 0.92) | 86% | 0% (0/1 task) | ~ 900 s | 1.4× faster but unusable |
 
 **Conclusion**: VLA-Cache prefix caching does not transfer to flow-matching VLAs because the denoise loop dominates 78.6% of inference cost. **Concurrent work** [SnapFlow (arXiv:2604.05656)](https://arxiv.org/abs/2604.05656) confirms our prescription via progressive self-distillation of the denoise loop.
 
