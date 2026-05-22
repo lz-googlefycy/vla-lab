@@ -1,0 +1,28 @@
+[reward] loading SigLIP from /ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial
+[encoder] state_dict load: 342 keys, missing=0, unexpected=0
+[encoder] loaded SigLIP from OpenVLA ckpt: /ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial
+[encoder] SigLIP frozen, 427.7M params, output_dim=1152
+[reward] loading proj_head from /ad-alg/planning-users/liuzhi7/ro_planning/output/pretrain_rlds_siglip_day8/proj_head.pt
+[reward] loading RLDS trajectories from /ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779443633.722811   30491 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779443635.122743   30491 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[reward] === suite spatial ===
+  monotonicity 0.560, spread 0.780, sep 0.773
+[reward] === suite object ===
+  monotonicity 0.556, spread 0.834, sep 0.752
+[reward] === suite goal ===
+  monotonicity 0.547, spread 0.853, sep 0.838
+[reward] === suite 10 ===
+  monotonicity 0.535, spread 0.586, sep 0.414
+
+=== GLOBAL ===
+{
+  "mean_monotonicity_ratio": 0.5494151283878973,
+  "mean_start_to_goal_spread": 0.7632776081562043,
+  "mean_early_late_separation": 0.6942725479602814
+}
+[reward] saved /ad-alg/planning-users/liuzhi7/ro_planning/output/reward_shaping_eval/reward_shaping_results.json
+[reward] plotting curves...
+[reward] saved /ad-alg/planning-users/liuzhi7/ro_planning/output/reward_shaping_eval/reward_curves.png

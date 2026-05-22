@@ -1,0 +1,47 @@
+{
+  "config": {
+    "rlds_root": "/ad-alg/planning-users/liuzhi7/ro_planning/datasets/modified_libero_rlds",
+    "siglip_path": "/ad-alg/planning-users/liuzhi7/ro_planning/models/openvla-7b-finetuned-libero-spatial",
+    "proj_ckpt": "/ad-alg/planning-users/liuzhi7/ro_planning/output/pretrain_rlds_siglip_day8/proj_head.pt",
+    "n_trajectories_per_suite": 5,
+    "batch_size": 16,
+    "output_dir": "/ad-alg/planning-users/liuzhi7/ro_planning/output/reward_shaping_eval",
+    "device": "cuda",
+    "goal_window": 10
+  },
+  "per_suite": {
+    "Spatial": {
+      "n_trajectories": 5,
+      "mean_monotonicity_ratio": 0.5603114467996158,
+      "mean_start_to_goal_spread": 0.7797165989875794,
+      "mean_early_late_separation": 0.7727859377861023,
+      "mean_goal_window_consistency": 0.024436591565608977
+    },
+    "Object": {
+      "n_trajectories": 5,
+      "mean_monotonicity_ratio": 0.5556752435861566,
+      "mean_start_to_goal_spread": 0.834276306629181,
+      "mean_early_late_separation": 0.7523631930351258,
+      "mean_goal_window_consistency": 0.01826351583003998
+    },
+    "Goal": {
+      "n_trajectories": 5,
+      "mean_monotonicity_ratio": 0.5467081311636409,
+      "mean_start_to_goal_spread": 0.8533394813537598,
+      "mean_early_late_separation": 0.838425076007843,
+      "mean_goal_window_consistency": 0.015497595816850663
+    },
+    "Long10": {
+      "n_trajectories": 5,
+      "mean_monotonicity_ratio": 0.5349656920021756,
+      "mean_start_to_goal_spread": 0.5857780456542969,
+      "mean_early_late_separation": 0.41351598501205444,
+      "mean_goal_window_consistency": 0.009312806650996208
+    }
+  },
+  "global": {
+    "mean_monotonicity_ratio": 0.5494151283878973,
+    "mean_start_to_goal_spread": 0.7632776081562043,
+    "mean_early_late_separation": 0.6942725479602814
+  }
+}
