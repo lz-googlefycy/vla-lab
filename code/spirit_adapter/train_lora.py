@@ -237,6 +237,26 @@ class _LoRALinear(torch.nn.Module):
         # B stays 0
         self.dropout = torch.nn.Dropout(dropout) if dropout > 0 else torch.nn.Identity()
 
+    # Proxy `weight` / `bias` / `in_features` / `out_features` to the wrapped
+    # nn.Linear so callers that introspect (e.g. transformers SigLIP doing
+    # `q_proj.weight.dtype` / fairscale FSDP gathering shapes) keep working
+    # transparently. Only the forward path actually uses LoRA's parameters.
+    @property
+    def weight(self):
+        return self.orig.weight
+
+    @property
+    def bias(self):
+        return self.orig.bias
+
+    @property
+    def in_features(self):
+        return self.orig.in_features
+
+    @property
+    def out_features(self):
+        return self.orig.out_features
+
     def forward(self, x):
         out = self.orig(x)
         # LoRA path
@@ -294,6 +314,24 @@ class _DoRALinear(torch.nn.Module):
             init_mag = orig.weight.norm(dim=1)  # (out_f,) per-column L2 norm
         self.magnitude = torch.nn.Parameter(init_mag.clone())
         self.dropout = torch.nn.Dropout(dropout) if dropout > 0 else torch.nn.Identity()
+
+    # Same proxy as _LoRALinear so introspecting code (transformers SigLIP
+    # checking `q_proj.weight.dtype`) keeps working through DoRA wrap.
+    @property
+    def weight(self):
+        return self.orig.weight
+
+    @property
+    def bias(self):
+        return self.orig.bias
+
+    @property
+    def in_features(self):
+        return self.orig.in_features
+
+    @property
+    def out_features(self):
+        return self.orig.out_features
 
     def forward(self, x):
         # Standard LoRA dropout convention: applied to the LoRA-update path

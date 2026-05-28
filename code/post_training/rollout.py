@@ -232,6 +232,11 @@ def rollout_one_episode(
     suite_max = cfg.max_steps_override or _MAX_STEPS.get(cfg.suite, 220)
     actions: list[np.ndarray] = []
     first_image: Optional[torch.Tensor] = None
+    # π0.5 inputs at first frame — saved into the pair bundle so DPO
+    # training can feed the same wrist/state to the adapter (OpenVLA pair
+    # files don't have these; including them is a no-cost back-compat extension).
+    first_wrist_uint8: Optional[np.ndarray] = None
+    first_state_8: Optional[np.ndarray] = None
     success = False
     n_steps = 0
     t = 0
@@ -269,6 +274,11 @@ def rollout_one_episode(
 
         if first_image is None:
             first_image = img_t.clone()
+            # Capture wrist + state at the first frame too. We do this
+            # before computing them below by using a deferred capture.
+            _capture_first_frame_aux = True
+        else:
+            _capture_first_frame_aux = False
 
         # Optional pi0.5 inputs: wrist camera + 8-dim robot state
         # LIBERO env exposes both — extract if present, else fill zeros so
@@ -298,6 +308,12 @@ def rollout_one_episode(
         except Exception:
             state_8 = np.zeros(8, dtype=np.float32)
 
+        # Capture first-frame aux (wrist + state) for later use during
+        # DPO training (π0.5 needs both per sample).
+        if _capture_first_frame_aux:
+            first_wrist_uint8 = wrist_uint8.copy()
+            first_state_8 = state_8.copy()
+
         # Build batch — include BOTH float tensor (back-compat) and raw
         # uint8 ndarray. OpenVLA adapter prefers the uint8 path because
         # the float→uint8 round-trip causes ~1/255 quantisation drift
@@ -311,46 +327,67 @@ def rollout_one_episode(
             "state": torch.from_numpy(state_8).unsqueeze(0),  # (1, 8)
         }
         with torch.no_grad():
-            # OpenVLA single-step prediction
-            action_chunk = adapter.select_action(batch)        # (1, 1, 7) for OpenVLA
-        action = action_chunk.squeeze(0).squeeze(0).cpu().numpy()  # (7,)
+            # adapter.select_action returns:
+            #   OpenVLA: (B=1, T=1, 7) — single step
+            #   π0.5:    (B=1, T=10, 7) — full action chunk
+            action_chunk = adapter.select_action(batch)
+        chunk_np = action_chunk.squeeze(0).cpu().numpy()  # (T, 7)
+        if chunk_np.ndim == 1:
+            chunk_np = chunk_np[None, :]
+        T_chunk = chunk_np.shape[0]
+        is_openvla = (hasattr(adapter, 'cfg') and getattr(adapter.cfg, 'base', '') == 'openvla')
 
-        # OpenVLA: gripper in [0, 1] → binarise to {-1, +1}, then invert
-        # because OpenVLA's RLDS dataloader maps 0=close, 1=open but
-        # LIBERO env expects -1=open, +1=close. See
-        # openvla/experiments/robot/robot_utils.py.
-        if hasattr(adapter, 'cfg') and getattr(adapter.cfg, 'base', '') == 'openvla':
-            # Step 1: normalize gripper to [-1, +1] then binarise
-            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
-            # Step 2: invert sign for LIBERO
-            action[-1] = -action[-1]
-        else:
-            # Spirit / π0.5 / others: simple binarise
-            action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+        # Execute chunk step-by-step. Each chunk step = one env.step (matches
+        # eval_libero.py exactly so rollout-pair distribution stays aligned
+        # with the eval-time distribution; otherwise pi05 pairs would
+        # systematically under-rollout).
+        chunk_done = False
+        for t_chunk in range(T_chunk):
+            action = chunk_np[t_chunk].copy()  # (7,)
+            if is_openvla:
+                action[-1] = 1.0 if action[-1] > 0.5 else -1.0
+                action[-1] = -action[-1]
+            else:
+                action[-1] = 1.0 if action[-1] > 0.5 else -1.0
 
-        actions.append(action.copy())
-        try:
-            obs, _, done, info = env.step(action.tolist())
-        except Exception as e:
-            if cfg.print_progress:
-                print(f"  [warn] env.step exception: {e}")
-            break
+            actions.append(action.copy())
+            try:
+                obs, _, done, info = env.step(action.tolist())
+            except Exception as e:
+                if cfg.print_progress:
+                    print(f"  [warn] env.step exception: {e}")
+                chunk_done = True
+                break
 
-        n_steps = t - cfg.num_steps_wait + 1
-        t += 1
+            n_steps = t - cfg.num_steps_wait + 1
+            t += 1
 
-        # LIBERO's `done` flag isn't always set on success — use the explicit
-        # check_success() method as the canonical signal.
-        if done or (hasattr(env, "check_success") and env.check_success()):
-            success = True
+            # LIBERO's `done` flag isn't always set on success — use the explicit
+            # check_success() method as the canonical signal.
+            if done or (hasattr(env, "check_success") and env.check_success()):
+                success = True
+                chunk_done = True
+                break
+
+            if t >= suite_max + cfg.num_steps_wait:
+                chunk_done = True
+                break
+
+        if chunk_done:
             break
 
     if first_image is None:
         first_image = torch.zeros(3, cfg.resolution, cfg.resolution)
+    if first_wrist_uint8 is None:
+        first_wrist_uint8 = np.zeros((cfg.resolution, cfg.resolution, 3), dtype=np.uint8)
+    if first_state_8 is None:
+        first_state_8 = np.zeros(8, dtype=np.float32)
 
     return {
         "actions": np.stack(actions) if actions else np.zeros((0, 7), dtype=np.float32),
         "first_image": first_image,
+        "first_wrist_uint8": first_wrist_uint8,   # (H, W, 3) uint8 — π0.5 wrist camera
+        "first_state_8": first_state_8,           # (8,) float32 — π0.5 robot state
         "success": bool(success),
         "n_steps": n_steps,
         "task": task_description,
@@ -417,6 +454,8 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
     all_chunks: list[torch.Tensor] = []      # each (T, A) — variable T per episode
     all_rewards: list[float] = []
     all_first_images: list[torch.Tensor] = []
+    all_first_wrists: list[np.ndarray] = []  # π0.5 wrist camera at first frame
+    all_first_states: list[np.ndarray] = []  # π0.5 8-d state at first frame
     all_instructions: list[str] = []
     all_success: list[bool] = []
     group_ids: list[int] = []                 # which (task, init) group each ep belongs to
@@ -451,6 +490,10 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
                 all_chunks.append(torch.from_numpy(episode["actions"]).float())
                 all_rewards.append(reward)
                 all_first_images.append(episode["first_image"])
+                all_first_wrists.append(episode.get("first_wrist_uint8",
+                                                     np.zeros((cfg.resolution, cfg.resolution, 3), dtype=np.uint8)))
+                all_first_states.append(episode.get("first_state_8",
+                                                     np.zeros(8, dtype=np.float32)))
                 all_instructions.append(episode["task"])
                 all_success.append(episode["success"])
                 group_ids.append(group_counter)
@@ -469,6 +512,8 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
     chosen_chunks: list[torch.Tensor] = []
     rejected_chunks: list[torch.Tensor] = []
     chosen_imgs: list[torch.Tensor] = []
+    chosen_wrists: list[np.ndarray] = []
+    chosen_states: list[np.ndarray] = []
     chosen_instrs: list[str] = []
     chosen_rs: list[float] = []
     rejected_rs: list[float] = []
@@ -491,6 +536,8 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
             chosen_chunks.append(all_chunks[top_i])
             rejected_chunks.append(all_chunks[bot_i])
             chosen_imgs.append(all_first_images[top_i])
+            chosen_wrists.append(all_first_wrists[top_i])
+            chosen_states.append(all_first_states[top_i])
             chosen_instrs.append(all_instructions[top_i])
             chosen_rs.append(all_rewards[top_i])
             rejected_rs.append(all_rewards[bot_i])
@@ -516,6 +563,10 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
     bundle = {
         "instructions": chosen_instrs,
         "images": torch.stack(chosen_imgs) if chosen_imgs else torch.empty(0),
+        # π0.5 multi-modal observation aux fields. (May be all-zeros for
+        # OpenVLA rollouts where the env didn't expose wrist camera.)
+        "wrist_uint8": np.stack(chosen_wrists) if chosen_wrists else np.empty(0),
+        "state": torch.tensor(np.stack(chosen_states), dtype=torch.float32) if chosen_states else torch.empty(0),
         "chosen_chunks": chosen_chunks_t,
         "rejected_chunks": rejected_chunks_t,
         "chosen_rewards": torch.tensor(chosen_rs, dtype=torch.float32),

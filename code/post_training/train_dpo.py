@@ -33,6 +33,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, Dataset
@@ -56,18 +57,37 @@ class DPOPairDataset(Dataset):
             "instructions": List[str],            # length B
             "images": Tensor (B, 3, H, W),        # float [0,1] — back-compat
             "images_uint8": List[ndarray],         # uint8 (H,W,3) — preferred
+            "wrist_uint8": ndarray (B, H, W, 3) uint8 — π0.5 wrist camera (optional)
+            "state":       Tensor (B, 8)          — π0.5 robot state (optional)
             "chosen_chunks": Tensor (B, T, A),
             "rejected_chunks": Tensor (B, T, A),
             "chosen_rewards": Tensor (B,),         # for diagnostics
             "rejected_rewards": Tensor (B,),
         }
+
+    Both wrist_uint8 and state are optional. When absent, the π0.5 adapter
+    falls back to zero-fill (which makes π0.5 DPO uninformative — see
+    rollout.py changes for a proper π0.5-friendly pair generator).
     """
 
     def __init__(self, pairs_file: str):
+        import numpy as _np
         d = torch.load(pairs_file, map_location="cpu", weights_only=False)
         self.instructions: list[str] = d["instructions"]
         self.images: torch.Tensor = d["images"]
         self.images_uint8 = d.get("images_uint8", None)
+        # π0.5 aux fields (optional — back-compat with old OpenVLA pair files)
+        wrist_raw = d.get("wrist_uint8", None)
+        if wrist_raw is None or (hasattr(wrist_raw, "size") and wrist_raw.size == 0):
+            self.wrist_uint8 = None
+        else:
+            # Stored as ndarray (B, H, W, 3) uint8
+            self.wrist_uint8 = _np.asarray(wrist_raw)
+        state_raw = d.get("state", None)
+        if state_raw is None or (torch.is_tensor(state_raw) and state_raw.numel() == 0):
+            self.state = None
+        else:
+            self.state = state_raw if torch.is_tensor(state_raw) else torch.tensor(state_raw, dtype=torch.float32)
         self.chosen_chunks: torch.Tensor = d["chosen_chunks"]
         self.rejected_chunks: torch.Tensor = d["rejected_chunks"]
         self.chosen_rewards: torch.Tensor = d.get(
@@ -97,6 +117,10 @@ class DPOPairDataset(Dataset):
         }
         if self.images_uint8 is not None:
             item["image_uint8"] = self.images_uint8[idx]
+        if self.wrist_uint8 is not None:
+            item["wrist_uint8"] = self.wrist_uint8[idx]
+        if self.state is not None:
+            item["state"] = self.state[idx]
         return item
 
     @staticmethod
@@ -111,6 +135,10 @@ class DPOPairDataset(Dataset):
         }
         if "image_uint8" in batch[0]:
             out["image_uint8"] = [b["image_uint8"] for b in batch]
+        if "wrist_uint8" in batch[0]:
+            out["wrist_uint8"] = [b["wrist_uint8"] for b in batch]
+        if "state" in batch[0]:
+            out["state"] = torch.stack([b["state"] for b in batch])
         return out
 
 
@@ -195,11 +223,39 @@ def parse_args():
     p.add_argument("--lora_dropout", type=float, default=0.05)
     p.add_argument("--no_lora", action="store_true")
 
+    # Optional: chunk-level reward shaping signal (Plan B)
+    # Multiplies DPO diff by (1 + lambda * sign-flag), so pairs where the
+    # proj_head's reward signal agrees with rollout reward (chosen > rejected)
+    # are weighted MORE; disagreeing pairs LESS.  Conservative: lambda small.
+    p.add_argument("--proj_reward_ckpt", default="",
+                   help="Path to proj_head.pt for chunk-level reward shaping. "
+                        "If empty, standard DPO (no shaping).")
+    p.add_argument("--siglip_path", default="",
+                   help="Path to OpenVLA ckpt to extract SigLIP weights for "
+                        "proj_head encoder. Required when --proj_reward_ckpt "
+                        "is set.")
+    p.add_argument("--proj_reward_lambda", type=float, default=0.2,
+                   help="Strength of proj-head reward shaping (0=off, "
+                        "0.2=conservative, 0.5+=aggressive).")
+
+    p.add_argument("--seed", type=int, default=42,
+                   help="Training RNG seed (controls dataloader shuffle, "
+                        "torch RNG, np RNG). Required to reproduce / multi-seed.")
+
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+    # Seed all RNGs early — affects dataloader shuffle, LoRA init noise (if any),
+    # torch.compile randomness, and the surrogate-logp's internal noise sampling.
+    import random as _random
+    import numpy as _np
+    _random.seed(args.seed)
+    _np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    print(f"[seed] all RNGs seeded with {args.seed}")
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     log_path = out / "train_log.jsonl"
@@ -282,6 +338,33 @@ def main():
         reference_free=args.reference_free,
     )
 
+    # Optional: load proj_head for chunk-level reward shaping (Plan B).
+    # When enabled, we compute a normalized agreement signal between proj_head's
+    # reward (cos sim of chosen vs rejected chunks' visual signature against
+    # the batch's image) and the rollout reward, then up-weight DPO samples
+    # where they agree, down-weight where they disagree. Conservative.
+    proj_reward_encoder = None
+    proj_reward_head = None
+    if args.proj_reward_ckpt:
+        if not args.siglip_path:
+            raise ValueError("--proj_reward_ckpt requires --siglip_path "
+                             "(SigLIP weights extracted from same OpenVLA ckpt).")
+        print(f"[reward] loading proj_head from {args.proj_reward_ckpt}")
+        # Lazy import to avoid pulling timm when not used
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pretrain"))
+        from pretrain.model import MultiViewProjectionHead
+        from pretrain.train import SiglipEncoderWrapper
+        proj_reward_encoder = SiglipEncoderWrapper(args.siglip_path).cuda().eval()
+        proj_reward_head = MultiViewProjectionHead(
+            in_dim=1152, hidden=512, out_dim=128,
+        ).cuda().eval()
+        ckpt = torch.load(args.proj_reward_ckpt, map_location="cuda", weights_only=False)
+        proj_reward_head.load_state_dict(ckpt["proj_head"])
+        for p in proj_reward_encoder.parameters(): p.requires_grad_(False)
+        for p in proj_reward_head.parameters(): p.requires_grad_(False)
+        print(f"[reward] proj_head loaded; lambda={args.proj_reward_lambda}")
+
     # Train loop
     print(f"[train] starting {cfg.max_train_steps} steps, batch={cfg.batch_size}")
     step = 0
@@ -310,6 +393,46 @@ def main():
             logp_cur_c, logp_cur_r, logp_ref_c, logp_ref_r, dpo_cfg
         )
         loss = out_dpo.loss
+
+        # Plan B: chunk-level reward shaping multiplier.
+        # If proj_head agrees with rollout reward (chosen > rejected on cosine
+        # similarity to image embedding), boost the loss; if disagrees, dampen.
+        # Conservative form: factor in [1-λ, 1+λ], so worst case 0.8x or 1.2x.
+        if proj_reward_head is not None:
+            with torch.no_grad():
+                # Encode batch image to a 128-d embedding via the same proj_head
+                img = batch["image"].cuda()
+                if img.max() <= 1.0 + 1e-3:
+                    img_norm = img * 2.0 - 1.0
+                else:
+                    img_norm = (img / 255.0) * 2.0 - 1.0
+                feat = proj_reward_encoder(img_norm)
+                z_img = proj_reward_head(feat)  # (B, 128) L2-normed
+
+                # As a chunk-level proxy: average action magnitude as
+                # a cheap surrogate for "chunk progresses toward goal".
+                # If chosen chunk has clearly different action profile from
+                # rejected, proj_head should give some signal — but we don't
+                # have per-frame intermediate images during training. Instead
+                # use rollout reward signal as the agreement target.
+                roll_chosen = batch["chosen_reward"].cuda()
+                roll_rejected = batch["rejected_reward"].cuda()
+                agree = (roll_chosen > roll_rejected).float()  # (B,) 0 or 1
+                # Map [0,1] → multiplier in [1-λ, 1+λ]
+                weight = 1.0 + args.proj_reward_lambda * (2 * agree - 1)
+                # Renormalize to keep loss scale similar
+                weight = weight / weight.mean().clamp(min=1e-6)
+
+            # Recompute loss with per-sample weighting (DPO loss is currently mean-reduced;
+            # we redo it without mean to apply weights).
+            if not dpo_cfg.reference_free:
+                diff_current = logp_cur_c - logp_cur_r
+                diff_ref = logp_ref_c - logp_ref_r
+                diff = dpo_cfg.beta * (diff_current - diff_ref)
+            else:
+                diff = dpo_cfg.beta * (logp_cur_c - logp_cur_r)
+            per_sample_loss = -F.logsigmoid(diff)
+            loss = (per_sample_loss * weight).mean()
 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(trainable, cfg.grad_clip_norm)

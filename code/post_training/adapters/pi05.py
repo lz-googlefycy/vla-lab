@@ -111,8 +111,15 @@ class Pi05Adapter(VLABase):
 
         # Build PI0Pytorch with pi05 LIBERO defaults
         # (pi05_libero TrainConfig uses these — see openpi/training/config.py)
+        # NOTE: explicitly disable torch.compile (default is "max-autotune"
+        # which on a fresh GPU spends 5-15 min on triton autotune before any
+        # forward runs — this matters for batch-1 inference where we don't
+        # benefit from kernel fusion much, and ruins our smoke / debug loop).
+        # Set to "max-autotune" only when running large eval / training jobs
+        # where the autotune cost amortises.
         pt_cfg = pi0_config.Pi0Config(
             pi05=True, action_horizon=10, discrete_state_input=False,
+            pytorch_compile_mode=None,
         )
         self.model = PI0Pytorch(pt_cfg)
 
@@ -511,6 +518,78 @@ class Pi05Adapter(VLABase):
         actions_32 = self.model.sample_actions(self.device, observation, num_steps=10)
         actions_7 = actions_32[..., :PI05_ACTION_DIM].float().cpu()
         return self._unnormalize_actions(actions_7)
+
+    @torch.no_grad()
+    def select_action_reranked(
+        self, batch: dict, n_candidates: int = 4, score: str = "logp"
+    ) -> tuple[torch.Tensor, dict]:
+        """Generate K candidate chunks via different noise samples, rerank
+        by surrogate flow-matching log-prob, return the best.
+
+        Used by experiment ⑤ (candidate reranking Pareto). When K=1 this
+        is equivalent to select_action() (same noise, same output).
+
+        Args:
+            batch: standard adapter batch
+            n_candidates: K candidates to generate
+            score: "logp" (default — surrogate flow-matching logp) or
+                   "random" (no rerank, pick first — debug baseline)
+
+        Returns:
+            best_chunk: (B, T, 7) the chunk with highest score
+            stats: dict with diagnostics — scores per candidate, picked idx
+        """
+        B = self._infer_batch_size(batch)
+        observation = self._batch_to_openpi_observation(batch, B)
+
+        # Generate K candidates with different noise — sample_actions samples
+        # noise internally each call (when noise=None), so K independent calls
+        # give K independent chunks.
+        candidates_32 = []
+        for _ in range(n_candidates):
+            actions_32 = self.model.sample_actions(self.device, observation, num_steps=10)
+            candidates_32.append(actions_32)
+        # (K, B, T, 32) — keep 32-d for scoring; we'll slice 7 only at the end
+        cand_stack = torch.stack(candidates_32, dim=0)
+
+        # Score each candidate by surrogate logp = -mean MSE over time/dim.
+        # We re-run the model's denoiser on the candidate chunk — same as
+        # policy_logp does. This is the *self-score* form of reranking.
+        scores = torch.zeros(n_candidates, B, dtype=torch.float32)
+        if score == "logp":
+            from openpi.models import model as _model  # noqa: F401
+            for k in range(n_candidates):
+                actions_k = cand_stack[k]  # (B, T, 32)
+                # PI0Pytorch.forward returns per-element MSE (B, T, 32)
+                # Average over PI05_T_EVAL noise samples for stability.
+                acc = torch.zeros(B, dtype=torch.float32)
+                for _ in range(PI05_T_EVAL):
+                    mse = self.model(observation, actions_k)
+                    mse_7 = mse[..., :PI05_ACTION_DIM]
+                    s = -mse_7.mean(dim=(-2, -1))
+                    acc += s.float().cpu()
+                scores[k] = acc / PI05_T_EVAL
+        elif score == "random":
+            scores = torch.randn(n_candidates, B)
+        else:
+            raise ValueError(f"unknown rerank score: {score}")
+
+        # Pick best per batch element
+        best_idx = scores.argmax(dim=0)  # (B,)
+        # Gather best chunk
+        best_chunk_32 = torch.stack(
+            [cand_stack[best_idx[b], b] for b in range(B)], dim=0
+        )
+        best_chunk_7 = best_chunk_32[..., :PI05_ACTION_DIM].float().cpu()
+        best_chunk = self._unnormalize_actions(best_chunk_7)
+
+        stats = {
+            "scores": scores.tolist(),
+            "best_idx": best_idx.tolist(),
+            "score_method": score,
+            "n_candidates": n_candidates,
+        }
+        return best_chunk, stats
 
     @staticmethod
     def _infer_batch_size(batch: dict) -> int:

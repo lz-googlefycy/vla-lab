@@ -116,6 +116,8 @@ def run_one_trial(
     capture_video: bool = False,
     chunk_cache=None,
     prefix_cache=None,
+    n_candidates: int = 1,
+    rerank_score: str = "logp",
 ) -> dict:
     """Run one trial, return outcome dict.
 
@@ -224,7 +226,12 @@ def run_one_trial(
             cache_hit_count += 1
         else:
             with torch.no_grad():
-                chunk = adapter.select_action(batch)
+                if n_candidates > 1 and hasattr(adapter, "select_action_reranked"):
+                    chunk, rerank_stats = adapter.select_action_reranked(
+                        batch, n_candidates=n_candidates, score=rerank_score
+                    )
+                else:
+                    chunk = adapter.select_action(batch)
             vla_forward_count += 1
             # chunk shape: (B=1, T, 7). For OpenVLA T=1, for pi0.5 T=10.
             chunk_full = chunk.squeeze(0).cpu()  # (T, 7) tensor
@@ -290,6 +297,8 @@ def evaluate_suite(
     print_progress: bool = True,
     chunk_cache=None,
     prefix_cache=None,
+    n_candidates: int = 1,
+    rerank_score: str = "logp",
 ) -> dict:
     """Eval one LIBERO suite. Returns nested dict: {task_id: per-trial list}."""
     from libero.libero import benchmark
@@ -325,6 +334,8 @@ def evaluate_suite(
                     capture_video=want_video,
                     chunk_cache=chunk_cache,
                     prefix_cache=prefix_cache,
+                    n_candidates=n_candidates,
+                    rerank_score=rerank_score,
                 )
                 if want_video and outcome.get("frames"):
                     cap_path = out_dir / "videos" / suite_name / \
@@ -447,6 +458,17 @@ def parse_args():
     p.add_argument("--prefix_cache_max_reuses", type=int, default=50,
                    help="Hard cap on consecutive prefix KV reuses; force "
                         "re-compute every N hits to bound drift.")
+    # ⑤ Candidate reranking (Pareto study)
+    p.add_argument("--n_candidates", type=int, default=1,
+                   help="Number of action chunks to sample per VLA forward "
+                        "and rerank (1 = no reranking, default). Each "
+                        "additional K linearly increases per-call latency. "
+                        "Adapter must implement select_action_reranked.")
+    p.add_argument("--rerank_score", default="logp",
+                   choices=["logp", "random"],
+                   help="How to score K candidates. 'logp' = surrogate "
+                        "flow-matching logp (negative MSE). 'random' = no "
+                        "rerank (debug baseline).")
     return p.parse_args()
 
 
@@ -522,6 +544,8 @@ def main():
             args.seeds, out, capture_videos=args.capture_videos,
             chunk_cache=chunk_cache,
             prefix_cache=prefix_cache,
+            n_candidates=args.n_candidates,
+            rerank_score=args.rerank_score,
         )
         per_suite[suite] = results
 
