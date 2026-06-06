@@ -104,10 +104,18 @@ def main() -> None:
         "instruction": [instruction],
         "image": image.unsqueeze(0),  # (B=1, 3, 224, 224)
     }
-    # Tiny chunk: 5 steps × 7 action dims
-    chunk = torch.zeros(1, 5, 7)  # (B, T, A)
-    chunk[0, :, 0] = torch.linspace(-0.1, 0.1, 5)   # move along x
-    chunk[0, :, 6] = torch.linspace(0, 1, 5)        # close gripper
+    # NOTE: π0.5 model.forward has hardcoded action_horizon=10 in
+    # embed_suffix's att_masks list (openpi pi0_pytorch.py line 308):
+    #   att_masks += [1] + ([0] * (config.action_horizon - 1))
+    # which forces chunk.shape[1] == 10. Any other T causes mask shape
+    # mismatch like:
+    #   RuntimeError: tensor a (978) ≠ tensor b (973) at dim 2
+    # OpenVLA / Spirit don't have this constraint, but for π0.5 we use
+    # T=10 always.
+    T_action = 10 if args.base == "pi05" else 5
+    chunk = torch.zeros(1, T_action, 7)  # (B, T, A)
+    chunk[0, :, 0] = torch.linspace(-0.1, 0.1, T_action)   # move along x
+    chunk[0, :, 6] = torch.linspace(0, 1, T_action)        # close gripper
 
     print(f"[2/4] batch ready: B=1, instruction len={len(instruction)}, "
           f"image={tuple(image.shape)}, chunk={tuple(chunk.shape)}")
