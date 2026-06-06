@@ -18,6 +18,10 @@
 \usepackage{multirow}
 \usepackage{makecell}
 
+% Switch natbib to numeric citation style: [1], [2], [3] in text;
+% references list ordered by first-cite appearance (matches unsrtnat).
+\setcitestyle{numbers,square,comma}
+
 \hypersetup{
   colorlinks=true,
   linkcolor=black,
@@ -282,7 +286,7 @@ We hypothesise DoRA's advantage stems from \textbf{magnitude/direction decouplin
   \item \textbf{Spatial} (+2.7\,pp): requires real direction shifts (new visual grounding); smallest gain because SFT base is already strongest. Direct s\(=42\) DoRA = LoRA = 78\% tie.
 \end{itemize}
 
-\subsection{\texorpdfstring{Cross-Paradigm Validation: \(\pi_{0.5}\) Surrogate Logp}{Cross-Paradigm Validation: pi0.5 Surrogate Logp}}\label{sec:cross-validation}
+\subsection{Cross-Paradigm Validation: \(\pi_{0.5}\) Surrogate Logp}\label{sec:cross-validation}
 
 We validate the surrogate flow-matching logp (\S\ref{sec:surrogate}) by training LoRA-r32 DPO on \(\pi_{0.5}\) across all four LIBERO suites with the same protocol as OpenVLA. We compare against the openpi paper's \(\pi_{0.5}\) SFT numbers~\cite{openpi2025pi05} (50 trials, seed 42):
 
@@ -293,17 +297,16 @@ We validate the surrogate flow-matching logp (\S\ref{sec:surrogate}) by training
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{lrrr}
 \toprule
-Suite & \makecell[r]{openpi paper\\SFT~\cite{openpi2025pi05}} & \makecell[r]{\(\pi_{0.5}\) + LoRA\\+ DPO (us)} & \(\Delta\) \\
+Suite & openpi paper SFT~\cite{openpi2025pi05} & \(\pi_{0.5}\) + LoRA + DPO (us) & \(\Delta\) \\
 \midrule
 Spatial & 98.8\% & \textbf{100.0\%} & \textbf{+1.2}\,pp \\
-Object & 98.2\% & 98.0\% & \(-0.2\)\,pp\(^\dagger\) \\
+Object & 98.2\% & 98.0\% & \(-0.2\)\,pp (50-trial noise) \\
 Goal & 98.0\% & \textbf{100.0\%} & \textbf{+2.0}\,pp \\
 Long-horizon & 92.4\% & \textbf{94.0\%} & \textbf{+1.6}\,pp \\
 \midrule
 \textbf{Mean} & \textbf{96.85\%} & \textbf{98.0\%} & \textbf{+1.15}\,pp \\
 \bottomrule
-\end{tabular}\\[0.3em]
-{\footnotesize \(^\dagger\) Within 50-trial binomial noise (\(\pm 4\)\,pp at 95\% CI).}
+\end{tabular}
 \end{table}
 
 The surrogate logp produces stable, non-degenerate DPO training on \(\pi_{0.5}\) (training loss decreases monotonically; chosen/rejected margin grows positive). Spatial and Goal saturate at 100\%; Object lands within 50-trial noise of the paper SFT baseline; the headline gain is on Long-horizon (+1.6\,pp), the suite where SFT leaves the most improvement room. Mean +1.15\,pp across the four suites validates that the surrogate, despite absorbing the standard MSE-to-logp prefactor into the DPO temperature \(\beta\) (\S\ref{sec:surrogate}), behaves as a calibrated preference signal rather than a tuning artifact.
@@ -481,7 +484,7 @@ The contributions are modest extensions of established techniques to the under-s
 
 All code, training logs, ckpts, and reproduction scripts are open at \url{https://github.com/lz-googlefycy/vla-lab}.
 
-\bibliographystyle{plainnat}
+\bibliographystyle{unsrtnat}
 \bibliography{references}
 
 \end{document}
