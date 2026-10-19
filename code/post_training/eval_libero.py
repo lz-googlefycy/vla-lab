@@ -37,10 +37,14 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 import torch
+from spirit_adapter.libero_bridge import (
+    control_freq, eef_pose_in_base, prepare_batch as prepare_spirit_batch,
+    resample_chunk, state_from_observation, to_osc_action,
+)
 
 # Settings shared with rollout.py
 _MAX_STEPS = {
@@ -69,16 +73,19 @@ def patch_torch_load_for_libero() -> None:
     _t.load = patched
 
 
-def get_libero_env(task, resolution: int = 256):
-    """Match OpenVLA official eval: render at 256, resize to 224 with
-    tf.image.lanczos3 + JPEG round-trip via _resize_image_rlds()."""
+def get_libero_env(task, resolution: int | tuple[int, int] = 256):
+    """Create an environment with square or explicit (height, width) cameras."""
     from libero.libero import get_libero_path
     from libero.libero.envs import OffScreenRenderEnv
     bddl = os.path.join(get_libero_path("bddl_files"),
                         task.problem_folder, task.bddl_file)
+    if isinstance(resolution, tuple):
+        camera_heights, camera_widths = resolution
+    else:
+        camera_heights = camera_widths = resolution
     env = OffScreenRenderEnv(
         bddl_file_name=bddl,
-        camera_heights=resolution, camera_widths=resolution,
+        camera_heights=camera_heights, camera_widths=camera_widths,
     )
     return env, task.language
 
@@ -118,6 +125,8 @@ def run_one_trial(
     prefix_cache=None,
     n_candidates: int = 1,
     rerank_score: str = "logp",
+    record_trace: bool = False,
+    reset_callback: Callable[[], dict] | None = None,
 ) -> dict:
     """Run one trial, return outcome dict.
 
@@ -129,9 +138,15 @@ def run_one_trial(
         prefix_cache: optional PrefixKVCache instance (token-level KV cache).
             When provided, must call reset_episode() between trials so the
             next trial's first call rebuilds the prefix.
+        reset_callback: optional reset that returns the initial observation.
+            Use this to restore a demonstration's XML and simulator state
+            together. The default reset builds a new benchmark scene.
     """
-    env.reset()
-    obs = env.set_init_state(initial_state)
+    if reset_callback is None:
+        env.reset()
+        obs = env.set_init_state(initial_state)
+    else:
+        obs = reset_callback()
     # Per-trial latency tracker
     vla_forward_count = 0
     cache_hit_count = 0
@@ -148,76 +163,88 @@ def run_one_trial(
     n_steps = 0
     frames: list[np.ndarray] = []
     t0 = time.time()
+    is_spirit = (hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "spirit")
+    trace = {"actions": []} if record_trace else None
 
     for t in range(max_steps):
         # Hard outer cap: stop if we already issued max_steps env actions
         if n_steps >= max_steps:
             break
-        img_arr = obs.get("agentview_image")
-        if img_arr is None:
-            for k in ("image", "rgb_static"):
-                if k in obs:
-                    img_arr = obs[k]
-                    break
-        if img_arr is None:
-            return {"success": False, "n_steps": 0, "elapsed_s": 0,
-                    "error": "no image in obs"}
-
-        # LIBERO renders agentview rotated 180° relative to OpenVLA's
-        # training distribution (per openvla/experiments/.../libero_utils.py
-        # get_libero_image: `img = img[::-1, ::-1]`).
-        img = img_arr[::-1, ::-1]
-        if img.dtype != np.uint8:
-            img = (img * 255).astype(np.uint8)
-        if capture_video:
-            frames.append(img.copy())
-        # OpenVLA RLDS resize (cv2 lanczos4 substitute for tf.lanczos3).
-        if img.shape[0] != 224:
-            img = _resize_image_rlds(img, 224)
-        img_uint8 = img.copy()
-        img_t = torch.from_numpy(img_uint8).permute(2, 0, 1).float() / 255.0
-
-        # Optional pi0.5 inputs (wrist + state). Always populate; pi05 adapter
-        # uses them, openvla / spirit ignore them.
-        wrist_arr = obs.get("robot0_eye_in_hand_image")
-        if wrist_arr is None:
-            for k in ("wrist_image", "robot_eye_in_hand_image"):
-                if k in obs:
-                    wrist_arr = obs[k]; break
-        if wrist_arr is not None:
-            w = wrist_arr[::-1, ::-1] if wrist_arr.ndim == 3 else wrist_arr
-            if w.dtype != np.uint8:
-                w = (w * 255).astype(np.uint8)
-            wrist_uint8 = w if w.shape[0] == img_uint8.shape[0] else _resize_image_rlds(w, img_uint8.shape[0])
+        if is_spirit:
+            batch = prepare_spirit_batch(obs, env, instruction)
+            img_t = batch["observation.images.cam_high"][0]
+            img_uint8 = (img_t.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+            if capture_video and not frames:
+                frames.append(img_uint8.copy())
+            if record_trace and "spirit_input" not in trace:
+                trace["spirit_input"] = {key: value.detach().clone() if torch.is_tensor(value) else value
+                                         for key, value in batch.items()}
         else:
-            wrist_uint8 = np.zeros_like(img_uint8)
-        try:
-            jpos = np.asarray(obs.get("robot0_joint_pos", np.zeros(7)), dtype=np.float32)
-            gpos = np.asarray(obs.get("robot0_gripper_qpos", np.zeros(1)), dtype=np.float32)
-            state_8 = np.concatenate([jpos[:7], gpos[:1]]).astype(np.float32)
-            if state_8.shape[0] < 8:
-                state_8 = np.pad(state_8, (0, 8 - state_8.shape[0]))
-        except Exception:
-            state_8 = np.zeros(8, dtype=np.float32)
+            img_arr = obs.get("agentview_image")
+            if img_arr is None:
+                for k in ("image", "rgb_static"):
+                    if k in obs:
+                        img_arr = obs[k]
+                        break
+            if img_arr is None:
+                return {"success": False, "n_steps": 0, "elapsed_s": 0,
+                        "error": "no image in obs"}
 
-        batch = {
-            "instruction": [instruction],
-            "image": img_t.unsqueeze(0),
-            "image_uint8": [img_uint8],
-            "wrist_uint8": [wrist_uint8],
-            "state": torch.from_numpy(state_8).unsqueeze(0),
-        }
+            img = img_arr[::-1, ::-1]
+            if img.dtype != np.uint8:
+                img = (img * 255).astype(np.uint8)
+            if capture_video:
+                frames.append(img.copy())
+            if img.shape[0] != 224:
+                img = _resize_image_rlds(img, 224)
+            img_uint8 = img.copy()
+            img_t = torch.from_numpy(img_uint8).permute(2, 0, 1).float() / 255.0
+
+            # Optional pi0.5 inputs (wrist + state). Always populate; pi05 adapter
+            # uses them, openvla / spirit ignore them.
+            wrist_arr = obs.get("robot0_eye_in_hand_image")
+            if wrist_arr is None:
+                for k in ("wrist_image", "robot_eye_in_hand_image"):
+                    if k in obs:
+                        wrist_arr = obs[k]; break
+            if wrist_arr is not None:
+                w = wrist_arr[::-1, ::-1] if wrist_arr.ndim == 3 else wrist_arr
+                if w.dtype != np.uint8:
+                    w = (w * 255).astype(np.uint8)
+                wrist_uint8 = w if w.shape[0] == img_uint8.shape[0] else _resize_image_rlds(w, img_uint8.shape[0])
+            else:
+                wrist_uint8 = np.zeros_like(img_uint8)
+            try:
+                jpos = np.asarray(obs.get("robot0_joint_pos", np.zeros(7)), dtype=np.float32)
+                gpos = np.asarray(obs.get("robot0_gripper_qpos", np.zeros(1)), dtype=np.float32)
+                state_8 = np.concatenate([jpos[:7], gpos[:1]]).astype(np.float32)
+                if state_8.shape[0] < 8:
+                    state_8 = np.pad(state_8, (0, 8 - state_8.shape[0]))
+            except Exception:
+                state_8 = np.zeros(8, dtype=np.float32)
+            batch = {
+                "instruction": [instruction],
+                "image": img_t.unsqueeze(0),
+                "image_uint8": [img_uint8],
+                "wrist_uint8": [wrist_uint8],
+                "state": torch.from_numpy(state_8).unsqueeze(0),
+            }
+
         # ---- VLA forward (with optional chunk cache) ----
         # current_visual: a low-dim signature for similarity check.
         # We use the resized base camera flattened tensor, downsampled to
         # 32×32 mean to keep cosine similarity meaningful and cheap.
-        if chunk_cache is not None:
+        if chunk_cache is not None and not is_spirit:
             # 32×32 mean-pool of normalized [0, 1] base image as the signature
             sig = (img_t.unsqueeze(0) if img_t.ndim == 3 else img_t)
             sig = torch.nn.functional.adaptive_avg_pool2d(sig, (32, 32)).flatten()
             cached_action = chunk_cache.try_get_action(sig)
         else:
             cached_action = None
+
+        spirit_chunk_origin = None
+        if is_spirit:
+            spirit_chunk_origin = eef_pose_in_base(obs, env)
 
         if cached_action is not None:
             # Cache hit: take a single action this iteration, skip VLA
@@ -226,7 +253,11 @@ def run_one_trial(
             cache_hit_count += 1
         else:
             with torch.no_grad():
-                if n_candidates > 1 and hasattr(adapter, "select_action_reranked"):
+                if is_spirit:
+                    chunk = adapter.select_action_for_libero(batch)
+                    if record_trace and "spirit_chunk" not in trace:
+                        trace["spirit_chunk"] = torch.nn.functional.pad(chunk[0].detach().cpu(), (0, 7))
+                elif n_candidates > 1 and hasattr(adapter, "select_action_reranked"):
                     chunk, rerank_stats = adapter.select_action_reranked(
                         batch, n_candidates=n_candidates, score=rerank_score
                     )
@@ -240,11 +271,18 @@ def run_one_trial(
                 chunk_np = chunk_np[None, :]
                 chunk_full = chunk_full.unsqueeze(0)
             T = chunk_np.shape[0]
-            if chunk_cache is not None:
+            if is_spirit:
+                chunk_np = resample_chunk(
+                    chunk_np, *spirit_chunk_origin[:2],
+                    source_hz=adapter.cfg.spirit_action_hz,
+                    target_hz=control_freq(env),
+                    origin_width=state_from_observation(obs, env)[6],
+                )
+                T = min(len(chunk_np), adapter.cfg.spirit_replan_steps)
+            if chunk_cache is not None and not is_spirit:
                 chunk_cache.put(sig, chunk_full)
 
         is_openvla = (hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "openvla")
-
         # Execute the chunk step-by-step in env (each chunk step = one env.step)
         chunk_done = False
         for t_chunk in range(T):
@@ -253,19 +291,28 @@ def run_one_trial(
             if is_openvla:
                 action[-1] = 1.0 if action[-1] > 0.5 else -1.0
                 action[-1] = -action[-1]
-            else:
-                # pi0.5 / spirit: binarise to {-1, +1}
+            elif is_spirit:
+                action = to_osc_action(action, spirit_chunk_origin, obs, env)
+            elif not is_spirit:
+                # π0.5 emits the LIBERO gripper convention directly.
                 action[-1] = 1.0 if action[-1] > 0.5 else -1.0
 
+            if record_trace:
+                trace["actions"].append(action.copy())
             try:
                 obs, _, done, _ = env.step(action.tolist())
             except Exception as e:
                 return {"success": False, "n_steps": n_steps, "elapsed_s": time.time()-t0,
                         "error": f"env.step: {e}"}
             n_steps += 1
+            if capture_video and is_spirit:
+                frames.append(np.ascontiguousarray(env.sim.render(
+                    camera_name="agentview", width=320, height=240,
+                )[::-1]))
 
-            if done or (hasattr(env, "check_success") and env.check_success()):
-                success = True
+            achieved = bool(env.check_success()) if hasattr(env, "check_success") else bool(done)
+            if done or achieved:
+                success = achieved
                 chunk_done = True
                 break
             # Stop chunk early if we exceed suite max steps
@@ -283,6 +330,7 @@ def run_one_trial(
         "frames": frames if capture_video else None,
         "vla_forwards": vla_forward_count,
         "cache_hits": cache_hit_count,
+        "trace": trace,
     }
 
 
@@ -313,7 +361,9 @@ def evaluate_suite(
 
     for task_id in range(n_tasks):
         task = task_suite.get_task(task_id)
-        env, task_description = get_libero_env(task, resolution=224)
+        is_spirit = (hasattr(adapter, "cfg") and getattr(adapter.cfg, "base", "") == "spirit")
+        resolution = (240, 320) if is_spirit else 224
+        env, task_description = get_libero_env(task, resolution=resolution)
         init_states = task_suite.get_task_init_states(task_id)
 
         if print_progress:
@@ -418,6 +468,11 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--base", choices=["openvla", "spirit", "pi05"], required=True)
     p.add_argument("--base_ckpt", required=True)
+    p.add_argument("--base_dtype", choices=["float32", "bfloat16"], default="bfloat16")
+    p.add_argument("--spirit_backbone", default="", help="Qwen config/tokenizer/processor path or HF ID")
+    p.add_argument("--spirit_device", default="", help="Torch policy device; independent of the MuJoCo render GPU")
+    p.add_argument("--spirit_action_hz", type=float, default=20.0)
+    p.add_argument("--spirit_replan_steps", type=int, default=10)
     p.add_argument("--lora_ckpt", default="",
                    help="Path to LoRA-trained adapter checkpoint (optional)")
     p.add_argument("--suites", nargs="+", default=ALL_4_SUITES,
@@ -489,12 +544,19 @@ def main():
         base=args.base,
         algorithm="sft",
         base_ckpt_path=args.base_ckpt,
+        base_dtype=args.base_dtype,
+        spirit_backbone_path=args.spirit_backbone,
+        spirit_device=args.spirit_device,
+        spirit_action_hz=args.spirit_action_hz,
+        spirit_replan_steps=args.spirit_replan_steps,
         libero_suite="spatial",
         use_lora=bool(args.lora_ckpt),
         lora_r=args.lora_r,
         lora_alpha=args.lora_alpha,
         use_dora=args.use_dora,
     )
+    if args.base == "spirit" and (args.use_chunk_cache or args.n_candidates != 1):
+        raise ValueError("Spirit LIBERO evaluation does not support cached or reranked OSC chunks")
     adapter = build_adapter(cfg)
 
     if args.lora_ckpt:
@@ -576,7 +638,10 @@ def main():
     summary["meta"] = {
         "base": args.base,
         "base_ckpt": args.base_ckpt,
+        "base_dtype": args.base_dtype,
         "lora_ckpt": args.lora_ckpt,
+        "spirit_action_hz": adapter.cfg.spirit_action_hz if args.base == "spirit" else None,
+        "spirit_replan_steps": args.spirit_replan_steps if args.base == "spirit" else None,
         "suites": args.suites,
         "n_trials_per_task": args.n_trials_per_task,
         "seeds": args.seeds,

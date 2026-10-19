@@ -62,6 +62,11 @@ class PostTrainConfig:
     # Base model
     base_ckpt_path: str                # local path or HF ID
     base_dtype: str = "bfloat16"
+    # Spirit LIBERO protocol; Qwen path supplies config/tokenizer/processor only.
+    spirit_backbone_path: str = ""
+    spirit_device: str = ""
+    spirit_action_hz: float = 20.0
+    spirit_replan_steps: int = 10
 
     # Dataset
     libero_suite: Literal["spatial", "object", "goal", "long10", "all4"] = "spatial"

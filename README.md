@@ -186,6 +186,16 @@ Code: [`code/inference/kv_cache.py`](code/inference/kv_cache.py) + [`code/infere
 
 ---
 
+## Spirit v1.5 on LIBERO
+
+The Franka adapter now has a shared camera/pose bridge, official demonstration
+conversion, LoRA SFT, and checkpoint reload through the LIBERO evaluator.
+See the [Spirit LIBERO guide](docs/spirit_libero.md) for conventions, commands,
+validation evidence, and the distinction between controller replay and policy
+success rate. Task fine-tuning is required before comparing benchmark scores.
+
+---
+
 ## 📂 Repository Structure
 
 ```

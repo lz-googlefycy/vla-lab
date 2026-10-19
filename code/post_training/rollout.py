@@ -213,6 +213,24 @@ def rollout_one_episode(
             "initial_state":  initial_state (for re-rollout if needed)
         }
     """
+    if getattr(adapter.cfg, "base", "") == "spirit":
+        from .eval_libero import run_one_trial
+        outcome = run_one_trial(
+            adapter, env, task_description, initial_state,
+            cfg.max_steps_override or _MAX_STEPS.get(cfg.suite, 220),
+            num_steps_wait=cfg.num_steps_wait, record_trace=True,
+        )
+        if "error" in outcome:
+            raise RuntimeError(outcome["error"])
+        trace = outcome["trace"]
+        return {
+            "actions": np.asarray(trace["actions"], dtype=np.float32),
+            "first_image": trace["spirit_input"]["observation.images.cam_high"][0],
+            "spirit_input": trace["spirit_input"], "spirit_chunk": trace["spirit_chunk"],
+            "success": outcome["success"], "n_steps": outcome["n_steps"],
+            "task": task_description, "initial_state": initial_state,
+        }
+
     sample_kwargs = sample_kwargs or {}
 
     # Toggle stochastic sampling on the adapter (if it supports it).
@@ -428,6 +446,11 @@ def collect_pair_dataset(adapter, cfg: RolloutConfig) -> dict:
 
     Returns the dict in DPOPairDataset format, ready to torch.save().
     """
+    if getattr(adapter.cfg, "base", "") == "spirit":
+        raise NotImplementedError(
+            "The generic DPO pair file stores full-episode OSC commands, not conditioned Spirit target chunks. "
+            "Use the Spirit LIBERO SFT/evaluation path; do not score these files as Spirit actions."
+        )
     from libero.libero import benchmark
 
     # LIBERO ships init_states as torch pickles that aren't safe-loadable
